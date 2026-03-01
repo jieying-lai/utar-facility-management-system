@@ -5,6 +5,9 @@ import my.edu.utar.model.*;
 import my.edu.utar.util.Constants;
 import my.edu.utar.util.Validator;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+
 import java.util.Scanner;
 
 /**
@@ -42,9 +45,18 @@ public class MainMenu {
     }
 
     private void printMainMenu() {
+        // Get current date and time from system
+        LocalDateTime now = LocalDateTime.now();
+        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd MMMM yyyy");
+        DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("hh:mm a");
+        String currentDate = now.format(dateFormatter);
+        String currentTime = now.format(timeFormatter);
+
         System.out.println("\n============================================");
         System.out.println("   UTAR Smart Campus Management System");
         System.out.println("============================================");
+        System.out.println("   " + currentDate + "\t\t" + currentTime);
+        System.out.println("--------------------------------------------");
         System.out.println("[1] Register New User");
         System.out.println("[2] Login");
         System.out.println("[E] Exit");
