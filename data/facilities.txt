@@ -1,0 +1,13 @@
+F001|KB|1|KB104|Lecture Hall|80|Available
+F002|KB|1|KB105|Lecture Hall|80|Available
+F003|KB|2|KB201|Lecture Hall|100|Available
+F004|KB|2|KB202|Computer Lab|40|Available
+F005|KB|3|KB301|Computer Lab|40|Under Maintenance
+F006|KB|G|KB-MPH|Multipurpose Hall|200|Available
+F007|KA|1|KA101|Lecture Hall|60|Available
+F008|KA|1|KA102|Lecture Hall|60|Available
+F009|KA|2|KA-DG01|Discussion Room|8|Available
+F010|KA|2|KA-DG02|Discussion Room|8|Available
+F011|KA|2|KA-DG03|Discussion Room|8|Available
+F012|KA|G|KA-SPORT1|Sports Court|20|Available
+F013|KA|G|KA-SPORT2|Sports Court|20|Available
