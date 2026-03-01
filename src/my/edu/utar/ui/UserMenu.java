@@ -30,7 +30,7 @@ public class UserMenu {
     // ===================== MAIN USER MENU =====================
     public void show() {
         while (true) {
-            showReminders();     // Always show reminders at top
+            showReminders();     
             printUserMenu();
 
             String choice = sc.nextLine().trim().toUpperCase();
@@ -116,31 +116,169 @@ public class UserMenu {
             if ("B".equals(choice)) return;
 
             switch (choice) {
-                case "1":
-                    // TODO: update name (validate non-empty, UPPERCASE)
-                    System.out.println("[TODO] Update name");
-                    break;
-                case "2":
-                    // TODO: update phone (validate phone format)
-                    System.out.println("[TODO] Update phone");
-                    break;
-                case "3":
-                    // TODO: update faculty (show list, choose)
-                    System.out.println("[TODO] Update faculty");
-                    break;
-                case "4":
-                    // TODO: update programme/department (based on faculty)
-                    System.out.println("[TODO] Update programme/department");
-                    break;
-                case "5":
-                    // TODO: update password (validate min 8, confirm twice)
-                    System.out.println("[TODO] Update password");
-                    break;
+                case "1": updateName();             break;
+                case "2": updatePhone();            break;
+                case "3": updateFaculty();          break;
+                case "4": updateProgrammeDept();    break;
+                case "5": updatePassword();         break;
                 default:
                     System.out.println("Invalid selection, please try again.");
             }
+        }
+    }
 
-            // After each update: call FileManager.updateUser(currentUser)
+    // ---- Update helper methods ----
+
+    private void updateName() {
+        while (true) {
+            System.out.print("Enter new name: ");
+            String input = sc.nextLine().trim();
+            if (Validator.isEmpty(input)) { 
+                System.out.println("Name cannot be empty."); 
+                continue; 
+            }
+            currentUser.setName(input.toUpperCase());
+            FileManager.updateUser(currentUser);
+            System.out.println("Name updated successfully to: " + currentUser.getName());
+            break;
+        }
+    }
+
+    private void updatePhone() {
+        while (true) {
+            System.out.print("Enter new phone number (e.g. 0112345678): ");
+            String input = sc.nextLine().trim();
+            if (Validator.isEmpty(input)) { 
+                System.out.println("Cannot be empty."); 
+                continue; 
+            }
+            if (!Validator.isValidPhone(input)) {
+                System.out.println("Invalid phone number. Format: 01xxxxxxxxx (10-11 digits)");
+                continue;
+            }
+            currentUser.setPhone(input);
+            FileManager.updateUser(currentUser);
+            System.out.println("Phone number updated successfully to: " + currentUser.getPhone());
+            break;
+        }
+    }
+
+    private void updateFaculty() {
+        while (true) {
+            System.out.println("\nSelect new Faculty:");
+            for (int i = 0; i < Constants.FACULTIES.length; i++) {
+                System.out.println("[" + (i + 1) + "] " + Constants.FACULTIES[i]);
+            }
+            System.out.println("[B] Back");
+            System.out.print("Enter choice: ");
+            String input = sc.nextLine().trim().toUpperCase();
+
+            if (Validator.isEmpty(input)) { System.out.println("Cannot be empty."); continue; }
+            if ("B".equals(input)) return;
+            if (!Validator.isValidMenuChoice(input, 1, Constants.FACULTIES.length)) {
+                System.out.println("Invalid selection, please try again.");
+                continue;
+            }
+            int index = Integer.parseInt(input) - 1;
+            currentUser.setFaculty(Constants.FACULTIES[index]);
+            FileManager.updateUser(currentUser);
+            System.out.println("Faculty updated successfully to: " + currentUser.getFaculty());
+            
+            // Ask if they want to update programme too
+            System.out.print("Do you want to update Programme/Department too? [Y/N]: ");
+            String confirm = sc.nextLine().trim().toUpperCase();
+            if ("Y".equals(confirm)) {
+                updateProgrammeDept();
+            }
+            break;
+        }
+    }
+
+    private void updateProgrammeDept() {
+        if (Constants.ROLE_STUDENT.equals(currentUser.getRole())) {
+            // Find current faculty index
+            int facultyIndex = 0;
+            for (int i = 0; i < Constants.FACULTIES.length; i++) {
+                if (Constants.FACULTIES[i].equals(currentUser.getFaculty())) {
+                    facultyIndex = i;
+                    break;
+                }
+            }
+            String[] programmes = Constants.PROGRAMMES[facultyIndex];
+            while (true) {
+                System.out.println("\nSelect new Programme:");
+                for (int i = 0; i < programmes.length; i++) {
+                    System.out.println("[" + (i + 1) + "] " + programmes[i]);
+                }
+                System.out.println("[B] Back");
+                System.out.print("Enter choice: ");
+                String input = sc.nextLine().trim().toUpperCase();
+
+                if (Validator.isEmpty(input)) { System.out.println("Cannot be empty."); continue; }
+                if ("B".equals(input)) return;
+                if (!Validator.isValidMenuChoice(input, 1, programmes.length)) {
+                    System.out.println("Invalid selection, please try again.");
+                    continue;
+                }
+                currentUser.setProgramme(programmes[Integer.parseInt(input) - 1]);
+                FileManager.updateUser(currentUser);
+                System.out.println("Programme updated successfully to: " + currentUser.getProgramme());
+                break;
+            }
+        } else {
+            // Staff - update department
+            while (true) {
+                System.out.println("\nSelect new Department:");
+                for (int i = 0; i < Constants.DEPARTMENTS.length; i++) {
+                    System.out.println("[" + (i + 1) + "] " + Constants.DEPARTMENTS[i]);
+                }
+                System.out.println("[B] Back");
+                System.out.print("Enter choice: ");
+                String input = sc.nextLine().trim().toUpperCase();
+
+                if (Validator.isEmpty(input)) { System.out.println("Cannot be empty."); continue; }
+                if ("B".equals(input)) return;
+                if (!Validator.isValidMenuChoice(input, 1, Constants.DEPARTMENTS.length)) {
+                    System.out.println("Invalid selection, please try again.");
+                    continue;
+                }
+                currentUser.setProgramme(Constants.DEPARTMENTS[Integer.parseInt(input) - 1]);
+                FileManager.updateUser(currentUser);
+                System.out.println("Department updated successfully to: " + currentUser.getProgramme());
+                break;
+            }
+        }
+    }
+
+    private void updatePassword() {
+        while (true) {
+            System.out.print("Enter current password: ");
+            String oldPass = sc.nextLine().trim();
+            if (Validator.isEmpty(oldPass)) { 
+                System.out.println("Cannot be empty."); 
+                continue; 
+            }
+            // Verify current password
+            if (!oldPass.equals(currentUser.getPassword())) {
+                System.out.println("Incorrect current password. Please try again.");
+                continue;
+            }
+            System.out.print("Enter new password (min 8 characters): ");
+            String newPass = sc.nextLine().trim();
+            if (!Validator.isValidPassword(newPass)) {
+                System.out.println("Password must be at least 8 characters.");
+                continue;
+            }
+            System.out.print("Confirm new password: ");
+            String confirmPass = sc.nextLine().trim();
+            if (!Validator.passwordsMatch(newPass, confirmPass)) {
+                System.out.println("Passwords do not match. Please try again.");
+                continue;
+            }
+            currentUser.setPassword(newPass);
+            FileManager.updateUser(currentUser);
+            System.out.println("Password updated successfully!");
+            break;
         }
     }
 

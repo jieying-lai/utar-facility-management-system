@@ -76,76 +76,19 @@ public class Constants {
     // ===================== BLOCKS =====================
     public static final String[] BLOCKS = { "KA", "KB" };
 
-    // ===================== FACULTIES =====================
+ // ===================== FACULTIES =====================
     public static final String[] FACULTIES = {
-        "Faculty of Information and Communication Technology (FICT)",
-        "Faculty of Engineering and Green Technology (FEGT)",
-        "Faculty of Business and Finance (FBF)",
-        "Faculty of Arts and Social Science (FASS)",
-        "Faculty of Science (FSC)",
-        "Faculty of Medicine and Health Sciences (FMHS)",
-        "Lee Kong Chian Faculty of Engineering and Science (LKC FES)"
-    };
-
-    // ===================== PROGRAMMES (by faculty index) =====================
-    public static final String[][] PROGRAMMES = {
-        // FICT (index 0)
-        {
-            "Bachelor of Computer Science (Hons)",
-            "Bachelor of Information Systems (Hons)",
-            "Bachelor of Information Technology (Hons)",
-            "Bachelor of Software Engineering (Hons)",
-            "Bachelor of Computer Science (Hons) Specialisation in Data Science",
-            "Bachelor of Computer Science (Hons) Specialisation in Cybersecurity"
-        },
-        // FEGT (index 1)
-        {
-            "Bachelor of Engineering (Hons) Civil Engineering",
-            "Bachelor of Engineering (Hons) Mechanical Engineering",
-            "Bachelor of Engineering (Hons) Electrical and Electronic Engineering",
-            "Bachelor of Engineering (Hons) Chemical Engineering",
-            "Bachelor of Engineering (Hons) Environmental Engineering"
-        },
-        // FBF (index 2)
-        {
-            "Bachelor of Commerce (Hons) Accounting",
-            "Bachelor of Business Administration (Hons)",
-            "Bachelor of Economics (Hons)",
-            "Bachelor of Finance (Hons)",
-            "Bachelor of Marketing (Hons)"
-        },
-        // FASS (index 3)
-        {
-            "Bachelor of Arts (Hons) Chinese Studies",
-            "Bachelor of Arts (Hons) English Language",
-            "Bachelor of Communication (Hons)",
-            "Bachelor of Arts (Hons) Journalism",
-            "Bachelor of Social Science (Hons) Psychology"
-        },
-        // FSC (index 4)
-        {
-            "Bachelor of Science (Hons) Biochemistry",
-            "Bachelor of Science (Hons) Biotechnology",
-            "Bachelor of Science (Hons) Chemistry",
-            "Bachelor of Science (Hons) Mathematical and Statistical Sciences",
-            "Bachelor of Science (Hons) Physics"
-        },
-        // FMHS (index 5)
-        {
-            "Bachelor of Medicine and Bachelor of Surgery (MBBS)",
-            "Bachelor of Pharmacy (Hons)",
-            "Bachelor of Nursing (Hons)",
-            "Bachelor of Biomedical Science (Hons)"
-        },
-        // LKC FES (index 6)
-        {
-            "Bachelor of Engineering (Hons) Electronic and Electrical Engineering",
-            "Bachelor of Engineering (Hons) Mechatronics Engineering",
-            "Bachelor of Science (Hons) Applied Science (Industrial Chemistry)",
-            "Bachelor of Computer Science (Hons) Game Development"
-        }
-    };
-
+    	    "Faculty of Accountancy and Management (FAM)",
+    	    "Faculty of Medicine and Health Science (FMHS)",
+    	    "Faculty of Creative Industries (FCI)",
+    	    "Lee Kong Chian Faculty of Engineering and Science (LKC FES)",
+    	    "Institute of Chinese Studies (ICS)",
+    	    "Centre for Foundation Studies (CFS)",
+    	    "Centre for Extension Education (CEE)",
+    	    "Institute of Management and Leadership Development (IMLD)",
+    	    "Institute of Postgraduate Studies and Research (IPSR)"
+    	};
+    
     // ===================== DEPARTMENTS (Staff) =====================
     public static final String[] DEPARTMENTS = {
         "Academic Affairs",

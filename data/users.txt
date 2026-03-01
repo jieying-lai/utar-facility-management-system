@@ -18,3 +18,4 @@
 1001003|MR WONG BOON HOONG|wongbh@utar.edu.my|0198881003|Staff|Faculty of Business and Finance (FBF)|Finance and Accounts|staffpass1
 1001004|MS CHAN MEI XIAN|chanmx@utar.edu.my|0198881004|Staff|Faculty of Arts and Social Science (FASS)|Library|staffpass1
 1001005|MR NG ZHI XIONG|ngzx@utar.edu.my|0198881005|Staff|Faculty of Science (FSC)|Facility Management|staffpass1
+2401444|LJY|jieying47@1utar.my|01120970647|Student|LKCFES|SE|12344321
