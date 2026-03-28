@@ -43,6 +43,7 @@ public abstract class User extends Person {
                faculty + Constants.DELIMITER +
                programme + Constants.DELIMITER +
                getPassword();
+        
     }
 
     public String getRole()      { return role; }

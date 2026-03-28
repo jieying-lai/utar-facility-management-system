@@ -225,5 +225,40 @@ public class FileManager {
         }
         writeAllLines(Constants.FILE_FACILITIES, lines);
     }
+<<<<<<< HEAD
 
+=======
+    
+    public static boolean isFacilityIdExists(String id) {
+        List<Facility> list = loadAllFacilities();
+        for (Facility f : list) {
+            if (f.getFacilityID().equalsIgnoreCase(id.trim())) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    public static boolean isExactFacilityDuplicate(Facility newFac) {
+    	List<Facility> list = loadAllFacilities();
+    	for(Facility f :list) {
+    		if(
+    		   f.getBlock().equalsIgnoreCase(newFac.getBlock())&&
+    		   f.getFloor().equalsIgnoreCase(newFac.getFloor())&&
+    		   f.getRoomNo().equalsIgnoreCase(newFac.getRoomNo())&&
+    		   f.getType().equalsIgnoreCase(newFac.getType())&&
+    		   f.getCapacity() == newFac.getCapacity());
+    		{
+    			return true;
+    		}
+    	}
+    	return false;
+    }
+    
+    
+    
+    
+    
+    
+>>>>>>> feature/member4-admin
 }
