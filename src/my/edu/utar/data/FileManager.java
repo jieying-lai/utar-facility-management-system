@@ -226,8 +226,11 @@ public class FileManager {
         writeAllLines(Constants.FILE_FACILITIES, lines);
     }
 <<<<<<< HEAD
+<<<<<<< HEAD
 
 =======
+=======
+>>>>>>> 305a3f4d2bee553bf5eaa46778e620624e3fc4f4
     
     public static boolean isFacilityIdExists(String id) {
         List<Facility> list = loadAllFacilities();
@@ -258,7 +261,13 @@ public class FileManager {
     
     
     
+<<<<<<< HEAD
     
     
 >>>>>>> feature/member4-admin
+=======
+=======
+
+>>>>>>> cd0f8775c2215e2328c3cf52a587c77ae509780f
+>>>>>>> 305a3f4d2bee553bf5eaa46778e620624e3fc4f4
 }
