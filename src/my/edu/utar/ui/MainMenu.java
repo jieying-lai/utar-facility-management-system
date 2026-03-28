@@ -372,12 +372,10 @@ public class MainMenu {
 
         User user = FileManager.loginUser(id, password);
         if (user != null) {
-<<<<<<< HEAD
+
             System.out.println("\nWelcome, " + user.getName() + "! (" + user.getRole() + ")");
             new UserMenu(sc, user, bookingManager).show();
-=======
-            new UserMenu(sc, user).show();
->>>>>>> cd0f8775c2215e2328c3cf52a587c77ae509780f
+
             return;
         }
 

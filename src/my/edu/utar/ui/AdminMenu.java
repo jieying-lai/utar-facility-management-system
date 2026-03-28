@@ -7,6 +7,7 @@ import java.util.Scanner;
 import my.edu.utar.data.FileManager;
 import my.edu.utar.model.Admin;
 import my.edu.utar.model.Facility;
+import my.edu.utar.util.Constants;
 import my.edu.utar.util.Validator;
 
 public class AdminMenu {
@@ -30,7 +31,7 @@ public class AdminMenu {
                 System.out.println("Cannot be empty. Please try again.");
                 continue;
             }
-
+          
             switch (choice) {
                 case "1": searchFacility();         break;
                 case "2": manageFacility();         break;
@@ -45,9 +46,9 @@ public class AdminMenu {
                 default:
                     System.out.println("Invalid selection, please try again.");
             }
+           }
         }
-    }
-
+    
     private void printAdminMenu() {
         System.out.println("\n============================================");
         System.out.println("   ADMIN DASHBOARD");
@@ -69,16 +70,22 @@ public class AdminMenu {
         // TODO Member 3: implement alert check here
     }
 
-    /** TODO Member 4 */
     private void searchFacility() {
     	System.out.println("\n--- Search Facility Status ---");
-    	System.out.print("Enter search keyword (ID, Block, or Type): ");
-        String keyword = sc.nextLine().trim().toLowerCase();
+    	System.out.println("Enter search keyword (ID, Block, or Type): ");
+    	System.out.print("[Press 0 return to previous menu]:");
+        String input = sc.nextLine().trim().toLowerCase();
         
-        if (keyword.isEmpty()) {
-            System.out.println("Error: Keyword cannot be empty.");
-            return;
+        if(input.equals("0")){
+        	System.out.print("Returning to the Admin Dashboard Page...");
+        	return;
         }
+        
+        if(input.isEmpty()) {
+        	System.out.print("Error,Cannot be empty.Returning...");
+        	return;
+        }
+        
         List<Facility> allFacilities = FileManager.loadAllFacilities();
         boolean found = false;
         
@@ -88,9 +95,9 @@ public class AdminMenu {
         System.out.println("---------------------------------------------------------------------------------------");
         
         for (Facility f : allFacilities) {
-            if (f.getFacilityID().toLowerCase().contains(keyword) ||
-                f.getBlock().toLowerCase().contains(keyword) ||
-                f.getType().toLowerCase().contains(keyword)) {
+            if (f.getFacilityID().toLowerCase().contains(input) ||
+                f.getBlock().toLowerCase().contains(input) ||
+                f.getType().toLowerCase().contains(input)) {
                 
                 System.out.printf("%-10s %-8s %-8s %-10s %-15s %-10s %-15s\n",
                     f.getFacilityID(), f.getBlock(), f.getFloor(), f.getRoomNo(),
@@ -101,12 +108,11 @@ public class AdminMenu {
         }
         
         if (!found) {
-            System.out.println("No matching facilities found for: " + keyword);
+            System.out.println("No matching facilities found for: " + input);
         }
         System.out.println("---------------------------------------------------------------------------------------");
     }
 
-    /** TODO Member 4 */
     private void manageFacility() {
     	Scanner input = new Scanner (System.in);
     	while (true) {
@@ -134,6 +140,7 @@ public class AdminMenu {
             	System.out.println("Press enter button to return to the admin menu...");
             	input.nextLine();
             break;
+            
             case "2" :
             	System.out.println("Please add a new facility by using format below.");
             	System.out.println("facilityID|block|floor|roomNo|type|capacity|status");
@@ -166,13 +173,102 @@ public class AdminMenu {
                 	}
             	}
             	break;
-            case "3" :
             	
+            case "3" :
+            	System.out.println("------Facilities Removal Page------");
+            	System.out.println("Enter the facility ID that you would like to remove:");
+            	String theremovingID = input.nextLine().trim();
+            	List <Facility> allf = FileManager.loadAllFacilities();
+            	
+            	try {
+            		new java.io.PrintWriter(Constants.FILE_FACILITIES).close();
+            	}catch (Exception e){}
+            	
+            	for(Facility f : allf) {
+            		if(!f.getFacilityID().equalsIgnoreCase(theremovingID)) {
+            			FileManager.saveFacility(f);
+            		}
+            	}
+            	System.out.println("The Facility list have been updated. Please check again.");
+            	break;
+            	
+            case "4" :
+            	System.out.println("------Edit Facilities Details Page------");
+            	System.out.println("Enter the facility ID that you would like to remove:");
+            	String theeditingID = input.nextLine().trim();
+            	
+            	List <Facility> allf1 =FileManager.loadAllFacilities();
+            	Facility target = null;
+            	
+            	for(Facility f : allf1) {
+            		if(f.getFacilityID().equalsIgnoreCase(theeditingID)) {
+            			target = f;
+            			break;
+            		}
+            	}
+            	
+            	if(target == null) {
+            		System.out.println("The facility ID is not existed.");
+            		return;
+            	}
+            	
+            	System.out.println("------Current Details of the Facility ID------");
+            	target.display();
+            	
+            	System.out.println("What would you like to edit?");
+            	System.out.println("[1] Block name");
+            	System.out.println("[2] Floor number");
+            	System.out.println("[3] Room number");
+            	System.out.println("[4] Facility type");
+            	System.out.println("[5] Faciltiy capacity");
+            	System.out.println("[6] Facility status");
+            	System.out.print("Choice: ");
+                int Choice = Integer.parseInt(input.nextLine());
+                
+                switch(Choice) {
+                case 1:
+                	System.out.println("Enter new block name:(e.g. KB) ");
+                	target.setBlock(input.nextLine());
+                	break;
+                case 2:
+                	System.out.println("Enter new floor number:(e.g. 1) ");
+                	target.setFloor(input.nextLine());
+                	break;
+                case 3:
+                	System.out.println("Enter new room number:(KB104) ");
+                	target.setRoomNo(input.nextLine());
+                	break;
+                case 4:
+                	System.out.println("Enter new facility type:(lecture hall) ");
+                	target.setType(input.nextLine());
+                	break;
+                case 5:
+                	System.out.println("Enter new facility capacity: (e.g. 80) ");
+                	target.setCapacity(Integer.parseInt(input.nextLine()));
+                	break;
+                case 6:
+                	System.out.println("Enter new facility status: (e.g. active) ");
+                	target.setStatus(input.nextLine());
+                	break;
+                default:
+                	System.out.println("Only choice 1 to 6 make changes. Please try again.");
+                	return;
+                	
+                }
+                try {
+                	new java.io.PrintWriter(Constants.FILE_FACILITIES).close();
+                	for(Facility f2 : allf1) {
+                		FileManager.saveFacility(f2);
+                	}
+                	
+                	System.out.println("Successfully Edited!");
+                	target.display();
+                }catch (Exception e) {
+                	System.out.println("Error on saving edited file. Please try again!");
+                }
             }
-
-            
     	}
-    }
+     }
 
     /** TODO Member 4 */
     private void approvalBooking() {
