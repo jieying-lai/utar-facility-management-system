@@ -7,16 +7,6 @@ import my.edu.utar.util.Validator;
 
 import java.util.Scanner;
 
-/**
- * UserMenu.java
- * The main menu page for logged-in Students and Staff.
- *
- * Member 1 owns: updateProfile(), reminderBooking() display
- * Member 2 owns: searchAvailableFacility(), newBooking(),
- *                modifyBooking(), viewBookingRequestStatus()
- * Member 3 owns: reportIssue()
- * Member 4 owns: viewBookingHistory() summary portion
- */
 public class UserMenu {
 
     private Scanner sc;
@@ -27,7 +17,6 @@ public class UserMenu {
         this.currentUser = currentUser;
     }
 
-    // ===================== MAIN USER MENU =====================
     public void show() {
         while (true) {
             showReminders();     
@@ -74,16 +63,6 @@ public class UserMenu {
         System.out.print("Enter your choice: ");
     }
 
-    // ===================== MEMBER 1: SHOW REMINDERS =====================
-    /**
-     * Displays upcoming approved bookings as reminders.
-     * TODO Member 1: Implement this method.
-     * Logic:
-     *   - Read bookings.txt
-     *   - Filter by currentUser.getId() AND status = Approved
-     *   - Show bookings where booking date is today or within next 3 days
-     *   - If none: show "No upcoming reminders."
-     */
     private void showReminders() {
         System.out.println("\n--- REMINDERS ---");
         // TODO: implement reminder logic here
@@ -91,12 +70,6 @@ public class UserMenu {
         System.out.println("-----------------");
     }
 
-    // ===================== MEMBER 1: UPDATE PROFILE =====================
-    /**
-     * Allows user to update editable fields.
-     * Role, ID, and Email are NOT editable.
-     * TODO Member 1: Implement this method.
-     */
     private void updateProfile() {
         System.out.println("\n========== UPDATE PROFILE ==========");
         currentUser.displayProfile();
@@ -126,8 +99,6 @@ public class UserMenu {
             }
         }
     }
-
-    // ---- Update helper methods ----
 
     private void updateName() {
         while (true) {
@@ -195,59 +166,32 @@ public class UserMenu {
     }
 
     private void updateProgrammeDept() {
-        if (Constants.ROLE_STUDENT.equals(currentUser.getRole())) {
-            // Find current faculty index
-            int facultyIndex = 0;
-            for (int i = 0; i < Constants.FACULTIES.length; i++) {
-                if (Constants.FACULTIES[i].equals(currentUser.getFaculty())) {
-                    facultyIndex = i;
-                    break;
-                }
-            }
-            String[] programmes = Constants.PROGRAMMES[facultyIndex];
-            while (true) {
-                System.out.println("\nSelect new Programme:");
-                for (int i = 0; i < programmes.length; i++) {
-                    System.out.println("[" + (i + 1) + "] " + programmes[i]);
-                }
-                System.out.println("[B] Back");
-                System.out.print("Enter choice: ");
-                String input = sc.nextLine().trim().toUpperCase();
+        String type = Constants.ROLE_STUDENT.equals(currentUser.getRole()) ? "Programme" : "Department";
+        String example = Constants.ROLE_STUDENT.equals(currentUser.getRole()) ? "SE" : "IT";
 
-                if (Validator.isEmpty(input)) { System.out.println("Cannot be empty."); continue; }
-                if ("B".equals(input)) return;
-                if (!Validator.isValidMenuChoice(input, 1, programmes.length)) {
-                    System.out.println("Invalid selection, please try again.");
-                    continue;
-                }
-                currentUser.setProgramme(programmes[Integer.parseInt(input) - 1]);
-                FileManager.updateUser(currentUser);
-                System.out.println("Programme updated successfully to: " + currentUser.getProgramme());
-                break;
-            }
-        } else {
-            // Staff - update department
-            while (true) {
-                System.out.println("\nSelect new Department:");
-                for (int i = 0; i < Constants.DEPARTMENTS.length; i++) {
-                    System.out.println("[" + (i + 1) + "] " + Constants.DEPARTMENTS[i]);
-                }
-                System.out.println("[B] Back");
-                System.out.print("Enter choice: ");
-                String input = sc.nextLine().trim().toUpperCase();
+        System.out.println("\nUpdate " + type);
+        System.out.println("Enter your " + type + " abbreviation (e.g., " + example + "):");
+        System.out.println("[B] Back");
+        System.out.print("Enter choice: ");
+        
+        String input = sc.nextLine().trim();
 
-                if (Validator.isEmpty(input)) { System.out.println("Cannot be empty."); continue; }
-                if ("B".equals(input)) return;
-                if (!Validator.isValidMenuChoice(input, 1, Constants.DEPARTMENTS.length)) {
-                    System.out.println("Invalid selection, please try again.");
-                    continue;
-                }
-                currentUser.setProgramme(Constants.DEPARTMENTS[Integer.parseInt(input) - 1]);
-                FileManager.updateUser(currentUser);
-                System.out.println("Department updated successfully to: " + currentUser.getProgramme());
-                break;
-            }
+        // 1. Check if user wants to go back
+        if (input.equalsIgnoreCase("B")) return;
+
+        // 2. Validate empty input
+        if (Validator.isEmpty(input)) {
+            System.out.println("Error: " + type + " cannot be empty.");
+            return;
         }
+
+        // 3. Store as Capitalized (Uppercase)
+        String formattedInput = input.toUpperCase();
+        
+        currentUser.setProgramme(formattedInput);
+        FileManager.updateUser(currentUser);
+        
+        System.out.println(type + " updated successfully to: " + formattedInput);
     }
 
     private void updatePassword() {

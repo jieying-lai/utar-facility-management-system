@@ -2,20 +2,15 @@ package my.edu.utar.model;
 
 import my.edu.utar.util.Constants;
 
-/**
- * Facility.java
- * Represents a campus facility (room/court/lab/hall).
- * Member 2 owns this class - add methods as needed.
- */
 public class Facility {
 
     private String facilityID;
-    private String block;       // KA or KB
-    private String floor;       // G, 1, 2, 3...
-    private String roomNo;      // e.g. KB104
-    private String type;        // from Constants.FACILITY_TYPES
+    private String block;       
+    private String floor;       
+    private String roomNo;      
+    private String type;      
     private int    capacity;
-    private String status;      // Available / Unavailable / Under Maintenance
+    private String status;     
 
     public Facility(String facilityID, String block, String floor,
                     String roomNo, String type, int capacity, String status) {
@@ -30,10 +25,6 @@ public class Facility {
 
     public Facility() {}
 
-    /**
-     * Converts to file string for facilities.txt
-     * Format: facilityID|block|floor|roomNo|type|capacity|status
-     */
     public String toFileString() {
         return facilityID + Constants.DELIMITER + block + Constants.DELIMITER +
                floor + Constants.DELIMITER + roomNo + Constants.DELIMITER +
@@ -47,7 +38,6 @@ public class Facility {
                            " | Status: " + status);
     }
 
-    // Getters
     public String getFacilityID() { return facilityID; }
     public String getBlock()      { return block; }
     public String getFloor()      { return floor; }
@@ -56,7 +46,6 @@ public class Facility {
     public int    getCapacity()   { return capacity; }
     public String getStatus()     { return status; }
 
-    // Setters
     public void setFacilityID(String id)     { this.facilityID = id; }
     public void setBlock(String block)       { this.block = block; }
     public void setFloor(String floor)       { this.floor = floor; }

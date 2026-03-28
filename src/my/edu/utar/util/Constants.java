@@ -1,10 +1,5 @@
 package my.edu.utar.util;
 
-/**
- * Constants.java
- * Stores all shared constant data used across the system.
- * All members should use these constants instead of hardcoding strings.
- */
 public class Constants {
 
     // ===================== FILE PATHS =====================
@@ -78,32 +73,14 @@ public class Constants {
 
  // ===================== FACULTIES =====================
     public static final String[] FACULTIES = {
+    		"Centre for Foundation Studies (CFS)",
+    		"M. Kandiah Faculty of Medicine and Health Sciences (MK FMHS)",
+    		"Lee Kong Chian Faculty of Engineering and Science (LKC FES)",
     	    "Faculty of Accountancy and Management (FAM)",
-    	    "Faculty of Medicine and Health Science (FMHS)",
     	    "Faculty of Creative Industries (FCI)",
-    	    "Lee Kong Chian Faculty of Engineering and Science (LKC FES)",
-    	    "Institute of Chinese Studies (ICS)",
-    	    "Centre for Foundation Studies (CFS)",
-    	    "Centre for Extension Education (CEE)",
-    	    "Institute of Management and Leadership Development (IMLD)",
-    	    "Institute of Postgraduate Studies and Research (IPSR)"
+    	    "Faculty of Chinese Studies (FCS)",
+    	    "Faculty of Education (FEd)",
     	};
-    
-    // ===================== DEPARTMENTS (Staff) =====================
-    public static final String[] DEPARTMENTS = {
-        "Academic Affairs",
-        "Admissions and Records",
-        "Finance and Accounts",
-        "Human Resource",
-        "Information Technology",
-        "Library",
-        "Facility Management",
-        "Student Affairs",
-        "Examination",
-        "Marketing and Communications",
-        "Research and Development",
-        "Security"
-    };
 
     // ===================== BOOKING / ADVANCE RULES =====================
     // Facilities that require 2 hours advance booking
@@ -115,8 +92,8 @@ public class Constants {
     public static final int REMINDER_DAYS_AHEAD = 3;
 
     // ===================== MAINTENANCE ALERT THRESHOLDS =====================
-    public static final int ALERT_ISSUE_COUNT    = 3;   // 3+ unresolved = alert
-    public static final int ALERT_OVERDUE_DAYS   = 7;   // 7+ days unresolved = alert
+    public static final int ALERT_ISSUE_COUNT    = 3;   
+    public static final int ALERT_OVERDUE_DAYS   = 7;   
 
     // ===================== ADMIN CONTACT =====================
     public static final String ADMIN_NAME    = "Mr Lee";
