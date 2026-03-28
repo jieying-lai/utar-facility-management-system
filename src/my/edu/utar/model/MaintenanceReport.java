@@ -2,11 +2,6 @@ package my.edu.utar.model;
 
 import my.edu.utar.util.Constants;
 
-/**
- * MaintenanceReport.java
- * Represents a facility maintenance/issue report.
- * Member 3 owns this class.
- */
 public class MaintenanceReport {
 
     private String issueID;       // Format: M + YYYYMMDD + 4-digit seq e.g. M202603140001
@@ -35,10 +30,6 @@ public class MaintenanceReport {
 
     public MaintenanceReport() {}
 
-    /**
-     * Converts to file string for maintenance.txt
-     * Format: issueID|facilityID|reporterID|issueType|description|reportDate|status|assignedTo|resolvedDate
-     */
     public String toFileString() {
         return issueID + Constants.DELIMITER + facilityID + Constants.DELIMITER +
                reporterID + Constants.DELIMITER + issueType + Constants.DELIMITER +
@@ -57,7 +48,6 @@ public class MaintenanceReport {
         System.out.println("Resolved    : " + (resolvedDate.isEmpty() ? "Not yet resolved" : resolvedDate));
     }
 
-    // Getters
     public String getIssueID()      { return issueID; }
     public String getFacilityID()   { return facilityID; }
     public String getReporterID()   { return reporterID; }
@@ -68,7 +58,6 @@ public class MaintenanceReport {
     public String getAssignedTo()   { return assignedTo; }
     public String getResolvedDate() { return resolvedDate; }
 
-    // Setters
     public void setIssueID(String id)          { this.issueID = id; }
     public void setFacilityID(String id)       { this.facilityID = id; }
     public void setReporterID(String id)       { this.reporterID = id; }

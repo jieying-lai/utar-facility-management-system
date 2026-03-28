@@ -1,10 +1,5 @@
 package my.edu.utar.util;
 
-/**
- * Constants.java
- * Stores all shared constant data used across the system.
- * All members should use these constants instead of hardcoding strings.
- */
 public class Constants {
 
     // ===================== FILE PATHS =====================
@@ -76,91 +71,16 @@ public class Constants {
     // ===================== BLOCKS =====================
     public static final String[] BLOCKS = { "KA", "KB" };
 
-    // ===================== FACULTIES =====================
+ // ===================== FACULTIES =====================
     public static final String[] FACULTIES = {
-        "Faculty of Information and Communication Technology (FICT)",
-        "Faculty of Engineering and Green Technology (FEGT)",
-        "Faculty of Business and Finance (FBF)",
-        "Faculty of Arts and Social Science (FASS)",
-        "Faculty of Science (FSC)",
-        "Faculty of Medicine and Health Sciences (FMHS)",
-        "Lee Kong Chian Faculty of Engineering and Science (LKC FES)"
-    };
-
-    // ===================== PROGRAMMES (by faculty index) =====================
-    public static final String[][] PROGRAMMES = {
-        // FICT (index 0)
-        {
-            "Bachelor of Computer Science (Hons)",
-            "Bachelor of Information Systems (Hons)",
-            "Bachelor of Information Technology (Hons)",
-            "Bachelor of Software Engineering (Hons)",
-            "Bachelor of Computer Science (Hons) Specialisation in Data Science",
-            "Bachelor of Computer Science (Hons) Specialisation in Cybersecurity"
-        },
-        // FEGT (index 1)
-        {
-            "Bachelor of Engineering (Hons) Civil Engineering",
-            "Bachelor of Engineering (Hons) Mechanical Engineering",
-            "Bachelor of Engineering (Hons) Electrical and Electronic Engineering",
-            "Bachelor of Engineering (Hons) Chemical Engineering",
-            "Bachelor of Engineering (Hons) Environmental Engineering"
-        },
-        // FBF (index 2)
-        {
-            "Bachelor of Commerce (Hons) Accounting",
-            "Bachelor of Business Administration (Hons)",
-            "Bachelor of Economics (Hons)",
-            "Bachelor of Finance (Hons)",
-            "Bachelor of Marketing (Hons)"
-        },
-        // FASS (index 3)
-        {
-            "Bachelor of Arts (Hons) Chinese Studies",
-            "Bachelor of Arts (Hons) English Language",
-            "Bachelor of Communication (Hons)",
-            "Bachelor of Arts (Hons) Journalism",
-            "Bachelor of Social Science (Hons) Psychology"
-        },
-        // FSC (index 4)
-        {
-            "Bachelor of Science (Hons) Biochemistry",
-            "Bachelor of Science (Hons) Biotechnology",
-            "Bachelor of Science (Hons) Chemistry",
-            "Bachelor of Science (Hons) Mathematical and Statistical Sciences",
-            "Bachelor of Science (Hons) Physics"
-        },
-        // FMHS (index 5)
-        {
-            "Bachelor of Medicine and Bachelor of Surgery (MBBS)",
-            "Bachelor of Pharmacy (Hons)",
-            "Bachelor of Nursing (Hons)",
-            "Bachelor of Biomedical Science (Hons)"
-        },
-        // LKC FES (index 6)
-        {
-            "Bachelor of Engineering (Hons) Electronic and Electrical Engineering",
-            "Bachelor of Engineering (Hons) Mechatronics Engineering",
-            "Bachelor of Science (Hons) Applied Science (Industrial Chemistry)",
-            "Bachelor of Computer Science (Hons) Game Development"
-        }
-    };
-
-    // ===================== DEPARTMENTS (Staff) =====================
-    public static final String[] DEPARTMENTS = {
-        "Academic Affairs",
-        "Admissions and Records",
-        "Finance and Accounts",
-        "Human Resource",
-        "Information Technology",
-        "Library",
-        "Facility Management",
-        "Student Affairs",
-        "Examination",
-        "Marketing and Communications",
-        "Research and Development",
-        "Security"
-    };
+    		"Centre for Foundation Studies (CFS)",
+    		"M. Kandiah Faculty of Medicine and Health Sciences (MK FMHS)",
+    		"Lee Kong Chian Faculty of Engineering and Science (LKC FES)",
+    	    "Faculty of Accountancy and Management (FAM)",
+    	    "Faculty of Creative Industries (FCI)",
+    	    "Faculty of Chinese Studies (FCS)",
+    	    "Faculty of Education (FEd)",
+    	};
 
     // ===================== BOOKING / ADVANCE RULES =====================
     // Facilities that require 2 hours advance booking
@@ -172,8 +92,8 @@ public class Constants {
     public static final int REMINDER_DAYS_AHEAD = 3;
 
     // ===================== MAINTENANCE ALERT THRESHOLDS =====================
-    public static final int ALERT_ISSUE_COUNT    = 3;   // 3+ unresolved = alert
-    public static final int ALERT_OVERDUE_DAYS   = 7;   // 7+ days unresolved = alert
+    public static final int ALERT_ISSUE_COUNT    = 3;   
+    public static final int ALERT_OVERDUE_DAYS   = 7;   
 
     // ===================== ADMIN CONTACT =====================
     public static final String ADMIN_NAME    = "Mr Lee";

@@ -2,11 +2,6 @@ package my.edu.utar.model;
 
 import my.edu.utar.util.Constants;
 
-/**
- * Booking.java
- * Represents a facility booking record.
- * Member 2 owns this class.
- */
 public class Booking {
 
     private String bookingID;   // Format: B + YYYYMMDD + 4-digit seq e.g. B202603140001
@@ -39,7 +34,6 @@ public class Booking {
     public Booking() {}
 
     /**
-     * Converts to file string for bookings.txt
      * Format: bookingID|userID|facilityID|applyDate|bookingDate|timeSlot|purpose|pax|status|rejectReason
      */
     public String toFileString() {
@@ -69,7 +63,6 @@ public class Booking {
         }
     }
 
-    // Getters
     public String getBookingID()    { return bookingID; }
     public String getUserID()       { return userID; }
     public String getFacilityID()   { return facilityID; }
@@ -81,7 +74,6 @@ public class Booking {
     public String getStatus()       { return status; }
     public String getRejectReason() { return rejectReason; }
 
-    // Setters
     public void setBookingID(String id)         { this.bookingID = id; }
     public void setUserID(String id)            { this.userID = id; }
     public void setFacilityID(String id)        { this.facilityID = id; }

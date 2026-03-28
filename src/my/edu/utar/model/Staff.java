@@ -2,14 +2,8 @@ package my.edu.utar.model;
 
 import my.edu.utar.util.Constants;
 
-/**
- * Staff.java
- * Extends User. Represents a staff member.
- * Applies OOP concept: INHERITANCE, POLYMORPHISM
- */
 public class Staff extends User {
 
-    // ===================== CONSTRUCTOR =====================
     public Staff(String staffId, String name, String email, String phone,
                  String password, String faculty, String department) {
         super(staffId, name, email, phone, password,
@@ -18,18 +12,11 @@ public class Staff extends User {
 
     public Staff() {}
 
-    // ===================== IMPLEMENTED METHODS =====================
-    /**
-     * Validates login credentials for staff.
-     */
     @Override
     public boolean validateCredentials(String inputId, String inputPassword) {
         return getId().equals(inputId) && getPassword().equals(inputPassword);
     }
 
-    /**
-     * Overrides displayProfile to show staff-specific labels.
-     */
     @Override
     public void displayProfile() {
         System.out.println("========== STAFF PROFILE ==========");
