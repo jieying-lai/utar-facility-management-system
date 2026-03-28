@@ -34,6 +34,7 @@ public class Booking {
         this.status       = status;
         this.rejectReason = rejectReason != null ? rejectReason : "";
     }
+    
 
     public Booking() {}
 
@@ -48,17 +49,23 @@ public class Booking {
                purpose + Constants.DELIMITER + pax + Constants.DELIMITER +
                status + Constants.DELIMITER + rejectReason;
     }
+    
+    @Override
+    public String toString() {
+        return bookingID + " | " + userID + " | " + facilityID + " | " + bookingDate +
+               " | " + Constants.TIME_SLOTS[timeSlot] + " | " + purpose + " | " + pax + " | " + status;
+    }
 
     public void display() {
-        System.out.println("Booking ID  : " + bookingID);
-        System.out.println("Facility ID : " + facilityID);
-        System.out.println("Date        : " + bookingDate);
-        System.out.println("Time Slot   : " + Constants.TIME_SLOTS[timeSlot]);
-        System.out.println("Purpose     : " + purpose);
-        System.out.println("Pax         : " + pax);
-        System.out.println("Status      : " + status);
-        if (!rejectReason.isEmpty()) {
-            System.out.println("Reason      : " + rejectReason);
+    	System.out.println("Booking ID: " + bookingID);
+        System.out.println("Facility ID: " + facilityID);
+        System.out.println("Date: " + bookingDate);
+        System.out.println("Time Slot: " + Constants.TIME_SLOTS[timeSlot]);
+        System.out.println("Purpose: " + purpose);
+        System.out.println("Pax: " + pax);
+        System.out.println("Status: " + status);
+        if (rejectReason != null && !rejectReason.isEmpty()) {
+            System.out.println("Reject Reason: " + rejectReason);
         }
     }
 

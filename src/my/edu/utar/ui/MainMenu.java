@@ -2,6 +2,7 @@ package my.edu.utar.ui;
 
 import my.edu.utar.data.FileManager;
 import my.edu.utar.model.*;
+import my.edu.utar.service.BookingManager;
 import my.edu.utar.util.Constants;
 import my.edu.utar.util.Validator;
 
@@ -18,9 +19,13 @@ import java.util.Scanner;
 public class MainMenu {
 
     private Scanner sc;
+    private BookingManager bookingManager;
 
     public MainMenu(Scanner sc) {
         this.sc = sc;
+        
+        bookingManager = new BookingManager();
+        bookingManager.loadFromFile();
     }
 
     // ===================== MAIN PAGE DISPLAY =====================
@@ -308,7 +313,7 @@ public class MainMenu {
         User user = FileManager.loginUser(id, password);
         if (user != null) {
             System.out.println("\nWelcome, " + user.getName() + "! (" + user.getRole() + ")");
-            new UserMenu(sc, user).show();
+            new UserMenu(sc, user, bookingManager).show();
             return;
         }
 
@@ -318,6 +323,7 @@ public class MainMenu {
         } else {
             System.out.println("Account not found. Please register first.");
         }
+       
     }
 
     // ===================== EXIT =====================

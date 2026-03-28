@@ -19,3 +19,5 @@
 1001004|MS CHAN MEI XIAN|chanmx@utar.edu.my|0198881004|Staff|Faculty of Arts and Social Science (FASS)|Library|staffpass1
 1001005|MR NG ZHI XIONG|ngzx@utar.edu.my|0198881005|Staff|Faculty of Science (FSC)|Facility Management|staffpass1
 1234567|HENG|hengyh@utar.edu.my|0112345678|Staff|Faculty of Information and Communication Technology (FICT)|Information Technology|11111111
+7654321|YY|yy@utar.edu.my|01120970987|Staff|Faculty of Information and Communication Technology (FICT)|Academic Affairs|12345678
+2402503|CHOK SHI YING|shiying@1utar.my|0112345678|Student|Lee Kong Chian Faculty of Engineering and Science (LKC FES)|Bachelor of Computer Science (Hons) Game Development|12345678
