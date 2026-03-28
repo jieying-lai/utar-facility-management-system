@@ -244,4 +244,51 @@ public class FileManager {
     // Member 2 - Facility & Booking methods go here
     // Member 3 - Maintenance methods go here
     // Member 4 - Report/analytics read methods go here
+    //Loads all facilities from facilities.txt
+    
+    public static List<Facility> loadAllFacilities(){    
+    	List<Facility> facilities = new ArrayList<>();
+        List<String> lines = readAllLines(Constants.FILE_FACILITIES);
+        
+        for (int i = 0; i < lines.size(); i++) {
+        	try {
+        		String[] parts = lines.get(i).split(Constants.DELIMITER_REGEX, -1);
+        		if (parts.length < 7) continue;
+        		
+        		facilities.add(new Facility(
+        				parts[0].trim(), 
+                        parts[1].trim(), 
+                        parts[2].trim(), 
+                        parts[3].trim(), 
+                        parts[4].trim(), 
+                        Integer.parseInt(parts[5].trim()), 
+                        parts[6].trim()
+                ));
+        	}catch (Exception e) {
+        		System.out.println("[WARNING] Error parsing facility on line " + (i + 1));
+        	}
+        }
+        return facilities;
+    }
+    
+    //Save a new facility (Append mode)
+    
+    public static void saveFacility(Facility f) {
+        appendLine(Constants.FILE_FACILITIES, f.toFileString());
+    }
+    
+    //Update or Delete facility file with a full list
+    public static void updateAllFacilities(List<Facility> facilities) {
+        List<String> lines = new ArrayList<>();
+        for (Facility f : facilities) {
+            lines.add(f.toFileString());
+        }
+        writeAllLines(Constants.FILE_FACILITIES, lines);
+    }
+    
+    
+    
+    
+    
+    
 }

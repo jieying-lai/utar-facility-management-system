@@ -1,9 +1,13 @@
+
 package my.edu.utar.ui;
 
-import my.edu.utar.model.Admin;
-import my.edu.utar.util.Validator;
-
+import java.util.List;
 import java.util.Scanner;
+
+import my.edu.utar.data.FileManager;
+import my.edu.utar.model.Admin;
+import my.edu.utar.model.Facility;
+import my.edu.utar.util.Validator;
 
 /**
  * AdminMenu.java
@@ -83,7 +87,41 @@ public class AdminMenu {
     // ===================== MEMBER 4: ALL ADMIN FEATURES =====================
     /** TODO Member 4 */
     private void searchFacility() {
-        System.out.println("[TODO - Member 4] Search Facility Status");
+    	System.out.println("\n--- Search Facility Status ---");
+    	System.out.print("Enter search keyword (ID, Block, or Type): ");
+        String keyword = sc.nextLine().trim().toLowerCase();
+        
+        if (keyword.isEmpty()) {
+            System.out.println("Error: Keyword cannot be empty.");
+            return;
+        }
+        List<Facility> allFacilities = FileManager.loadAllFacilities();
+        boolean found = false;
+        
+        System.out.println("\n---------------------------------------------------------------------------------------");
+        System.out.printf("%-10s %-8s %-8s %-10s %-15s %-10s %-15s\n", 
+                          "ID", "Block", "Floor", "Room", "Type", "Capacity", "Status");
+        System.out.println("---------------------------------------------------------------------------------------");
+        
+        for (Facility f : allFacilities) {
+            // Multi-criteria search logic
+            if (f.getFacilityID().toLowerCase().contains(keyword) ||
+                f.getBlock().toLowerCase().contains(keyword) ||
+                f.getType().toLowerCase().contains(keyword)) {
+                
+                // Reusing your Facility.java display method
+                System.out.printf("%-10s %-8s %-8s %-10s %-15s %-10s %-15s\n",
+                    f.getFacilityID(), f.getBlock(), f.getFloor(), f.getRoomNo(),
+                    f.getType(), f.getCapacity(), f.getStatus());
+                
+                found = true;
+            }
+        }
+        
+        if (!found) {
+            System.out.println("No matching facilities found for: " + keyword);
+        }
+        System.out.println("---------------------------------------------------------------------------------------");
     }
 
     /** TODO Member 4 */
