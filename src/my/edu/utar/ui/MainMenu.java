@@ -62,40 +62,30 @@ public class MainMenu {
         System.out.println("  [C] to cancel registration at any time    ");
         System.out.println("--------------------------------------------");
 
-        // Step 1: Role
         String role = chooseRole();
         if (role == null) return;
 
-        // Step 2: ID
         String id = enterStudentId(role);
         if (id == null) return;
 
-        // Step 3: Name
         String name = enterName();
         if (name == null) return;
 
-        // Step 4: Email
         String email = enterEmail(role);
         if (email == null) return;
 
-        // Step 5: Phone
         String phone = enterPhone();
         if (phone == null) return;
 
-        // Step 6: Faculty
         int facultyIndex = chooseFaculty();
         if (facultyIndex == -1) return;
         String faculty = Constants.FACULTIES[facultyIndex];
 
-        // Step 7: Programme / Department
         String programme = enterProgrammeOrDept(role);
         if (programme == null) return;
 
-        // Step 8: Password
         String password = enterPassword();
         if (password == null) return;
-
-        // Step 9: Summary + Confirm
 
         System.out.println("============================================");
         System.out.println("         REGISTRATION SUMMARY               ");
@@ -116,7 +106,6 @@ public class MainMenu {
             return;
         }
 
-        // Save user
         User newUser;
         if (Constants.ROLE_STUDENT.equals(role)) {
             newUser = new Student(id, name, email, phone, password, faculty, programme);
@@ -126,8 +115,6 @@ public class MainMenu {
         FileManager.saveUser(newUser);
         System.out.println("\n  Registration successful! You can now login.");
     }
-
-    // ---- Register helper methods ----
 
     private String chooseRole() {
         while (true) {
@@ -269,12 +256,6 @@ public class MainMenu {
         }
     }
 
-    /**
-     * Programme/Department entry using short form.
-     * Short form must be 2-5 uppercase letters only.
-     * Stored in UPPERCASE (e.g., SE, ME, CS).
-     * Shows examples based on role.
-     */
     private String enterProgrammeOrDept(String role) {
         while (true) {
             System.out.println();
@@ -310,26 +291,23 @@ public class MainMenu {
                 return null;
             }
 
-            // Validation: only letters, length 2-5
             if (!input.matches("[A-Z]{2,5}")) {
                 System.out.println("  Invalid format! Short form must be:");
                 System.out.println("  - Letters only (no numbers or symbols)");
                 System.out.println("  - Between 2 to 5 characters");
-                System.out.println("  - Example: SE, CS, BUS, MBBS");
+                System.out.println("  - Example: SE, MH, CL, AS, MBBS");
                 continue;
             }
 
-            // Confirm what they typed
             System.out.print("\n  You entered: \"" + input + "\". Confirm? [Y] Yes / [N] Re-enter / [C] Cancel: ");
             String confirm = sc.nextLine().trim().toUpperCase();
 
             if ("Y".equals(confirm)) {
-                return input; // stored as uppercase e.g. "SE"
+                return input; 
             } else if ("C".equals(confirm)) {
                 System.out.println("\n  Registration cancelled.");
                 return null;
             }
-            // if N, loop again
         }
     }
 
@@ -362,7 +340,6 @@ public class MainMenu {
         }
     }
 
-    // ===================== LOGIN =====================
     private void login() {
         System.out.println("============================================");
         System.out.println("                  LOGIN                     ");

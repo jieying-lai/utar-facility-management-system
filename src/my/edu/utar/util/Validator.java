@@ -89,7 +89,7 @@ public class Validator {
                    Constants.ADMIN_NAME + " at " + Constants.ADMIN_EMAIL +
                    " or " + Constants.ADMIN_PHONE + ".";
         }
-        return null; // null means valid
+        return null; 
     }
 
     public static boolean isEmpty(String input) {
