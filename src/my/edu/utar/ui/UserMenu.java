@@ -5,6 +5,8 @@ import my.edu.utar.model.User;
 import my.edu.utar.util.Constants;
 import my.edu.utar.util.Validator;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Scanner;
 
 public class UserMenu {
@@ -19,8 +21,8 @@ public class UserMenu {
 
     public void show() {
         while (true) {
-            showReminders();     
-            printUserMenu();
+             
+            printUserMenu();    
 
             String choice = sc.nextLine().trim().toUpperCase();
 
@@ -47,9 +49,18 @@ public class UserMenu {
     }
 
     private void printUserMenu() {
-        System.out.println("\n============================================");
-        System.out.println("   Welcome, " + currentUser.getName());
-        System.out.println("   Role: " + currentUser.getRole());
+        LocalDateTime now = LocalDateTime.now();
+        String currentDate = now.format(DateTimeFormatter.ofPattern("dd MMMM yyyy"));
+        String currentTime = now.format(DateTimeFormatter.ofPattern("hh:mm a"));
+
+        System.out.println("============================================");
+        System.out.println("    UTAR Smart Campus Management System     ");
+        System.out.println("============================================");
+        System.out.println("  Date : " + currentDate);
+        System.out.println("  Time : " + currentTime);
+        System.out.println("\n  Welcome, " + currentUser.getName());
+        System.out.println("  Role: " + currentUser.getRole());
+        showReminders();
         System.out.println("============================================");
         System.out.println("[1] Update Profile");
         System.out.println("[2] Search Available Facility");

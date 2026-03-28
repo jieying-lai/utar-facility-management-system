@@ -9,12 +9,6 @@ import my.edu.utar.model.Admin;
 import my.edu.utar.model.Facility;
 import my.edu.utar.util.Validator;
 
-/**
- * AdminMenu.java
- * The main menu page for Admin users.
- * Member 4 owns the full implementation of this class.
- * Member 1 sets up this skeleton so login can route here correctly.
- */
 public class AdminMenu {
 
     private Scanner sc;
@@ -25,10 +19,9 @@ public class AdminMenu {
         this.currentAdmin = currentAdmin;
     }
 
-    // ===================== ADMIN MENU =====================
     public void show() {
         while (true) {
-            showIssueAlerts();   // Always show alerts at top
+            showIssueAlerts();  
             printAdminMenu();
 
             String choice = sc.nextLine().trim().toUpperCase();
@@ -72,19 +65,10 @@ public class AdminMenu {
         System.out.print("Enter your choice: ");
     }
 
-    // ===================== MEMBER 3: ISSUE ALERTS =====================
-    /**
-     * Auto-shown on every admin page load.
-     * TODO Member 3: Implement this.
-     * Check maintenance.txt for:
-     *   - Facilities with 3+ unresolved issues
-     *   - Issues pending more than 7 days
-     */
     private void showIssueAlerts() {
         // TODO Member 3: implement alert check here
     }
 
-    // ===================== MEMBER 4: ALL ADMIN FEATURES =====================
     /** TODO Member 4 */
     private void searchFacility() {
     	System.out.println("\n--- Search Facility Status ---");
@@ -104,12 +88,10 @@ public class AdminMenu {
         System.out.println("---------------------------------------------------------------------------------------");
         
         for (Facility f : allFacilities) {
-            // Multi-criteria search logic
             if (f.getFacilityID().toLowerCase().contains(keyword) ||
                 f.getBlock().toLowerCase().contains(keyword) ||
                 f.getType().toLowerCase().contains(keyword)) {
                 
-                // Reusing your Facility.java display method
                 System.out.printf("%-10s %-8s %-8s %-10s %-15s %-10s %-15s\n",
                     f.getFacilityID(), f.getBlock(), f.getFloor(), f.getRoomNo(),
                     f.getType(), f.getCapacity(), f.getStatus());
