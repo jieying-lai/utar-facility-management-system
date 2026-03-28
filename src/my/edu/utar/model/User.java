@@ -67,6 +67,7 @@ public abstract class User extends Person {
                faculty + Constants.DELIMITER +
                programme + Constants.DELIMITER +
                getPassword();
+        
     }
 
     // ===================== GETTERS =====================

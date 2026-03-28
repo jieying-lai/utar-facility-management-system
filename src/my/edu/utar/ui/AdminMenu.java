@@ -104,12 +104,10 @@ public class AdminMenu {
         System.out.println("---------------------------------------------------------------------------------------");
         
         for (Facility f : allFacilities) {
-            // Multi-criteria search logic
             if (f.getFacilityID().toLowerCase().contains(keyword) ||
                 f.getBlock().toLowerCase().contains(keyword) ||
                 f.getType().toLowerCase().contains(keyword)) {
                 
-                // Reusing your Facility.java display method
                 System.out.printf("%-10s %-8s %-8s %-10s %-15s %-10s %-15s\n",
                     f.getFacilityID(), f.getBlock(), f.getFloor(), f.getRoomNo(),
                     f.getType(), f.getCapacity(), f.getStatus());
@@ -126,7 +124,70 @@ public class AdminMenu {
 
     /** TODO Member 4 */
     private void manageFacility() {
-        System.out.println("[TODO - Member 4] Manage Facilities");
+    	Scanner input = new Scanner (System.in);
+    	while (true) {
+    		System.out.println("Facilities Management Page");
+            System.out.println("Please enter your choice: ");
+            System.out.println("[1] View all current facilities");
+            System.out.println("[2] Add new facilities");
+            System.out.println("[3] Remove unused facilities");
+            System.out.println("[4] Edit current facilities details");
+            String choice = sc.nextLine().trim().toUpperCase();
+            
+            if (Validator.isEmpty(choice)) {
+                System.out.println("Cannot be empty. Please try again.");
+                continue;
+            }
+ 
+            switch (choice) {
+            case "1" :
+            	System.out.println("---Current facilities List---");
+            	System.out.println("facilityID|block|floor|roomNo|type|capacity|status");
+            	List <Facility> all =FileManager.loadAllFacilities();
+            	for(Facility f : all) {
+            		System.out.println(f.toFileString());
+            	}
+            	System.out.println("Press enter button to return to the admin menu...");
+            	input.nextLine();
+            break;
+            case "2" :
+            	System.out.println("Please add a new facility by using format below.");
+            	System.out.println("facilityID|block|floor|roomNo|type|capacity|status");
+            	System.out.print("Enter facility ID (e.g. F001): ");
+            	String ID = input.nextLine();
+            	
+            	if(FileManager.isFacilityIdExists(ID)) {
+            		System.out.println("ID" + ID + "exists in the system. Try another ID.");
+            	} else {
+            		System.out.print("Enter block name (e.g. KB): ");
+            		String block = input.nextLine();
+                	System.out.print("Enter floor number (e.g. 1): ");
+                	String num = input.nextLine();
+                	System.out.print("Enter roomNo (e.g. KB104): ");
+                	String roomNo = input.nextLine();
+                	System.out.print("Enter type of the facility (e.g. Lecture hall): ");
+                	String type = input.nextLine();
+                	System.out.print("Enter capacity of the facility (e.g. 80): ");
+                	String cap = input.nextLine();
+                	int capacity = Integer.parseInt(cap);
+                	String status = "Available";
+                	
+                	Facility f = new Facility(ID,block,num,roomNo,type,capacity,status);
+                	
+                	if(FileManager.isExactFacilityDuplicate(f)) {
+                		System.out.println("Facility added failed. It is already exists in the system.");
+                	} else {
+                		FileManager.saveFacility(f);
+                		System.out.println("The facility is successfully added!");
+                	}
+            	}
+            	break;
+            case "3" :
+            	
+            }
+
+            
+    	}
     }
 
     /** TODO Member 4 */

@@ -39,7 +39,12 @@ public class Facility {
                floor + Constants.DELIMITER + roomNo + Constants.DELIMITER +
                type + Constants.DELIMITER + capacity + Constants.DELIMITER + status;
     }
-
+    
+    @Override
+    public String toString() {
+    	return toFileString();
+    }
+    
     public void display() {
         System.out.println("ID: " + facilityID + " | Block: " + block +
                            " | Floor: " + floor + " | Room: " + roomNo +
