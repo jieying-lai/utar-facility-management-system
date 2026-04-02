@@ -10,16 +10,15 @@ import my.edu.utar.model.User;
 import my.edu.utar.util.Constants;
 import my.edu.utar.util.Validator;
 
-<<<<<<< HEAD
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.HashSet;
 import java.util.stream.Collectors;
-=======
+
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
->>>>>>> cd0f8775c2215e2328c3cf52a587c77ae509780f
+
 import java.util.Scanner;
 
 public class UserMenu {
