@@ -1,6 +1,8 @@
 
 package my.edu.utar.ui;
 
+import java.io.File;
+import java.util.Scanner;
 import java.util.List;
 import java.util.Scanner;
 
@@ -35,7 +37,7 @@ public class AdminMenu {
             switch (choice) {
                 case "1": searchFacility();         break;
                 case "2": manageFacility();         break;
-                case "3": approvalBooking();        break;
+                case "3": approval();        break;
                 case "4": facilityUsageTracking();  break;
                 case "5": viewSummaryReport();      break;
                 case "6": maintenanceManagement();  break;
@@ -270,10 +272,80 @@ public class AdminMenu {
     	}
      }
 
-    /** TODO Member 4 */
-    private void approvalBooking() {
-        System.out.println("[TODO - Member 4] Process Booking Requests");
+    private abstract class Booking{
+    	private String ID;
+    	public abstract void approvalBooking();
+ 
+    
+    	public Booking(String id) {
+    		this.ID=id;
+    	}
+    
+    	public String getID() {
+    		return ID;
+    	}
     }
+    
+    private class OfficialBooking extends Booking{
+    	public OfficialBooking(String id) {
+			super(id);
+		}
+
+    	@Override
+		public void approvalBooking() {
+    		System.out.println("Approved successfully!");
+    	}
+    }
+    
+    	private void approval() {
+    	    Scanner input = new Scanner(System.in);
+    	    System.out.print("Enter User ID: ");
+    	    String userID = input.next();
+
+    	    File uFile = new File("data/users.txt");
+    	    File bFile = new File("data/bookings.txt");
+
+    	    if (!uFile.exists() || !bFile.exists()) {
+    	        System.out.println("System Error: File 'users.txt' or 'bookings.list' is missing from the folder!");
+    	        return;
+    	    }
+
+    	    try {
+    	        Scanner userReader = new Scanner(uFile);
+    	        boolean userFound = false;
+    	        while (userReader.hasNextLine()) {
+    	            String[] data = userReader.nextLine().split("\\|");
+    	            if (data.length > 0 && data[0].equals(userID)) {
+    	                userFound = true;
+    	                break;
+    	            }
+    	        }
+    	        userReader.close();
+
+    	        if (!userFound) {
+    	            System.out.println("User ID not found in users.txt");
+    	            return;
+    	        }
+
+    	        Scanner bookReader = new Scanner(bFile);
+    	        boolean bookFound = false;
+    	        while (bookReader.hasNextLine()) {
+    	            String[] data = bookReader.nextLine().split("\\|");
+    	            if (data.length > 1 && data[1].equals(userID)) {
+    	                bookFound = true;
+    	                Booking request = new OfficialBooking(userID);
+    	                request.approvalBooking();
+    	                break;
+    	            }
+    	        }
+    	        bookReader.close();
+
+    	        if (!bookFound) System.out.println("No pending bookings found for this user.");
+
+    	    } catch (Exception e) {
+    	        System.out.println("A logic error occurred: " + e.getMessage());
+    	    }
+    	}
 
     /** TODO Member 4 */
     private void facilityUsageTracking() {
