@@ -85,7 +85,8 @@ public class BookingManager {
 		System.out.println("Only Pending bookings can be modified.");
 		return false;
 	}
-	
+	/* I not sure if delete this will affect other functions
+	 * or not so i keep it first
 	public boolean approveBooking(String bookingID) {
 		Booking booking=findBooking(bookingID);
 		if(booking!=null) {
@@ -95,6 +96,24 @@ public class BookingManager {
 		}
 		return false;
 	}
+	*/
+	
+	public boolean approveBooking(String id) {
+	    boolean found = false;
+	    for(Booking booking: bookingList) {
+	        if(booking.getUserID().equals(id)) { 
+	            booking.setStatus("Approved");
+	            found = true; 
+	        }
+	    }
+	    if(found) {
+	        saveToFile();
+	        return true;
+	    } else {
+	    	return false;
+	    }
+	}
+	
 	
 	public boolean rejectBooking(String bookingID, String reason) {
 		Booking booking=findBooking(bookingID);
