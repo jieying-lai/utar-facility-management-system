@@ -3,9 +3,11 @@ package my.edu.utar.ui;
 
 import java.io.File;
 
+
 import java.util.Scanner;
 import java.util.List;
 import my.edu.utar.service.BookingManager;
+import my.edu.utar.model.Booking;
 
 import my.edu.utar.data.FileManager;
 import my.edu.utar.model.Admin;
@@ -263,10 +265,21 @@ public class AdminMenu{
 	    }
 	 }
  
-
-    /** TODO Member 4 */
     private void facilityUsageTracking() {
-        System.out.println("[TODO - Member 4] Facility Usage Tracking");
+        System.out.println("\n--- Facility Usage Tracking ---");
+  
+        List<Facility> allFacilities = facilityService.getAllFacilities();
+        List<Booking> allBookings = bookingManager.getBookingList();
+
+        for (Facility f : allFacilities) {
+            int count = 0; 
+                for (Booking booking : allBookings) {
+                    if (booking.getFacilityID().equals(f.getFacilityID())) {
+                        count++;
+                    }
+                }
+                System.out.println("Facility: " + f.getFacilityID() + " | Total Usage: " + count);
+        }
     }
 
     /** TODO Member 4 */
