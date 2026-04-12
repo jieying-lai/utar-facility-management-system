@@ -247,23 +247,20 @@ public class AdminMenu{
             }
     	}
      }
-
     
     private void approval() {
-    	Scanner input = new Scanner(System.in);
-	    System.out.print("Enter User ID: ");
-	    String userID = input.nextLine().trim();
-	    
-	    if (Validator.isEmpty(userID)) {
-	        System.out.println("Booking ID cannot be empty.");
-	        return;
-	    }
-	    if (bookingManager.approveBooking(userID)) {
-	        System.out.println("Booking [" +userID+ "] has been approved successfully!");
-	    } else {
-	        System.out.println("Failed to find or approve Booking ID: " + userID);
-	    }
-	 }
+        Scanner input = new Scanner(System.in);
+        System.out.print("Enter Booking ID: ");
+        String id = input.nextLine();
+
+        if (bookingManager.approveBooking(id)) {
+            System.out.println("Booking approved successfully!");
+        } else {
+            System.out.println("Failed to approve this booking request, please try another!");
+        }
+    }
+    
+
  
     private void facilityUsageTracking() {
         System.out.println("\n--- Facility Usage Tracking ---");

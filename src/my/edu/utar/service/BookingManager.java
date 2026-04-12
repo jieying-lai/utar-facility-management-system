@@ -98,23 +98,7 @@ public class BookingManager {
 	}
 	*/
 	
-	public boolean approveBooking(String id) {
-	    boolean found = false;
-	    for(Booking booking: bookingList) {
-	        if(booking.getUserID().equals(id)) { 
-	            booking.setStatus("Approved");
-	            found = true; 
-	        }
-	    }
-	    if(found) {
-	        saveToFile();
-	        return true;
-	    } else {
-	    	return false;
-	    }
-	}
-	
-	
+
 	public boolean rejectBooking(String bookingID, String reason) {
 		Booking booking=findBooking(bookingID);
 		if(booking!=null) {
@@ -124,6 +108,35 @@ public class BookingManager {
 			return true;
 		}
 		return false;
+	}
+	
+	public boolean approveBooking(String bookingID) {
+	    Booking request = findBooking(bookingID);
+	    if (request == null) return false;
+
+	    for (Booking b : bookingList) { 
+	        if (b.getStatus().equalsIgnoreCase("Approved") &&
+	            b.getFacilityID().equals(request.getFacilityID()) && 
+	            b.getTimeSlot() == request.getTimeSlot()) {
+	            
+	            System.out.println("Conflict detected!");
+	            return false;
+	        }
+	    }
+
+	    request.setStatus("Approved");
+	    
+	    for (Booking b : bookingList) {
+	        if (b.getStatus().equalsIgnoreCase("Pending") &&
+	            b.getFacilityID().equals(request.getFacilityID()) &&
+	            b.getTimeSlot() == request.getTimeSlot() &&
+	            !b.getBookingID().equals(bookingID)) {
+	            b.setStatus("Rejected");
+	        }
+	    }
+	    
+	    saveToFile();
+	    return true;
 	}
 	
 	public void viewUserBookings(String userID) {
