@@ -3,12 +3,11 @@ package my.edu.utar.ui;
 
 import java.io.File;
 
-
+import java.io.*;
 import java.util.Scanner;
 import java.util.List;
 import my.edu.utar.service.BookingManager;
 import my.edu.utar.model.Booking;
-
 import my.edu.utar.data.FileManager;
 import my.edu.utar.model.Admin;
 import my.edu.utar.model.Facility;
@@ -41,13 +40,20 @@ public class AdminMenu{
             }
           
             switch (choice) {
-                case "1": searchFacility();         break;
-                case "2": manageFacility();         break;
-                case "3": approval();        break;
-                case "4": facilityUsageTracking();  break;
-                case "5": viewSummaryReport();      break;
-                case "6": maintenanceManagement();  break;
-                case "7": issueAlert();             break;
+                case "1": searchFacility();        
+                		  break;
+                case "2": manageFacility();       
+                		  break;
+                case "3": approval();    
+                		  break;
+                case "4": facilityUsageTracking();
+                          break;
+                case "5": viewSummaryReport();
+                		  break;
+                case "6": maintenanceManagement();  
+                		  break;
+                case "7": issueAlert();             
+                		  break;
                 case "L":
                     System.out.println("Logged out. Goodbye, " + currentAdmin.getName() + "!");
                     return;
@@ -249,19 +255,34 @@ public class AdminMenu{
      }
     
     private void approval() {
-        Scanner input = new Scanner(System.in);
-        System.out.print("Enter Booking ID: ");
+    	Scanner input = new Scanner(System.in);
+        System.out.print("Enter Booking ID to process: ");
         String id = input.nextLine();
 
-        if (bookingManager.approveBooking(id)) {
-            System.out.println("Booking approved successfully!");
+        System.out.println("(1) Approve or (2) Reject this booking?");
+        System.out.print("Selection: ");
+        String choice = input.nextLine();
+
+        if (choice.equals("1")) {
+            if (bookingManager.approveBooking(id)) {
+                System.out.println("Booking approved successfully!");
+            } else {
+                System.out.println("Error: Booking ID not found or already processed.");
+            }
+        } else if (choice.equals("2")) {
+            System.out.print("Enter reason for rejection: ");
+            String reason = input.nextLine();
+            
+            if (bookingManager.rejectBooking(id, reason)) {
+                System.out.println("Booking rejected. Reason recorded.");
+            } else {
+                System.out.println("Error: Failed to reject the booking.");
+            }
         } else {
-            System.out.println("Failed to approve this booking request, please try another!");
+            System.out.println("Invalid selection.");
         }
     }
     
-
- 
     private void facilityUsageTracking() {
         System.out.println("\n--- Facility Usage Tracking ---");
   
@@ -279,9 +300,57 @@ public class AdminMenu{
         }
     }
 
-    /** TODO Member 4 */
     private void viewSummaryReport() {
-        System.out.println("[TODO - Member 4] View Summary Report");
+        try {
+            File facilityFile = new File("data/facilities.txt");
+            File bookingFile = new File("data/bookings.txt");
+
+            if (!facilityFile.exists() || !bookingFile.exists()) {
+                System.out.println("Error: Required data files are missing.");
+                return;
+            }
+
+            System.out.println("========== FACILITIES BOOKING SUMMARY REPORT ==========\" ");
+            System.out.printf("%-6s | %-6s | %-6s | %-10s | %-15s | %-5s\n", 
+                    "ID", "Block", "Floor", "Room", "Name", "Total Booking Number");
+            System.out.println("---------------------------------------------------------------------------");
+
+            Scanner facScanner = new Scanner(facilityFile);
+            while (facScanner.hasNextLine()) {
+                String facLine = facScanner.nextLine();
+                String[] fParts = facLine.split("\\|");
+                
+                if (fParts.length >= 5) {
+                    String ID = fParts[0];
+                    String Block = fParts[1];
+                    String floor = fParts[2];
+                    String RoomNum = fParts[3];
+                    String name = fParts[4];
+                    
+                    int count = 0;
+
+                    Scanner bookScanner = new Scanner(bookingFile);
+                    while (bookScanner.hasNextLine()) {
+                        String bookLine = bookScanner.nextLine();
+                        String[] bParts = bookLine.split("\\|");
+                        
+                        if (bParts.length > 2 && bParts[2].equals(ID)) {
+                            count++;
+                        }
+                    }
+                    bookScanner.close();
+
+                    System.out.printf("%-6s | %-6s | %-6s | %-10s | %-15s | %-5d\n", 
+                            ID, Block, floor, RoomNum, name, count);
+                }
+            }
+            facScanner.close();
+        } catch (FileNotFoundException e) {
+            System.out.println("File not found: " + e.getMessage());
+        }
+        
+        System.out.println("======================================================\n");
+
     }
 
     /** TODO Member 3 */
