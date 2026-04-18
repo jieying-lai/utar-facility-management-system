@@ -250,6 +250,8 @@ public class UserMenu {
             break;
         }
     }
+    
+    
 
     // ===================== MEMBER 2: SEARCH FACILITY =====================
     /**
@@ -257,10 +259,34 @@ public class UserMenu {
      * TODO Member 2: Implement this method.
      * Steps: Block > Facility Type > Floor > Room > Date > Time Slot
      */
+    private String selectFromMenu(Scanner sc, List<String> options, String title) {
+        System.out.println("\nAvailable " + title + ":");
+
+        for (int i = 0; i < options.size(); i++) {
+            System.out.println("[" + (i + 1) + "] " + options.get(i));
+        }
+
+        while (true) {
+            System.out.print("Select " + title + " (1-" + options.size() + "): ");
+
+            try {
+                int choice = Integer.parseInt(sc.nextLine().trim());
+
+                if (choice >= 1 && choice <= options.size()) {
+                    return options.get(choice - 1);
+                }
+
+                System.out.println("Invalid selection. Try again.");
+
+            } catch (NumberFormatException e) {
+                System.out.println("Please enter a valid number.");
+            }
+        }
+    }
+    
     private void searchAvailableFacility() {
         System.out.println("\n========== SEARCH AVAILABLE FACILITY ==========");
 
-        // Step 0: Load all facilities
         List<Facility> facilities = FileManager.loadAllFacilities();
         if (facilities.isEmpty()) {
             System.out.println("No facilities found in the system.");
@@ -270,74 +296,110 @@ public class UserMenu {
         Scanner sc = this.sc;
 
         // ---------------- Step 1: Block ----------------
-        Set<String> blocks = new HashSet<>();
-        for (Facility f : facilities) blocks.add(f.getBlock());
-        System.out.println("Available Blocks: " + blocks);
-        System.out.print("Select Block: ");
-        String block = sc.nextLine().trim();
+        Set<String> blockSet = new HashSet<>();
+        for (Facility f : facilities) blockSet.add(f.getBlock());
+
+        String block = selectFromMenu(sc, new ArrayList<>(blockSet), "Block");
+
         facilities = facilities.stream()
                 .filter(f -> f.getBlock().equalsIgnoreCase(block))
                 .collect(Collectors.toList());
+
         if (facilities.isEmpty()) {
             System.out.println("No facilities found for this block.");
             return;
         }
 
         // ---------------- Step 2: Facility Type ----------------
-        Set<String> types = new HashSet<>();
-        for (Facility f : facilities) types.add(f.getType());
-        System.out.println("Available Facility Types: " + types);
-        System.out.print("Select Facility Type: ");
-        String type = sc.nextLine().trim();
+        Set<String> typeSet = new HashSet<>();
+        for (Facility f : facilities) typeSet.add(f.getType());
+
+        String type = selectFromMenu(sc, new ArrayList<>(typeSet), "Facility Type");
+
         facilities = facilities.stream()
                 .filter(f -> f.getType().equalsIgnoreCase(type))
                 .collect(Collectors.toList());
+
         if (facilities.isEmpty()) {
             System.out.println("No facilities found for this type.");
             return;
         }
 
         // ---------------- Step 3: Floor ----------------
-        Set<String> floors = new HashSet<>();
-        for (Facility f : facilities) floors.add(f.getFloor());
-        System.out.println("Available Floors: " + floors);
-        System.out.print("Select Floor: ");
-        String floor = sc.nextLine().trim();
+        Set<String> floorSet = new HashSet<>();
+        for (Facility f : facilities) floorSet.add(f.getFloor());
+
+        String floor = selectFromMenu(sc, new ArrayList<>(floorSet), "Floor");
+
         facilities = facilities.stream()
                 .filter(f -> f.getFloor().equalsIgnoreCase(floor))
                 .collect(Collectors.toList());
+
         if (facilities.isEmpty()) {
             System.out.println("No facilities found for this floor.");
             return;
         }
 
         // ---------------- Step 4: Room ----------------
-        Set<String> rooms = new HashSet<>();
-        for (Facility f : facilities) rooms.add(f.getRoomNo());
-        System.out.println("Available Rooms: " + rooms);
-        System.out.print("Select Room: ");
-        String room = sc.nextLine().trim();
+        Set<String> roomSet = new HashSet<>();
+        for (Facility f : facilities) roomSet.add(f.getRoomNo());
+
+        String room = selectFromMenu(sc, new ArrayList<>(roomSet), "Room");
+
         facilities = facilities.stream()
                 .filter(f -> f.getRoomNo().equalsIgnoreCase(room))
                 .collect(Collectors.toList());
+
         if (facilities.isEmpty()) {
             System.out.println("No facilities found for this room.");
             return;
         }
 
         // ---------------- Step 5: Date ----------------
-        System.out.print("Enter Booking Date (YYYY-MM-DD): ");
-        String date = sc.nextLine().trim();
+        String date;
+        while (true) {
+            System.out.print("\nEnter Booking Date (YYYY-MM-DD): ");
+            date = sc.nextLine().trim();
+
+            try {
+                java.time.LocalDate.parse(date); // validate format
+                break;
+            } catch (Exception e) {
+                System.out.println("Invalid date format. Please use YYYY-MM-DD.");
+            }
+        }
+
         facilities = bookingManager.getAvailableFacilities(facilities, date);
+
         if (facilities.isEmpty()) {
             System.out.println("No facilities available on this date.");
             return;
         }
 
         // ---------------- Step 6: Time Slot ----------------
-        System.out.print("Enter Time Slot (e.g., 09:00-10:00): ");
-        String timeSlot = sc.nextLine().trim();
+        String timeSlot;
+        while (true) {
+            System.out.print("Enter Time Slot (HH:MM-HH:MM): ");
+            timeSlot = sc.nextLine().trim();
+
+            String regex = "^([01]\\d|2[0-3]):[0-5]\\d-([01]\\d|2[0-3]):[0-5]\\d$";
+
+            if (!timeSlot.matches(regex)) {
+                System.out.println("Invalid format. Example: 09:00-10:00");
+                continue;
+            }
+
+            String[] parts = timeSlot.split("-");
+            if (parts[0].compareTo(parts[1]) >= 0) {
+                System.out.println("Start time must be earlier than end time.");
+                continue;
+            }
+
+            break;
+        }
+
         facilities = bookingManager.getAvailableFacilities(facilities, date, timeSlot);
+
         if (facilities.isEmpty()) {
             System.out.println("No facilities available at this time slot.");
             return;
@@ -345,10 +407,11 @@ public class UserMenu {
 
         // ---------------- Step 7: Display Results ----------------
         System.out.println("\n--- AVAILABLE FACILITIES ---");
+
         for (Facility f : facilities) {
-            f.display(); // use display() method from Facility class
+            f.display();
+            System.out.println("----------------------------");
         }
-        System.out.println("----------------------------");
     }
 
     // ===================== MEMBER 2: NEW BOOKING =====================
@@ -357,123 +420,193 @@ public class UserMenu {
      * TODO Member 2: Implement this method.
      */
     private String generateBookingID() {
-        // Format: B + YYYYMMDD + 4-digit sequence
-        String date = java.time.LocalDate.now().format(java.time.format.DateTimeFormatter.BASIC_ISO_DATE);
-        int seq = bookingManager.getBookingList().size() + 1; // simple sequence
-        return String.format("B%s%04d", date, seq);
-    }
-    
-    private Facility searchAvailableFacilityForBooking() {
-        System.out.println("\n========== SEARCH AVAILABLE FACILITY ==========");
+        String date = java.time.LocalDate.now()
+                .format(java.time.format.DateTimeFormatter.BASIC_ISO_DATE);
 
-        List<Facility> facilities = FileManager.loadAllFacilities();
-        if (facilities.isEmpty()) {
-            System.out.println("No facilities found in the system.");
-            return null;
-        }
+        int seq = bookingManager.getBookingList().size() + 1;
 
-        // Step 1: Block
-        Set<String> blocks = new HashSet<>();
-        for (Facility f : facilities) blocks.add(f.getBlock());
-        System.out.println("Available Blocks: " + blocks);
-        System.out.print("Select Block: ");
-        String block = sc.nextLine().trim();
-        facilities = facilities.stream()
-                .filter(f -> f.getBlock().equalsIgnoreCase(block))
-                .collect(Collectors.toList());
-        if (facilities.isEmpty()) return null;
-
-        // Step 2: Facility Type
-        Set<String> types = new HashSet<>();
-        for (Facility f : facilities) types.add(f.getType());
-        System.out.println("Available Facility Types: " + types);
-        System.out.print("Select Facility Type: ");
-        String type = sc.nextLine().trim();
-        facilities = facilities.stream()
-                .filter(f -> f.getType().equalsIgnoreCase(type))
-                .collect(Collectors.toList());
-        if (facilities.isEmpty()) return null;
-
-        // Step 3: Floor
-        Set<String> floors = new HashSet<>();
-        for (Facility f : facilities) floors.add(f.getFloor());
-        System.out.println("Available Floors: " + floors);
-        System.out.print("Select Floor: ");
-        String floor = sc.nextLine().trim();
-        facilities = facilities.stream()
-                .filter(f -> f.getFloor().equalsIgnoreCase(floor))
-                .collect(Collectors.toList());
-        if (facilities.isEmpty()) return null;
-
-        // Step 4: Room
-        Set<String> rooms = new HashSet<>();
-        for (Facility f : facilities) rooms.add(f.getRoomNo());
-        System.out.println("Available Rooms: " + rooms);
-        System.out.print("Select Room: ");
-        String room = sc.nextLine().trim();
-        facilities = facilities.stream()
-                .filter(f -> f.getRoomNo().equalsIgnoreCase(room))
-                .collect(Collectors.toList());
-        if (facilities.isEmpty()) return null;
-
-        // Step 5: Display available facilities
-        System.out.println("\n--- AVAILABLE FACILITIES ---");
-        for (int i = 0; i < facilities.size(); i++) {
-            System.out.print("[" + (i + 1) + "] ");
-            facilities.get(i).display();
-        }
-
-        System.out.print("Select a facility by number: ");
-        int choice = Integer.parseInt(sc.nextLine().trim()) - 1;
-        if (choice < 0 || choice >= facilities.size()) {
-            System.out.println("Invalid selection.");
-            return null;
-        }
-        return facilities.get(choice);
+        return "B" + date + String.format("%04d", seq);
     }
     
     private void newBooking() {
-    	System.out.println("\n--- NEW BOOKING ---");
-        
-        // 1. Call searchAvailableFacility() to select facility
-        Facility selectedFacility = searchAvailableFacilityForBooking(); 
-        
-        // 2. Ask user for date, time, duration
-        System.out.print("Enter booking date (YYYY-MM-DD): ");
-        String date = sc.nextLine().trim();
+        System.out.println("\n--- NEW BOOKING ---");
 
-        int startHour = -1;
-        while (startHour < 0 || startHour > 23) {
-            System.out.print("Enter start hour (0-23): ");
-            try {
-                startHour = Integer.parseInt(sc.nextLine().trim());
-            } catch (NumberFormatException e) {
-                startHour = -1; // reset on invalid input
-            }
-            if (startHour < 0 || startHour > 23) {
-                System.out.println("Invalid input. Please enter a number between 0 and 23.");
+        List<Facility> facilities = FileManager.loadAllFacilities();
+
+        if (facilities.isEmpty()) {
+            System.out.println("No facilities found.");
+            return;
+        }
+
+        Scanner sc = this.sc;
+
+        // ================= STEP 1: BLOCK =================
+        Set<String> blockSet = new HashSet<>();
+        for (Facility f : facilities) {
+            blockSet.add(f.getBlock());
+        }
+
+        String block = selectFromMenu(sc, new ArrayList<>(blockSet), "Block");
+
+        List<Facility> filtered = new ArrayList<>();
+        for (Facility f : facilities) {
+            if (f.getBlock().equalsIgnoreCase(block)) {
+                filtered.add(f);
             }
         }
-        
-        // 3. Create Booking object
-        Booking b = new Booking(
-        	    generateBookingID(),                     // bookingID
-        	    currentUser.getId(),                     // userID
-        	    selectedFacility.getFacilityID(),        // facilityID
-        	    java.time.LocalDate.now().format(java.time.format.DateTimeFormatter.ofPattern("ddMMyyyy")), // applyDate
-        	    date,                                    // bookingDate (user input)
-        	    startHour,                               // timeSlot
-        	    "General Purpose",                       // purpose (or ask user)
-        	    1,                                       // pax (number of people)
-        	    "Pending",                               // status
-        	    ""                                       // rejectReason
-        	);
+        facilities = filtered;
 
-        // 4. Add booking via BookingManager
+        if (facilities.isEmpty()) {
+            System.out.println("No facilities found.");
+            return;
+        }
+
+        // ================= STEP 2: TYPE =================
+        Set<String> typeSet = new HashSet<>();
+        for (Facility f : facilities) {
+            typeSet.add(f.getType());
+        }
+
+        String type = selectFromMenu(sc, new ArrayList<>(typeSet), "Facility Type");
+
+        filtered = new ArrayList<>();
+        for (Facility f : facilities) {
+            if (f.getType().equalsIgnoreCase(type)) {
+                filtered.add(f);
+            }
+        }
+        facilities = filtered;
+
+        if (facilities.isEmpty()) {
+            System.out.println("No facilities found.");
+            return;
+        }
+
+        // ================= STEP 3: FLOOR =================
+        Set<String> floorSet = new HashSet<>();
+        for (Facility f : facilities) {
+            floorSet.add(f.getFloor());
+        }
+
+        String floor = selectFromMenu(sc, new ArrayList<>(floorSet), "Floor");
+
+        filtered = new ArrayList<>();
+        for (Facility f : facilities) {
+            if (f.getFloor().equalsIgnoreCase(floor)) {
+                filtered.add(f);
+            }
+        }
+        facilities = filtered;
+
+        if (facilities.isEmpty()) {
+            System.out.println("No facilities found.");
+            return;
+        }
+
+        // ================= STEP 4: ROOM =================
+        Set<String> roomSet = new HashSet<>();
+        for (Facility f : facilities) {
+            roomSet.add(f.getRoomNo());
+        }
+
+        String room = selectFromMenu(sc, new ArrayList<>(roomSet), "Room");
+
+        filtered = new ArrayList<>();
+        for (Facility f : facilities) {
+            if (f.getRoomNo().equalsIgnoreCase(room)) {
+                filtered.add(f);
+            }
+        }
+        facilities = filtered;
+
+        if (facilities.isEmpty()) {
+            System.out.println("No facilities found.");
+            return;
+        }
+
+        Facility selectedFacility = facilities.get(0);
+
+        // ================= STEP 5: DATE VALIDATION =================
+        String date;
+        while (true) {
+            System.out.print("\nEnter booking date (YYYY-MM-DD): ");
+            date = sc.nextLine().trim();
+
+            try {
+                java.time.LocalDate.parse(date);
+                break;
+            } catch (Exception e) {
+                System.out.println("Invalid date format.");
+            }
+        }
+
+        // ================= STEP 6: TIME VALIDATION =================
+        String timeSlot;
+        while (true) {
+            System.out.print("Enter time slot (HH:MM-HH:MM): ");
+            timeSlot = sc.nextLine().trim();
+
+            if (timeSlot.length() == 11 && timeSlot.contains("-")) {
+                String start = timeSlot.split("-")[0];
+                String end = timeSlot.split("-")[1];
+
+                if (start.compareTo(end) < 0) {
+                    break;
+                } else {
+                    System.out.println("Start time must be earlier than end time.");
+                }
+            } else {
+                System.out.println("Invalid format. Example: 09:00-10:00");
+            }
+        }
+
+        // ================= STEP 7: PURPOSE =================
+        System.out.print("Enter purpose of booking: ");
+        String purpose = sc.nextLine().trim();
+
+        // ================= STEP 8: PAX =================
+        int pax;
+        while (true) {
+            System.out.print("Enter number of people (pax): ");
+
+            try {
+                pax = Integer.parseInt(sc.nextLine().trim());
+
+                if (pax > 0) break;
+
+                System.out.println("Pax must be greater than 0.");
+
+            } catch (NumberFormatException e) {
+                System.out.println("Please enter a valid number.");
+            }
+        }
+        int slot = -1;
+
+        for (int i = 0; i < Constants.TIME_SLOTS.length; i++) {
+            if (Constants.TIME_SLOTS[i].equals(timeSlot)) {
+                slot = i;
+                break;
+            }
+        }
+
+        // ================= CREATE BOOKING =================
+        Booking b = new Booking(
+                generateBookingID(),
+                currentUser.getId(),
+                selectedFacility.getFacilityID(),
+                java.time.LocalDate.now().format(java.time.format.DateTimeFormatter.ofPattern("ddMMyyyy")),
+                date,
+                slot,
+                purpose,
+                pax,
+                "Pending",
+                ""
+        );
         bookingManager.addBooking(b);
 
         System.out.println("Booking request submitted successfully!");
     }
+    
 
     // ===================== MEMBER 2: MODIFY/CANCEL BOOKING =====================
     /**
@@ -481,43 +614,120 @@ public class UserMenu {
      * TODO Member 2: Implement this method.
      */
     private void modifyBooking() {
-    	 List<Booking> userBookings = bookingManager.getBookingsByUser(currentUser.getId());
 
-    	    if (userBookings.isEmpty()) {
-    	        System.out.println("No pending bookings to modify.");
-    	        return;
-    	    }
+        List<Booking> userBookings =
+                bookingManager.getBookingsByUser(currentUser.getId());
 
-    	    // Display bookings with index
-    	    for (int i = 0; i < userBookings.size(); i++) {
-    	    	System.out.print("[" + (i+1) + "] ");
-    	    	userBookings.get(i).display(); // uses display() from Booking
-    	    	System.out.println("----------------------------");
-    	    }
+        if (userBookings.isEmpty()) {
+            System.out.println("No pending bookings to modify.");
+            return;
+        }
 
-    	    System.out.print("Select booking to modify/cancel: ");
-    	    int choice = Integer.parseInt(sc.nextLine().trim()) - 1;
+        System.out.println("\n--- YOUR PENDING BOOKINGS ---");
 
-    	    Booking selected = userBookings.get(choice);
+        List<Booking> safeList = new ArrayList<>();
 
-    	    System.out.println("[1] Modify");
-    	    System.out.println("[2] Cancel");
-    	    String action = sc.nextLine().trim();
+        // ================= FILTER VALID BOOKINGS ONLY =================
+        for (Booking b : userBookings) {
+            if (b.getTimeSlot() >= 0 &&
+                b.getTimeSlot() < Constants.TIME_SLOTS.length) {
 
-    	    if ("2".equals(action)) {
-    	        bookingManager.cancelBooking(selected.getBookingID());
-    	        System.out.println("Booking cancelled.");
-    	    } else if ("1".equals(action)) {
-    	        // Ask new date/time and update
-    	        System.out.print("Enter new date (YYYY-MM-DD): ");
-    	        selected.setBookingDate(sc.nextLine().trim());
+                safeList.add(b);
+            } else {
+                System.out.println("[WARNING] Skipping corrupted booking: " + b.getBookingID());
+            }
+        }
 
-    	        System.out.print("Enter new start hour (0-23): ");
-    	        selected.setTimeSlot(Integer.parseInt(sc.nextLine().trim()));
+        if (safeList.isEmpty()) {
+            System.out.println("No valid bookings available to modify.");
+            return;
+        }
 
-    	        bookingManager.updateBooking(selected);
-    	        System.out.println("Booking modified successfully!");
-    	    }
+        // ================= DISPLAY SAFE BOOKINGS =================
+        for (int i = 0; i < safeList.size(); i++) {
+            System.out.print("[" + (i + 1) + "] ");
+            safeList.get(i).display();
+            System.out.println("----------------------------");
+        }
+
+        // ================= SELECT BOOKING =================
+        System.out.print("Select booking number: ");
+
+        int index;
+        try {
+            index = Integer.parseInt(sc.nextLine().trim()) - 1;
+        } catch (Exception e) {
+            System.out.println("Invalid input.");
+            return;
+        }
+
+        if (index < 0 || index >= safeList.size()) {
+            System.out.println("Invalid selection.");
+            return;
+        }
+
+        Booking selected = safeList.get(index);
+
+        // ================= ACTION =================
+        System.out.println("[1] Modify");
+        System.out.println("[2] Cancel");
+        System.out.print("Choose action: ");
+
+        String action = sc.nextLine().trim();
+
+        // ================= CANCEL =================
+        if ("2".equals(action)) {
+            bookingManager.cancelBooking(selected.getBookingID());
+            System.out.println("Booking cancelled.");
+            return;
+        }
+
+        // ================= MODIFY =================
+        if ("1".equals(action)) {
+
+            // ---------- NEW DATE ----------
+            String newDate;
+            while (true) {
+                System.out.print("Enter new date (YYYY-MM-DD): ");
+                newDate = sc.nextLine().trim();
+
+                try {
+                    java.time.LocalDate.parse(newDate);
+                    break;
+                } catch (Exception e) {
+                    System.out.println("Invalid date format.");
+                }
+            }
+
+            // ---------- NEW TIME SLOT ----------
+            System.out.print("Enter new time slot (HH:MM-HH:MM): ");
+            String newSlot = sc.nextLine().trim();
+
+            int slotIndex = -1;
+
+            for (int i = 0; i < Constants.TIME_SLOTS.length; i++) {
+                if (Constants.TIME_SLOTS[i].equals(newSlot)) {
+                    slotIndex = i;
+                    break;
+                }
+            }
+
+            if (slotIndex == -1) {
+                System.out.println("Invalid time slot.");
+                return;
+            }
+
+            // ---------- UPDATE ----------
+            selected.setBookingDate(newDate);
+            selected.setTimeSlot(slotIndex);
+
+            bookingManager.updateBooking(selected);
+
+            System.out.println("Booking modified successfully!");
+            return;
+        }
+
+        System.out.println("Invalid action selected.");
     }
 
     // ===================== MEMBER 2: VIEW BOOKING STATUS =====================
@@ -526,7 +736,9 @@ public class UserMenu {
      * TODO Member 2: Implement this method.
      */
     private void viewBookingRequestStatus() {
-    	List<Booking> userBookings = bookingManager.getBookingsByUser(currentUser.getId());
+
+        List<Booking> userBookings =
+                bookingManager.getBookingsByUser(currentUser.getId());
 
         if (userBookings.isEmpty()) {
             System.out.println("You have no bookings.");
@@ -534,8 +746,30 @@ public class UserMenu {
         }
 
         System.out.println("\n--- YOUR BOOKINGS ---");
+
         for (Booking b : userBookings) {
-            System.out.println(b);
+
+            // ================= SAFETY CHECK =================
+            if (b.getTimeSlot() < 0 ||
+                b.getTimeSlot() >= Constants.TIME_SLOTS.length) {
+
+                System.out.println(b.getBookingID()
+                        + " | INVALID TIME SLOT | "
+                        + b.getBookingDate()
+                        + " | " + b.getStatus());
+            } else {
+
+                // safe print instead of toString()
+                System.out.println(
+                        b.getBookingID() + " | "
+                        + b.getFacilityID() + " | "
+                        + b.getBookingDate() + " | "
+                        + Constants.TIME_SLOTS[b.getTimeSlot()] + " | "
+                        + b.getPurpose() + " | "
+                        + b.getPax() + " | "
+                        + b.getStatus()
+                );
+            }
         }
     }
 
