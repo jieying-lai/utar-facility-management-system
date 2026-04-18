@@ -4,22 +4,13 @@ import my.edu.utar.model.*;
 import my.edu.utar.util.Constants;
 
 import java.io.*;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * FileManager.java
- * Handles ALL file read/write operations for the system.
- * All members use this class to access .txt data files.
- * Never read/write files directly outside this class.
- */
 public class FileManager {
 
-    // ===================== INIT FILES =====================
-    /**
-     * Creates all required .txt files if they don't exist yet.
-     * Call this once at program startup in Main.java
-     */
     public static void initFiles() {
         String[] files = {
             Constants.FILE_USERS,
@@ -28,7 +19,7 @@ public class FileManager {
             Constants.FILE_BOOKINGS,
             Constants.FILE_MAINTENANCE
         };
-        // Make sure data/ folder exists
+
         new File("data").mkdirs();
 
         for (String filePath : files) {
@@ -44,10 +35,6 @@ public class FileManager {
         }
     }
 
-    // ===================== GENERIC HELPERS =====================
-    /**
-     * Reads all lines from a file. Returns empty list if file not found.
-     */
     public static List<String> readAllLines(String filePath) {
         List<String> lines = new ArrayList<>();
         try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
@@ -65,9 +52,6 @@ public class FileManager {
         return lines;
     }
 
-    /**
-     * Writes all lines to a file (overwrites existing content).
-     */
     public static void writeAllLines(String filePath, List<String> lines) {
         try (BufferedWriter bw = new BufferedWriter(new FileWriter(filePath, false))) {
             for (String line : lines) {
@@ -79,9 +63,6 @@ public class FileManager {
         }
     }
 
-    /**
-     * Appends a single line to a file.
-     */
     public static void appendLine(String filePath, String line) {
         try (BufferedWriter bw = new BufferedWriter(new FileWriter(filePath, true))) {
             bw.write(line);
@@ -91,11 +72,6 @@ public class FileManager {
         }
     }
 
-    // ===================== USER FILE OPERATIONS =====================
-    /**
-     * Loads all users from users.txt
-     * Returns list of User objects (Student or Staff based on role field).
-     */
     public static List<User> loadAllUsers() {
         List<User> users = new ArrayList<>();
         List<String> lines = readAllLines(Constants.FILE_USERS);
@@ -130,17 +106,10 @@ public class FileManager {
         return users;
     }
 
-    /**
-     * Saves a new user to users.txt (appends one line).
-     */
     public static void saveUser(User user) {
         appendLine(Constants.FILE_USERS, user.toFileString());
     }
 
-    /**
-     * Updates an existing user's record in users.txt.
-     * Finds the line matching the user's ID and replaces it.
-     */
     public static void updateUser(User updatedUser) {
         List<String> lines = readAllLines(Constants.FILE_USERS);
         for (int i = 0; i < lines.size(); i++) {
@@ -153,9 +122,6 @@ public class FileManager {
         writeAllLines(Constants.FILE_USERS, lines);
     }
 
-    /**
-     * Checks if a student/staff ID already exists in users.txt.
-     */
     public static boolean isUserIdExists(String id) {
         List<String> lines = readAllLines(Constants.FILE_USERS);
         for (String line : lines) {
@@ -167,10 +133,6 @@ public class FileManager {
         return false;
     }
 
-    /**
-     * Finds and returns a User by ID and password (for login).
-     * Returns null if not found or wrong password.
-     */
     public static User loginUser(String id, String password) {
         List<User> users = loadAllUsers();
         for (User user : users) {
@@ -195,10 +157,6 @@ public class FileManager {
         return null;
     }
 
-    // ===================== ADMIN FILE OPERATIONS =====================
-    /**
-     * Loads all admins from admin.txt
-     */
     public static List<Admin> loadAllAdmins() {
         List<Admin> admins = new ArrayList<>();
         List<String> lines = readAllLines(Constants.FILE_ADMIN);
@@ -223,10 +181,6 @@ public class FileManager {
         return admins;
     }
 
-    /**
-     * Finds an admin by ID and password for login.
-     * Returns null if not found.
-     */
     public static Admin loginAdmin(String id, String password) {
         List<Admin> admins = loadAllAdmins();
         for (Admin admin : admins) {
@@ -236,12 +190,155 @@ public class FileManager {
         }
         return null;
     }
+    
+    public static List<Facility> loadAllFacilities(){    
+    	List<Facility> facilities = new ArrayList<>();
+        List<String> lines = readAllLines(Constants.FILE_FACILITIES);
+        
+        for (int i = 0; i < lines.size(); i++) {
+        	try {
+        		String[] parts = lines.get(i).split(Constants.DELIMITER_REGEX, -1);
+        		if (parts.length < 7) continue;
+        		
+        		facilities.add(new Facility(
+        				parts[0].trim(), 
+                        parts[1].trim(), 
+                        parts[2].trim(), 
+                        parts[3].trim(), 
+                        parts[4].trim(), 
+                        Integer.parseInt(parts[5].trim()), 
+                        parts[6].trim()
+                ));
+        	}catch (Exception e) {
+        		System.out.println("[WARNING] Error parsing facility on line " + (i + 1));
+        	}
+        }
+        return facilities;
+    }
+    
+    public static void saveFacility(Facility f) {
+        appendLine(Constants.FILE_FACILITIES, f.toFileString());
+    }
 
-    // ===================== PLACEHOLDER METHODS (for other members) =====================
-    // Members 2, 3, 4 will add their own methods below this line.
-    // Do not delete this comment.
-
-    // Member 2 - Facility & Booking methods go here
-    // Member 3 - Maintenance methods go here
-    // Member 4 - Report/analytics read methods go here
+    public static void updateAllFacilities(List<Facility> facilities) {
+        List<String> lines = new ArrayList<>();
+        for (Facility f : facilities) {
+            lines.add(f.toFileString());
+        }
+        writeAllLines(Constants.FILE_FACILITIES, lines);
+    }
+    
+    public static boolean isFacilityIdExists(String id) {
+        List<Facility> list = loadAllFacilities();
+        for (Facility f : list) {
+            if (f.getFacilityID().equalsIgnoreCase(id.trim())) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    public static boolean isExactFacilityDuplicate(Facility newFac) {
+    	List<Facility> list = loadAllFacilities();
+    	for(Facility f :list) {
+    		if(
+    		   f.getBlock().equalsIgnoreCase(newFac.getBlock())&&
+    		   f.getFloor().equalsIgnoreCase(newFac.getFloor())&&
+    		   f.getRoomNo().equalsIgnoreCase(newFac.getRoomNo())&&
+    		   f.getType().equalsIgnoreCase(newFac.getType())&&
+    		   f.getCapacity() == newFac.getCapacity())
+    		{
+    			return true;
+    		}
+    	}
+    	return false;
+    }
+    
+  //maintenance - read all the reports from the fiel
+    public static List<MaintenanceReport> readMaintenanceReports()
+    {
+    	List<MaintenanceReport> reports = new ArrayList<>();
+    	try (BufferedReader br = new BufferedReader(new FileReader(Constants.FILE_MAINTENANCE)))
+    	{
+    		String line;
+    		int lineNumber = 0;
+    		while((line = br.readLine()) != null)
+    		{
+    			lineNumber++;
+    			if (line.trim().isEmpty()) continue;
+                String[] parts = line.split("\\|", -1); 
+                if (parts.length < 9)
+                {
+                	System.out.println("[WARNING] Data error occured on line" + lineNumber + " .");
+                	continue; // skip the error part then continue with the next
+                }
+                reports.add(new MaintenanceReport(parts[0], parts[1],parts[2],parts[3],parts[4],parts[5],parts[6],parts[7],parts[8]));
+    		}
+    	}
+		catch (FileNotFoundException e)
+		{
+			try
+			{
+				new File(Constants.FILE_MAINTENANCE).createNewFile();
+			}
+			catch (IOException ex)
+			{
+				System.out.println("Could not create maintenance.txt");
+			}
+		}
+		catch (IOException e)
+		{
+			System.out.println("File error: try again.");
+		}
+		return reports;
+		
+	}
+    
+    //maintenanc - write all the reports back to file
+    public static void writeMaintenanceReports(List<MaintenanceReport> reports)
+    {
+    	try (BufferedWriter bw = new BufferedWriter(new FileWriter(Constants.FILE_MAINTENANCE, false)))
+    	{
+            for (MaintenanceReport r : reports)
+            {
+                bw.write(r.toFileString());
+                bw.newLine();
+            }
+    	}
+    	catch (IOException e)
+    	{
+    		System.out.println("File error: try again.");
+    	}
+    }
+    
+    //maintenance - append one new report to the file
+    public static void appendMaintenanceReport(MaintenanceReport reports)
+    {
+    	try (BufferedWriter bw = new BufferedWriter(new FileWriter(Constants.FILE_MAINTENANCE, true)))
+    	{
+            bw.write(reports.toFileString());
+            bw.newLine();
+    	}
+    	catch (IOException e)
+    	{
+    		System.out.println("File error: try again.");
+    	}
+    }
+    
+    //Maintenance - method to generate maintenanceID
+    public static String generateMaintenanceID()
+    {
+    	LocalDate today = LocalDate.now();
+    	String datePart = today.format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+    	List<MaintenanceReport> all = readMaintenanceReports();
+    	long count = all.stream().filter(r -> r.getIssueID().startsWith("M" + datePart)).count();
+    	return String.format("M%s%04d", datePart, count + 1);
+    }
 }
+
+
+	
+    
+    
+    
+    

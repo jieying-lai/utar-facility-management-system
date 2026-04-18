@@ -2,11 +2,6 @@ package my.edu.utar.model;
 
 import my.edu.utar.util.Constants;
 
-/**
- * Booking.java
- * Represents a facility booking record.
- * Member 2 owns this class.
- */
 public class Booking {
 
     private String bookingID;   // Format: B + YYYYMMDD + 4-digit seq e.g. B202603140001
@@ -34,11 +29,11 @@ public class Booking {
         this.status       = status;
         this.rejectReason = rejectReason != null ? rejectReason : "";
     }
+    
 
     public Booking() {}
 
     /**
-     * Converts to file string for bookings.txt
      * Format: bookingID|userID|facilityID|applyDate|bookingDate|timeSlot|purpose|pax|status|rejectReason
      */
     public String toFileString() {
@@ -48,21 +43,26 @@ public class Booking {
                purpose + Constants.DELIMITER + pax + Constants.DELIMITER +
                status + Constants.DELIMITER + rejectReason;
     }
+    
+    @Override
+    public String toString() {
+        return bookingID + " | " + userID + " | " + facilityID + " | " + bookingDate +
+               " | " + Constants.TIME_SLOTS[timeSlot] + " | " + purpose + " | " + pax + " | " + status;
+    }
 
     public void display() {
-        System.out.println("Booking ID  : " + bookingID);
-        System.out.println("Facility ID : " + facilityID);
-        System.out.println("Date        : " + bookingDate);
-        System.out.println("Time Slot   : " + Constants.TIME_SLOTS[timeSlot]);
-        System.out.println("Purpose     : " + purpose);
-        System.out.println("Pax         : " + pax);
-        System.out.println("Status      : " + status);
-        if (!rejectReason.isEmpty()) {
-            System.out.println("Reason      : " + rejectReason);
+    	System.out.println("Booking ID: " + bookingID);
+        System.out.println("Facility ID: " + facilityID);
+        System.out.println("Date: " + bookingDate);
+        System.out.println("Time Slot: " + Constants.TIME_SLOTS[timeSlot]);
+        System.out.println("Purpose: " + purpose);
+        System.out.println("Pax: " + pax);
+        System.out.println("Status: " + status);
+        if (rejectReason != null && !rejectReason.isEmpty()) {
+            System.out.println("Reject Reason: " + rejectReason);
         }
     }
 
-    // Getters
     public String getBookingID()    { return bookingID; }
     public String getUserID()       { return userID; }
     public String getFacilityID()   { return facilityID; }
@@ -74,7 +74,6 @@ public class Booking {
     public String getStatus()       { return status; }
     public String getRejectReason() { return rejectReason; }
 
-    // Setters
     public void setBookingID(String id)         { this.bookingID = id; }
     public void setUserID(String id)            { this.userID = id; }
     public void setFacilityID(String id)        { this.facilityID = id; }
