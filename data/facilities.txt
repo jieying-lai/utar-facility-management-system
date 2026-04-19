@@ -11,4 +11,4 @@ F010|KA|2|KA-DG02|Discussion Room|8|Available
 F011|KA|2|KA-DG03|Discussion Room|8|Available
 F012|KA|G|KA-SPORT1|Sports Court|20|Available
 F013|KA|G|KA-SPORT2|Sports Court|20|Available
-F014|KA|4|KA907|Staff room|59|Available
+F014|KA|4|KA907|Staff room|59|Unavailable
