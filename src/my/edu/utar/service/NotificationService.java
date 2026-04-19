@@ -24,6 +24,4 @@ public class NotificationService {
 			System.out.println("There is no booking.");
 		}
 	}
-	
-
 }

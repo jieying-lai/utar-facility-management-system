@@ -75,7 +75,5 @@ public class MaintenanceReport {
         System.out.println("Status      : " + status);
         System.out.println("Assigned To : " + (assignedTo.isEmpty() ? "Unassigned" : assignedTo));
         System.out.println("Resolved    : " + (resolvedDate.isEmpty() ? "Unresolved" : resolvedDate));
-    }
-
-    
+    }  
 }

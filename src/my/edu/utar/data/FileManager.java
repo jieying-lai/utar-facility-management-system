@@ -143,10 +143,6 @@ public class FileManager {
         return null;
     }
 
-    /**
-     * Finds a user by ID only (to check if registered).
-     * Returns null if not found.
-     */
     public static User findUserById(String id) {
         List<User> users = loadAllUsers();
         for (User user : users) {
@@ -254,7 +250,6 @@ public class FileManager {
     	return false;
     }
     
-  //maintenance - read all the reports from the fiel
     public static List<MaintenanceReport> readMaintenanceReports()
     {
     	List<MaintenanceReport> reports = new ArrayList<>();
@@ -292,9 +287,7 @@ public class FileManager {
 		}
 		return reports;
 		
-	}
-    
-    //maintenanc - write all the reports back to file
+	}    
     public static void writeMaintenanceReports(List<MaintenanceReport> reports)
     {
     	try (BufferedWriter bw = new BufferedWriter(new FileWriter(Constants.FILE_MAINTENANCE, false)))
@@ -311,7 +304,6 @@ public class FileManager {
     	}
     }
     
-    //maintenance - append one new report to the file
     public static void appendMaintenanceReport(MaintenanceReport reports)
     {
     	try (BufferedWriter bw = new BufferedWriter(new FileWriter(Constants.FILE_MAINTENANCE, true)))
@@ -325,7 +317,6 @@ public class FileManager {
     	}
     }
     
-    //Maintenance - method to generate maintenanceID
     public static String generateMaintenanceID()
     {
     	LocalDate today = LocalDate.now();
@@ -334,11 +325,30 @@ public class FileManager {
     	long count = all.stream().filter(r -> r.getIssueID().startsWith("M" + datePart)).count();
     	return String.format("M%s%04d", datePart, count + 1);
     }
+    
+ // 在 FileManager.java 类里面添加这个静态方法
+    public static void deleteUser(String userId) {
+        List<User> users = loadAllUsers();
+        
+        boolean removed = users.removeIf(u -> u.getId().equalsIgnoreCase(userId));
+        
+        if (removed) {
+            saveAllUsers(users); 
+            System.out.println(">> Database updated: User " + userId + " removed.");
+        } else {
+            System.out.println(">> Error: User ID not found in database.");
+        }
+    }
+    
+    public static void saveAllUsers(List<User> users) {
+        try (PrintWriter writer = new PrintWriter(new FileWriter("data/users.txt"))) {
+            for (User u : users) {
+                
+                writer.println(u.toFileString()); 
+            }
+        } catch (IOException e) {
+            System.out.println("Error saving users: " + e.getMessage());
+        }
+    }
+    
 }
-
-
-	
-    
-    
-    
-    

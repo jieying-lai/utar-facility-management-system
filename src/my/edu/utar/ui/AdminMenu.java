@@ -10,6 +10,7 @@ import my.edu.utar.service.BookingManager;
 import my.edu.utar.model.Booking;
 import my.edu.utar.data.FileManager;
 import my.edu.utar.model.Admin;
+import my.edu.utar.model.User; 
 import my.edu.utar.model.Facility;
 import my.edu.utar.util.Constants;
 import my.edu.utar.util.Validator;
@@ -54,6 +55,9 @@ public class AdminMenu{
                 		  break;
                 case "7": issueAlert();             
                 		  break;
+                case "8": manageUsers(); 
+                		  break;
+                
                 case "L":
                     System.out.println("Logged out. Goodbye, " + currentAdmin.getName() + "!");
                     return;
@@ -75,6 +79,7 @@ public class AdminMenu{
         System.out.println("[5] View Summary Report");
         System.out.println("[6] Maintenance Management");
         System.out.println("[7] View Issue Alerts");
+        System.out.println("[8] Manage Users");
         System.out.println("[L] Logout");
         System.out.println("--------------------------------------------");
         System.out.print("Enter your choice: ");
@@ -353,6 +358,119 @@ public class AdminMenu{
 
     }
 
+    private void manageUsers() {
+        System.out.println("\n========== MANAGE USERS ==========");
+        System.out.println("[1] Student");
+        System.out.println("[2] Staff");
+        System.out.println("[B] Back");
+        System.out.print("Select role: ");
+        String roleChoice = sc.nextLine().trim().toUpperCase();
+
+        String filterRole = "";
+        if (roleChoice.equals("1")) filterRole = Constants.ROLE_STUDENT;
+        else if (roleChoice.equals("2")) filterRole = Constants.ROLE_STAFF;
+        else return;
+
+        System.out.print("Enter " + filterRole + " ID to search: ");
+        String targetId = sc.nextLine().trim();
+        
+        User targetUser = FileManager.findUserById(targetId);
+        if (targetUser == null || !targetUser.getRole().equalsIgnoreCase(filterRole)) {
+            System.out.println("Error: User not found in " + filterRole + " category.");
+            return;
+        }
+
+        System.out.println("\n--- User Details ---");
+        System.out.println("ID        : " + targetUser.getId());
+        System.out.println("Name      : " + targetUser.getName());
+        System.out.println("Role      : " + targetUser.getRole());
+        System.out.println("Phone     : " + targetUser.getPhone());
+        System.out.println("Faculty   : " + targetUser.getFaculty());
+        System.out.println("Password  : ******** (Hidden)");
+        
+        System.out.println("\n[1] Update User Info");
+        System.out.println("[2] Delete User");
+        System.out.println("[B] Back");
+        System.out.print("Action: ");
+        String action = sc.nextLine().trim().toUpperCase();
+
+        if (action.equals("1")) {
+            adminUpdateUser(targetUser);
+        } else if (action.equals("2")) {
+            adminDeleteUser(targetUser);
+        }
+    }
+    
+    private void adminUpdateUser(User user) {
+        while (true) {
+            System.out.println("\n--- Updating User: " + user.getId() + " ---");
+            System.out.println("[1] Edit Name  (Current: " + user.getName() + ")");
+            System.out.println("[2] Edit Phone (Current: " + user.getPhone() + ")");
+            System.out.println("[3] Reset Password");
+            System.out.println("[B] Finish & Back");
+            System.out.print("Select field to update: ");
+            String choice = sc.nextLine().trim().toUpperCase();
+
+            if (choice.equals("B")) break;
+
+            switch (choice) {
+                case "1":
+                    System.out.print("Enter new Name: ");
+                    String newName = sc.nextLine().trim();
+                    if (Validator.isValidName(newName)) {
+                        user.setName(newName);
+                        FileManager.updateUser(user);
+                        System.out.println(">> Success: Name updated.");
+                    } else {
+                        System.out.println(">> Error: Invalid Name format.");
+                    }
+                    break;
+
+                case "2":
+                    System.out.print("Enter new Phone (e.g., 0123456789): ");
+                    String newPhone = sc.nextLine().trim();
+                    if (Validator.isValidPhone(newPhone)) {
+                        user.setPhone(newPhone);
+                        FileManager.updateUser(user);
+                        System.out.println(">> Success: Phone updated.");
+                    } else {
+                        System.out.println(">> Error: Invalid Phone format (Must start with 01 and be 10-11 digits).");
+                    }
+                    break;
+
+                case "3":
+                    System.out.print("Enter new Password (min 8 chars): ");
+                    String newPass = sc.nextLine().trim();
+                    if (Validator.isValidPassword(newPass)) {
+                        user.setPassword(newPass);
+                        FileManager.updateUser(user);
+                        System.out.println(">> Success: Password reset.");
+                    } else {
+                        System.out.println(">> Error: Password too short (Minimum 8 characters).");
+                    }
+                    break;
+
+                default:
+                    System.out.println("Invalid choice.");
+            }
+        }
+    }
+    
+    private void adminDeleteUser(User user) {
+        if (bookingManager.hasFutureBookings(user.getId())) {
+            System.out.println("FAILED: Cannot delete user. User has active/future bookings.");
+            return;
+        }
+
+        System.out.print("Are you SURE you want to delete " + user.getName() + "? (YES/NO): ");
+        if (sc.nextLine().trim().equalsIgnoreCase("YES")) {
+            FileManager.deleteUser(user.getId()); 
+            System.out.println("User deleted successfully.");
+        } else {
+            System.out.println("Deletion cancelled.");
+        }
+    }
+    
     /** TODO Member 3 */
     private void maintenanceManagement() {
         System.out.println("[TODO - Member 3] Maintenance Management");
