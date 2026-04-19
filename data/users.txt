@@ -25,3 +25,4 @@
 =======
 2401444|LJY|jieying47@1utar.my|01120970647|Student|Lee Kong Chian Faculty of Engineering and Science (LKC FES)|SE|12341234
 >>>>>>> cd0f8775c2215e2328c3cf52a587c77ae509780f
+2402681|CHAY MIN CHEN|mmcc38@1utar.my|01150953625|Student|Lee Kong Chian Faculty of Engineering and Science (LKC FES)|SE|Minchen2402681

@@ -4,6 +4,8 @@ import my.edu.utar.model.*;
 import my.edu.utar.util.Constants;
 
 import java.io.*;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -250,7 +252,92 @@ public class FileManager {
     		}
     	}
     	return false;
-    }}
+    }
+    
+  //maintenance - read all the reports from the fiel
+    public static List<MaintenanceReport> readMaintenanceReports()
+    {
+    	List<MaintenanceReport> reports = new ArrayList<>();
+    	try (BufferedReader br = new BufferedReader(new FileReader(Constants.FILE_MAINTENANCE)))
+    	{
+    		String line;
+    		int lineNumber = 0;
+    		while((line = br.readLine()) != null)
+    		{
+    			lineNumber++;
+    			if (line.trim().isEmpty()) continue;
+                String[] parts = line.split("\\|", -1); 
+                if (parts.length < 9)
+                {
+                	System.out.println("[WARNING] Data error occured on line" + lineNumber + " .");
+                	continue; // skip the error part then continue with the next
+                }
+                reports.add(new MaintenanceReport(parts[0], parts[1],parts[2],parts[3],parts[4],parts[5],parts[6],parts[7],parts[8]));
+    		}
+    	}
+		catch (FileNotFoundException e)
+		{
+			try
+			{
+				new File(Constants.FILE_MAINTENANCE).createNewFile();
+			}
+			catch (IOException ex)
+			{
+				System.out.println("Could not create maintenance.txt");
+			}
+		}
+		catch (IOException e)
+		{
+			System.out.println("File error: try again.");
+		}
+		return reports;
+		
+	}
+    
+    //maintenanc - write all the reports back to file
+    public static void writeMaintenanceReports(List<MaintenanceReport> reports)
+    {
+    	try (BufferedWriter bw = new BufferedWriter(new FileWriter(Constants.FILE_MAINTENANCE, false)))
+    	{
+            for (MaintenanceReport r : reports)
+            {
+                bw.write(r.toFileString());
+                bw.newLine();
+            }
+    	}
+    	catch (IOException e)
+    	{
+    		System.out.println("File error: try again.");
+    	}
+    }
+    
+    //maintenance - append one new report to the file
+    public static void appendMaintenanceReport(MaintenanceReport reports)
+    {
+    	try (BufferedWriter bw = new BufferedWriter(new FileWriter(Constants.FILE_MAINTENANCE, true)))
+    	{
+            bw.write(reports.toFileString());
+            bw.newLine();
+    	}
+    	catch (IOException e)
+    	{
+    		System.out.println("File error: try again.");
+    	}
+    }
+    
+    //Maintenance - method to generate maintenanceID
+    public static String generateMaintenanceID()
+    {
+    	LocalDate today = LocalDate.now();
+    	String datePart = today.format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+    	List<MaintenanceReport> all = readMaintenanceReports();
+    	long count = all.stream().filter(r -> r.getIssueID().startsWith("M" + datePart)).count();
+    	return String.format("M%s%04d", datePart, count + 1);
+    }
+}
+
+
+	
     
     
     
