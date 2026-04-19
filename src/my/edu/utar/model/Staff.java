@@ -11,6 +11,14 @@ public class Staff extends User {
     }
 
     public Staff() {}
+    
+    public String getDepartment() {
+        return getProgramme(); 
+    }
+
+    public void setDepartment(String d) {
+        setProgramme(d);
+    }
 
     @Override
     public boolean validateCredentials(String inputId, String inputPassword) {
@@ -25,7 +33,7 @@ public class Staff extends User {
         System.out.println("Email       : " + getEmail());
         System.out.println("Phone       : " + getPhone());
         System.out.println("Faculty     : " + getFaculty());
-        System.out.println("Department  : " + getProgramme()); // reused as department
+        System.out.println("Department  : " + getDepartment()); // reused as department
         System.out.println("===================================");
     }
 }

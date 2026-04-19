@@ -3,7 +3,8 @@ package my.edu.utar.model;
 import my.edu.utar.util.Constants;
 
 public class Student extends User {
-
+	private String studentID;
+	
     public Student(String studentId, String name, String email, String phone,
                    String password, String faculty, String programme) {
         super(studentId, name, email, phone, password,
@@ -11,7 +12,15 @@ public class Student extends User {
     }
 
     public Student() {}
-
+    
+    public String getStudentID() {
+        return studentID;
+    }
+    
+    public boolean validateStudentEmail() {
+        return getEmail() != null && getEmail().endsWith("@1utar.my");
+    }
+    
     @Override
     public boolean validateCredentials(String inputId, String inputPassword) {
         return getId().equals(inputId) && getPassword().equals(inputPassword);
