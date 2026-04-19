@@ -299,101 +299,106 @@ public class AdminMenu{
     }
 
     private void viewSummaryReport() {
-        System.out.println("\n========== GENERATE SUMMARY REPORT ==========");
+        System.out.println("\n--- GENERATE SUMMARY REPORT ---");
         System.out.println("Select Report Period: [1] Monthly [2] Semester [3] Yearly");
         System.out.print("Choice: ");
         String periodType = sc.nextLine().trim();
         
-        System.out.print("Enter specific period (e.g., 2026-03, 2026-S1, or 2026): ");
+        System.out.print("Enter specific period (e.g., 2026-03, 2026S1, 2026): ");
         String period = sc.nextLine().trim();
 
-        
         List<Booking> allBookings = bookingManager.getBookingList();
         List<Facility> allFacilities = facilityService.getAllFacilities();
         List<String[]> maintenanceData = loadMaintenanceData(period); 
 
-        List<Booking> filteredBookings = new ArrayList<>();
-        for (Booking b : allBookings) {
-            if (b.getBookingDate().contains(period) && b.getStatus().equalsIgnoreCase("Approved")) {
-                filteredBookings.add(b);
-            }
-        }
-
-        if (filteredBookings.isEmpty() && maintenanceData.isEmpty()) {
-            System.out.println("No data found for the selected period: " + period);
-            return;
-        }
-        calculateAndDisplayAnalytics(filteredBookings, allFacilities, maintenanceData);
+        displayReportManual(allBookings, allFacilities, maintenanceData, period);
     }
     
     private List<String[]> loadMaintenanceData(String period) {
-        List<String[]> filteredMaint = new ArrayList<>();
-        File file = new File("data/maintenance.txt");
+        List<String[]> results = new ArrayList<>();
+        File f = new File("data/maintenance.txt");
         
-        if (!file.exists()) return filteredMaint;
+        if (!f.exists()) {
+            return results;
+        }
 
-        try (Scanner scanner = new Scanner(file)) {
-            while (scanner.hasNextLine()) {
-                String line = scanner.nextLine();
-                if (line.trim().isEmpty()) continue;
+        try {
+            Scanner reader = new Scanner(f);
+            while (reader.hasNextLine()) {
+                String row = reader.nextLine();
                 
-                String[] data = line.split("\\|");
-                if (data.length > 4 && data[2].contains(period)) {
-                    filteredMaint.add(data);
+                if (row.trim().equals("")) {
+                    continue;
+                }
+                
+                String[] parts = row.split("\\|");
+                
+                if (parts.length >= 5) {
+                    String dateInFile = parts[2];
+                    if (dateInFile.contains(period)) {
+                        results.add(parts);
+                    }
                 }
             }
+            reader.close();
         } catch (FileNotFoundException e) {
-            System.out.println("Maintenance record file not found.");
+            System.out.println("Cannot find maintenance file!");
         }
-        return filteredMaint;
+        
+        return results;
     }
     
-    private void calculateAndDisplayAnalytics(List<Booking> filtered, List<Facility> facilities, List<String[]> maintenance) {
-        System.out.println("\n" + "=".repeat(60));
-        System.out.println("FACILITY ANALYTICS REPORT");
-        System.out.println("=".repeat(60));
+    private void displayReportManual(List<Booking> bookings, List<Facility> facilities, List<String[]> maintenance, String period) {
+        System.out.println("\n============================================================");
+        System.out.println("                FACILITY ANALYTICS REPORT");
+        System.out.println("============================================================");
+        System.out.printf("%-10s | %-15s | %-10s | %-10s | %-10s\n", "ID", "Type", "Booked", "Maint", "Util%");
+        System.out.println("------------------------------------------------------------");
 
-        Map<String, Integer> usageMap = new HashMap<>();
-        Map<String, Integer> maintMap = new HashMap<>();
-        double totalRepairHours = 0;
-
-        for (Booking b : filtered) {
-            usageMap.put(b.getFacilityID(), usageMap.getOrDefault(b.getFacilityID(), 0) + 1);
-        }
-
-        for (String[] m : maintenance) {
-            String fID = m[1]; 
-            maintMap.put(fID, maintMap.getOrDefault(fID, 0) + 1);
-            totalRepairHours += Double.parseDouble(m[4]);
-        }
-
-        double avgRepairTime = maintenance.isEmpty() ? 0 : totalRepairHours / maintenance.size();
-
-        String mostUsed = "N/A";
-        if (!usageMap.isEmpty()) {
-            mostUsed = Collections.max(usageMap.entrySet(), Map.Entry.comparingByValue()).getKey();
-        }
-
-        System.out.printf("%-10s | %-15s | %-12s | %-12s | %-10s\n", 
-                          "Fac ID", "Type", "Bookings", "Maint Cases", "Util %");
-        System.out.println("-".repeat(60));
+        String mostUsedID = "N/A";
+        int maxBookings = -1;
+        double totalHours = 0;
 
         for (Facility f : facilities) {
-            int count = usageMap.getOrDefault(f.getFacilityID(), 0);
-            int mCount = maintMap.getOrDefault(f.getFacilityID(), 0);
-            
-            double utilRate = (count / 20.0) * 100;
+            int bookingCount = 0;
+            int maintCount = 0;
 
-            System.out.printf("%-10s | %-15s | %-12d | %-12d | %-9.1f%%\n", 
-                              f.getFacilityID(), f.getType(), count, mCount, utilRate);
+            for (Booking b : bookings) {
+                if (b.getFacilityID().equals(f.getFacilityID()) && 
+                    b.getBookingDate().contains(period) && 
+                    b.getStatus().equalsIgnoreCase("Approved")) {
+                    bookingCount++;
+                }
+            }
+
+            for (String[] m : maintenance) {
+                if (m[1].equals(f.getFacilityID())) {
+                    maintCount++;
+                    totalHours += Double.parseDouble(m[4]);
+                }
+            }
+
+            if (bookingCount > maxBookings) {
+                maxBookings = bookingCount;
+                mostUsedID = f.getFacilityID();
+            }
+
+            double util = (bookingCount / 20.0) * 100;
+
+            System.out.printf("%-10s | %-15s | %-10d | %-10d | %-9.1f%%\n", 
+                              f.getFacilityID(), f.getType(), bookingCount, maintCount, util);
         }
 
-        System.out.println("-".repeat(60));
-        System.out.println("Most Frequently Used: " + mostUsed);
-        System.out.printf("Average Repair Time: %.2f hours\n", avgRepairTime);
-        System.out.println("=".repeat(60));
+        System.out.println("------------------------------------------------------------");
+        System.out.println("Most Frequently Used Facility: " + mostUsedID);
+        
+        double avgTime = 0;
+        if (maintenance.size() > 0) {
+            avgTime = totalHours / maintenance.size();
+        }
+        System.out.printf("Average Repair Time: %.2f hours\n", avgTime);
+        System.out.println("============================================================\n");
     }
-
     /** TODO Member 3 */
     private void maintenanceManagement() {
         System.out.println("[TODO - Member 3] Maintenance Management");
