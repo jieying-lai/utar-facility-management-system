@@ -4,6 +4,8 @@ import my.edu.utar.model.*;
 import my.edu.utar.util.Constants;
 
 import java.io.*;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -141,10 +143,6 @@ public class FileManager {
         return null;
     }
 
-    /**
-     * Finds a user by ID only (to check if registered).
-     * Returns null if not found.
-     */
     public static User findUserById(String id) {
         List<User> users = loadAllUsers();
         for (User user : users) {
@@ -250,8 +248,107 @@ public class FileManager {
     		}
     	}
     	return false;
-    }}
+    }
     
+    public static List<MaintenanceReport> readMaintenanceReports()
+    {
+    	List<MaintenanceReport> reports = new ArrayList<>();
+    	try (BufferedReader br = new BufferedReader(new FileReader(Constants.FILE_MAINTENANCE)))
+    	{
+    		String line;
+    		int lineNumber = 0;
+    		while((line = br.readLine()) != null)
+    		{
+    			lineNumber++;
+    			if (line.trim().isEmpty()) continue;
+                String[] parts = line.split("\\|", -1); 
+                if (parts.length < 9)
+                {
+                	System.out.println("[WARNING] Data error occured on line" + lineNumber + " .");
+                	continue; // skip the error part then continue with the next
+                }
+                reports.add(new MaintenanceReport(parts[0], parts[1],parts[2],parts[3],parts[4],parts[5],parts[6],parts[7],parts[8]));
+    		}
+    	}
+		catch (FileNotFoundException e)
+		{
+			try
+			{
+				new File(Constants.FILE_MAINTENANCE).createNewFile();
+			}
+			catch (IOException ex)
+			{
+				System.out.println("Could not create maintenance.txt");
+			}
+		}
+		catch (IOException e)
+		{
+			System.out.println("File error: try again.");
+		}
+		return reports;
+		
+	}    
+    public static void writeMaintenanceReports(List<MaintenanceReport> reports)
+    {
+    	try (BufferedWriter bw = new BufferedWriter(new FileWriter(Constants.FILE_MAINTENANCE, false)))
+    	{
+            for (MaintenanceReport r : reports)
+            {
+                bw.write(r.toFileString());
+                bw.newLine();
+            }
+    	}
+    	catch (IOException e)
+    	{
+    		System.out.println("File error: try again.");
+    	}
+    }
     
+    public static void appendMaintenanceReport(MaintenanceReport reports)
+    {
+    	try (BufferedWriter bw = new BufferedWriter(new FileWriter(Constants.FILE_MAINTENANCE, true)))
+    	{
+            bw.write(reports.toFileString());
+            bw.newLine();
+    	}
+    	catch (IOException e)
+    	{
+    		System.out.println("File error: try again.");
+    	}
+    }
     
+    public static String generateMaintenanceID()
+    {
+    	LocalDate today = LocalDate.now();
+    	String datePart = today.format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+    	List<MaintenanceReport> all = readMaintenanceReports();
+    	long count = all.stream().filter(r -> r.getIssueID().startsWith("M" + datePart)).count();
+    	return String.format("M%s%04d", datePart, count + 1);
+    }
     
+ // 在 FileManager.java 类里面添加这个静态方法
+    public static void deleteUser(String userId) {
+        List<User> users = loadAllUsers();
+        
+        boolean removed = users.removeIf(u -> u.getId().equalsIgnoreCase(userId));
+        
+        if (removed) {
+            saveAllUsers(users); 
+            System.out.println(">> Database updated: User " + userId + " removed.");
+        } else {
+            System.out.println(">> Error: User ID not found in database.");
+        }
+    }
+    
+    public static void saveAllUsers(List<User> users) {
+        try (PrintWriter writer = new PrintWriter(new FileWriter("data/users.txt"))) {
+            for (User u : users) {
+                
+                writer.println(u.toFileString()); 
+            }
+        } catch (IOException e) {
+            System.out.println("Error saving users: " + e.getMessage());
+        }
+    }
+    
+}

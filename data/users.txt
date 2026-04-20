@@ -1,27 +1,25 @@
-<<<<<<< HEAD
-2301001|LEE CHONG WEI|2301001@1utar.my|0112345671|Student|Faculty of Information and Communication Technology (FICT)|Bachelor of Computer Science (Hons)|password1
-2301002|TAN SIEW LING|2301002@1utar.my|0112345672|Student|Faculty of Information and Communication Technology (FICT)|Bachelor of Software Engineering (Hons)|password1
-2301003|ONG KAH HENG|2301003@1utar.my|0112345673|Student|Faculty of Engineering and Green Technology (FEGT)|Bachelor of Engineering (Hons) Mechanical Engineering|password1
-2301004|LIM WEI XIAN|2301004@1utar.my|0112345674|Student|Faculty of Business and Finance (FBF)|Bachelor of Business Administration (Hons)|password1
-2301005|WONG JING YI|2301005@1utar.my|0112345675|Student|Faculty of Arts and Social Science (FASS)|Bachelor of Communication (Hons)|password1
-2301006|CHAN ZI YANG|2301006@1utar.my|0112345676|Student|Faculty of Science (FSC)|Bachelor of Science (Hons) Biotechnology|password1
-2301007|YAP WEI LING|2301007@1utar.my|0112345677|Student|Faculty of Medicine and Health Sciences (FMHS)|Bachelor of Pharmacy (Hons)|password1
-2301008|LOW KIAN MING|2301008@1utar.my|0112345678|Student|Lee Kong Chian Faculty of Engineering and Science (LKC FES)|Bachelor of Engineering (Hons) Mechatronics Engineering|password1
-2301009|CHIN JIA HUI|2301009@1utar.my|0112345679|Student|Faculty of Information and Communication Technology (FICT)|Bachelor of Information Technology (Hons)|password1
-2301010|NG YEE XIAN|2301010@1utar.my|0112345610|Student|Faculty of Engineering and Green Technology (FEGT)|Bachelor of Engineering (Hons) Civil Engineering|password1
-2301011|GOH KAH WAI|2301011@1utar.my|0112345611|Student|Faculty of Business and Finance (FBF)|Bachelor of Finance (Hons)|password1
-2301012|TEH JIA WEN|2301012@1utar.my|0112345612|Student|Faculty of Arts and Social Science (FASS)|Bachelor of Arts (Hons) English Language|password1
-2301013|KOAY MING XUAN|2301013@1utar.my|0112345613|Student|Faculty of Science (FSC)|Bachelor of Science (Hons) Chemistry|password1
-2301014|PHANG WEI JIAN|2301014@1utar.my|0112345614|Student|Faculty of Information and Communication Technology (FICT)|Bachelor of Information Systems (Hons)|password1
-2301015|SIM XIAO HUI|2301015@1utar.my|0112345615|Student|Faculty of Medicine and Health Sciences (FMHS)|Bachelor of Nursing (Hons)|password1
-1001001|DR TAN KIM HOCK|tankh@utar.edu.my|0198881001|Staff|Faculty of Information and Communication Technology (FICT)|Academic Affairs|staffpass1
-1001002|MS LIM PEI YING|limpying@utar.edu.my|0198881002|Staff|Faculty of Engineering and Green Technology (FEGT)|Human Resource|staffpass1
-1001003|MR WONG BOON HOONG|wongbh@utar.edu.my|0198881003|Staff|Faculty of Business and Finance (FBF)|Finance and Accounts|staffpass1
-1001004|MS CHAN MEI XIAN|chanmx@utar.edu.my|0198881004|Staff|Faculty of Arts and Social Science (FASS)|Library|staffpass1
-1001005|MR NG ZHI XIONG|ngzx@utar.edu.my|0198881005|Staff|Faculty of Science (FSC)|Facility Management|staffpass1
-1234567|HENG|hengyh@utar.edu.my|0112345678|Staff|Faculty of Information and Communication Technology (FICT)|Information Technology|11111111
-7654321|YY|yy@utar.edu.my|01120970987|Staff|Faculty of Information and Communication Technology (FICT)|Academic Affairs|12345678
-2402503|CHOK SHI YING|shiying@1utar.my|0112345678|Student|Lee Kong Chian Faculty of Engineering and Science (LKC FES)|Bachelor of Computer Science (Hons) Game Development|12345678
-=======
-2401444|LJY|jieying47@1utar.my|01120970647|Student|Lee Kong Chian Faculty of Engineering and Science (LKC FES)|SE|12341234
->>>>>>> cd0f8775c2215e2328c3cf52a587c77ae509780f
+2301001|LEE CHONG WEI|2301001@1utar.my|0112345671|Student|LKCFES|CS|password1
+2301002|TAN SIEW LING|2301002@1utar.my|0112345672|Student|LKCFES|SE|password1
+2301003|ONG KAH HENG|2301003@1utar.my|0112345673|Student|LKCFES|ME|password1
+2301004|LIM WEI XIAN|2301004@1utar.my|0112345674|Student|FAM|BA|password1
+2301005|WONG JING YI|2301005@1utar.my|0112345675|Student|FCI|MC|password1
+2301006|CHAN ZI YANG|2301006@1utar.my|0112345676|Student|LKCFES|BI|password1
+2301007|YAP WEI LING|2301007@1utar.my|0112345677|Student|MKFMHS|PH|password1
+2301008|LOW KIAN MING|2301008@1utar.my|0112345678|Student|LKCFES|MH|password1
+2301009|CHIN JIA HUI|2301009@1utar.my|0112345679|Student|LKCFES|IT|password1
+2301010|NG YEE XIAN|2301010@1utar.my|0112345610|Student|LKCFES|CI|password1
+2301011|GOH KAH WAI|2301011@1utar.my|0112345611|Student|FAM|FN|password1
+2301012|TEH JIA WEN|2301012@1utar.my|0112345612|Student|FEd|ED|password1
+2301013|KOAY MING XUAN|2301013@1utar.my|0112345613|Student|LKCFES|PH|password1
+2301014|PHANG WEI JIAN|2301014@1utar.my|0112345614|Student|LKCFES|IS|password1
+2301015|SIM XIAO HUI|2301015@1utar.my|0112345615|Student|MKFMHS|NS|password1
+1001001|DR TAN KIM HOCK|tankh@utar.edu.my|0198881001|Staff|LKCFES|AA|staffpass1
+1001002|MS LIM PEI YING|limpying@utar.edu.my|0198881002|Staff|LKCFES|HR|staffpass1
+1001003|MR WONG BOON HOONG|wongbh@utar.edu.my|0198881003|Staff|LKCFES|FIN|staffpass1
+1001004|MS CHAN MEI XIAN|chanmx@utar.edu.my|0198881004|Staff|MKFMHS|LIB|staffpass1
+1001005|MR NG ZHI XIONG|ngzx@utar.edu.my|0198881005|Staff|LKCFES|FM|staffpass1
+1234567|HENG|hengyh@utar.edu.my|0112345678|Staff|LKCFES|IT|11111111
+7654321|YY|yy@utar.edu.my|01120970987|Staff|LKCFES|AA|12345678
+2402503|CHOK SHI YING|shiying@1utar.my|0112345678|Student|LKCFES|GV|12345678
+2401444|LJY|jieying47@1utar.my|01120970647|Student|LKCFES|SE|12341234
+2402681|CHAY MIN CHEN|mmcc38@1utar.my|01150953625|Student|LKCFES|SE|Minchen2402681

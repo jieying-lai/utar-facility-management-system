@@ -5,6 +5,7 @@ import my.edu.utar.model.*;
 import my.edu.utar.service.BookingManager;
 import my.edu.utar.util.Constants;
 import my.edu.utar.util.Validator;
+import java.util.Map;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -55,7 +56,7 @@ public class MainMenu {
         System.out.println("--------------------------------------------");
         System.out.println("  [1] Register New User");
         System.out.println("  [2] Login");
-        System.out.println("  [E] Exit");
+        System.out.println("  [E] xit");
         System.out.println("--------------------------------------------");
         System.out.print("  Enter your choice: ");
     }
@@ -84,9 +85,11 @@ public class MainMenu {
 
         int facultyIndex = chooseFaculty();
         if (facultyIndex == -1) return;
-        String faculty = Constants.FACULTIES[facultyIndex];
-
-        String programme = enterProgrammeOrDept(role);
+        
+        String facultyFullName = Constants.FACULTIES[facultyIndex];
+        String facultyCode = Constants.FACULTY_CODE_MAP.get(facultyFullName);
+        String programme = enterProgrammeOrDept(role, facultyFullName);
+        
         if (programme == null) return;
 
         String password = enterPassword();
@@ -100,8 +103,11 @@ public class MainMenu {
         System.out.println("  Name        : " + name);
         System.out.println("  Email       : " + email);
         System.out.println("  Phone       : " + phone);
-        System.out.println("  Faculty     : " + faculty);
-        System.out.println("  Programme   : " + programme);
+        System.out.println("  Faculty     : " + facultyFullName);
+        String progDisplay = Constants.FACULTY_PROGRAMME_MAP.get(facultyFullName) != null ? 
+                Constants.FACULTY_PROGRAMME_MAP.get(facultyFullName).getOrDefault(programme, programme) : 
+                programme;
+        System.out.println("  Programme   : " + progDisplay);
         System.out.println("--------------------------------------------");
         System.out.print("  Confirm registration? [Y] Yes / [N] No: ");
 
@@ -113,12 +119,13 @@ public class MainMenu {
 
         User newUser;
         if (Constants.ROLE_STUDENT.equals(role)) {
-            newUser = new Student(id, name, email, phone, password, faculty, programme);
+            newUser = new Student(id, name, email, phone, password, facultyCode, programme);
         } else {
-            newUser = new Staff(id, name, email, phone, password, faculty, programme);
+            newUser = new Staff(id, name, email, phone, password, facultyCode, programme);
         }
+        
         FileManager.saveUser(newUser);
-        System.out.println("\n  Registration successful! You can now login.");
+        System.out.println("\n  Registration successful!");
     }
 
     private String chooseRole() {
@@ -126,7 +133,7 @@ public class MainMenu {
             System.out.println("\n  Select your role:");
             System.out.println("  [1] Student");
             System.out.println("  [2] Staff");
-            System.out.println("  [C] Cancel");
+            System.out.println("  [C] ancel");
             System.out.print("  Enter choice: ");
             String input = sc.nextLine().trim().toUpperCase();
 
@@ -146,7 +153,7 @@ public class MainMenu {
 
     private String enterStudentId(String role) {
         while (true) {
-            System.out.print("\n  Enter " + role + " ID (7 digits) or [C] Cancel: ");
+            System.out.print("\n  Enter " + role + " ID (7 digits) or [C]ancel: ");
             String input = sc.nextLine().trim().toUpperCase();
 
             if (Validator.isEmpty(input)) {
@@ -171,7 +178,7 @@ public class MainMenu {
 
     private String enterName() {
         while (true) {
-            System.out.print("\n  Enter Full Name or [C] Cancel: ");
+            System.out.print("\n  Enter Full Name or [C] ancel: ");
             String input = sc.nextLine().trim();
 
             if (Validator.isEmpty(input)) {
@@ -189,9 +196,9 @@ public class MainMenu {
     private String enterEmail(String role) {
         while (true) {
             if (Constants.ROLE_STUDENT.equals(role)) {
-                System.out.print("\n  Enter Student Email (e.g., 2301234@1utar.my) or [C] Cancel: ");
+                System.out.print("\n  Enter Student Email (e.g., 2301234@1utar.my) or [C] ancel: ");
             } else {
-                System.out.print("\n  Enter Staff Email (e.g., name@utar.edu.my) or [C] Cancel: ");
+                System.out.print("\n  Enter Staff Email (e.g., name@utar.edu.my) or [C] ancel: ");
             }
             String input = sc.nextLine().trim().toLowerCase();
 
@@ -217,7 +224,7 @@ public class MainMenu {
 
     private String enterPhone() {
         while (true) {
-            System.out.print("\n  Enter Phone Number (e.g., 0112345678) or [C] Cancel: ");
+            System.out.print("\n  Enter Phone Number (e.g., 0112345678) or [C] ancel: ");
             String input = sc.nextLine().trim();
 
             if (Validator.isEmpty(input)) {
@@ -242,7 +249,7 @@ public class MainMenu {
             for (int i = 0; i < Constants.FACULTIES.length; i++) {
                 System.out.println("  [" + (i + 1) + "] " + Constants.FACULTIES[i]);
             }
-            System.out.println("  [C] Cancel");
+            System.out.println("  [C] ancel");
             System.out.print("  Enter choice: ");
             String input = sc.nextLine().trim().toUpperCase();
 
@@ -261,57 +268,38 @@ public class MainMenu {
         }
     }
 
-    private String enterProgrammeOrDept(String role) {
+    private String enterProgrammeOrDept(String role, String selectedFaculty) {
         while (true) {
-            System.out.println();
+            System.out.println("\n--------------------------------------------");
             if (Constants.ROLE_STUDENT.equals(role)) {
-                System.out.println("  Enter your Programme using short form.");
-                System.out.println("  Examples:");
-                System.out.println("    SE  = Bachelor of Software Engineering");
-                System.out.println("    CS  = Bachelor of Computer Science");
-                System.out.println("    ME  = Bachelor of Mechanical Engineering");
-                System.out.println("    BUS = Bachelor of Business Administration");
-                System.out.println("    MED = Bachelor of Medicine (MBBS)");
-                System.out.println("    NUR = Bachelor of Nursing");
-                System.out.print("  Enter short form (2-5 letters) or [C] Cancel: ");
+                System.out.println("  Enter your Programme Code (e.g., SE, MH, AS):");
             } else {
-                System.out.println("  Enter your Department using short form.");
-                System.out.println("  Examples:");
-                System.out.println("    HR  = Human Resource");
-                System.out.println("    IT  = Information Technology");
-                System.out.println("    FIN = Finance and Accounts");
-                System.out.println("    LIB = Library");
-                System.out.println("    FM  = Facility Management");
-                System.out.print("  Enter short form (2-5 letters) or [C] Cancel: ");
+                System.out.println("  Enter your Department Code (e.g., HR, LIB):");
             }
+            System.out.print("  Choice: ");
 
             String input = sc.nextLine().trim().toUpperCase();
 
             if (Validator.isEmpty(input)) {
-                System.out.println("  Cannot be empty. Please try again.");
+                System.out.println("  Cannot be empty.");
                 continue;
             }
-            if ("C".equals(input)) {
-                System.out.println("\n  Registration cancelled.");
-                return null;
+            if ("C".equals(input)) return null;
+
+            Map<String, String> programmes = Constants.FACULTY_PROGRAMME_MAP.get(selectedFaculty);
+            String fullName = (programmes != null) ? programmes.get(input) : null;
+
+            if (fullName != null) {
+                System.out.println("  Verified Programme: " + fullName);
+                System.out.print("  Confirm? [Y] Yes / [N] Re-enter: ");
+            } else {
+                System.out.println("  [WARNING] \"" + input + "\" is not registered under " + selectedFaculty + ".");
+                System.out.print("  Are you sure you want to persist with this code? [Y] Yes / [N] Re-enter: ");
             }
 
-            if (!input.matches("[A-Z]{2,5}")) {
-                System.out.println("  Invalid format! Short form must be:");
-                System.out.println("  - Letters only (no numbers or symbols)");
-                System.out.println("  - Between 2 to 5 characters");
-                System.out.println("  - Example: SE, MH, CL, AS, MBBS");
-                continue;
-            }
-
-            System.out.print("\n  You entered: \"" + input + "\". Confirm? [Y] Yes / [N] Re-enter / [C] Cancel: ");
             String confirm = sc.nextLine().trim().toUpperCase();
-
             if ("Y".equals(confirm)) {
                 return input; 
-            } else if ("C".equals(confirm)) {
-                System.out.println("\n  Registration cancelled.");
-                return null;
             }
         }
     }
@@ -346,45 +334,56 @@ public class MainMenu {
     }
 
     private void login() {
-        System.out.println("============================================");
-        System.out.println("                  LOGIN                     ");
-        System.out.println("============================================");
+        while (true) {
+            System.out.println("============================================");
+            System.out.println("                  LOGIN                     ");
+            System.out.println("============================================");
 
-        System.out.print("  Enter ID: ");
-        String id = sc.nextLine().trim();
-        if (Validator.isEmpty(id)) {
-            System.out.println("  Please fill in completely.");
-            return;
+            System.out.print("  Enter ID (or 'B' to back): ");
+            String id = sc.nextLine().trim();
+
+            if (id.equalsIgnoreCase("B")) {
+                return; 
+            }
+
+            if (Validator.isEmpty(id)) {
+                System.out.println("  ID cannot be empty.");
+                continue;
+            }
+
+            System.out.print("  Enter Password (or 'B' to back): ");
+            String password = sc.nextLine().trim();
+            
+            if (password.equalsIgnoreCase("B")) {
+                return;
+            }
+
+            if (Validator.isEmpty(password)) {
+                System.out.println("  Password cannot be empty.");
+                continue; 
+            }
+
+            Admin admin = FileManager.loginAdmin(id, password);
+            if (admin != null) {
+                new AdminMenu(sc, admin).show();
+                return; 
+            }
+
+            User user = FileManager.loginUser(id, password);
+            if (user != null) {
+                System.out.println("\nWelcome, " + user.getName() + "! (" + user.getRole() + ")");
+                new UserMenu(sc, user, bookingManager).show();
+                return;
+            }
+
+            
+            if (FileManager.findUserById(id) != null) {
+                System.out.println("\n  >> Incorrect password. Please try again.");
+            } else {
+                System.out.println("\n  >> Account not found. Please register first.");
+            }
+            System.out.println("--------------------------------------------");
         }
-
-        System.out.print("  Enter Password: ");
-        String password = sc.nextLine().trim();
-        if (Validator.isEmpty(password)) {
-            System.out.println("  Please fill in completely.");
-            return;
-        }
-
-        Admin admin = FileManager.loginAdmin(id, password);
-        if (admin != null) {
-            new AdminMenu(sc, admin).show();
-            return;
-        }
-
-        User user = FileManager.loginUser(id, password);
-        if (user != null) {
-
-            System.out.println("\nWelcome, " + user.getName() + "! (" + user.getRole() + ")");
-            new UserMenu(sc, user, bookingManager).show();
-
-            return;
-        }
-
-        if (FileManager.findUserById(id) != null) {
-            System.out.println("\n  Incorrect password. Please try again.");
-        } else {
-            System.out.println("\n  Account not found. Please register first.");
-        }
-       
     }
 
     private void exitProgram() {

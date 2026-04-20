@@ -6,6 +6,7 @@ import my.edu.utar.data.FileManager;
 import my.edu.utar.util.Constants;
 import java.util.ArrayList;
 import java.util.List;
+import java.time.LocalDate;
 
 public class BookingManager {
 	
@@ -280,6 +281,19 @@ public class BookingManager {
                 return true;
             }
         }
+    }
+    
+    public boolean hasFutureBookings(String userId) {
+        LocalDate today = LocalDate.now();
+        for (Booking b : bookingList) {
+            if (b.getUserID().equals(userId)) {
+                LocalDate bookingDate = LocalDate.parse(b.getBookingDate()); 
+                if (!bookingDate.isBefore(today) && 
+                    !b.getStatus().equals(Constants.STATUS_CANCELLED)) {
+                    return true;
+                }
+            }
+        }
         return false;
     }
     
@@ -314,6 +328,4 @@ public class BookingManager {
         }
         FileManager.writeAllLines(Constants.FILE_BOOKINGS, lines);
     }
-
-	
 }
