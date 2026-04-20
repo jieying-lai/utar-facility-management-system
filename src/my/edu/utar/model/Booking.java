@@ -33,9 +33,6 @@ public class Booking {
 
     public Booking() {}
 
-    /**
-     * Format: bookingID|userID|facilityID|applyDate|bookingDate|timeSlot|purpose|pax|status|rejectReason
-     */
     public String toFileString() {
         return bookingID + Constants.DELIMITER + userID + Constants.DELIMITER +
                facilityID + Constants.DELIMITER + applyDate + Constants.DELIMITER +
