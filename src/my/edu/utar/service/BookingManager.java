@@ -178,7 +178,7 @@ public class BookingManager {
         }
     }
 	
-	public List<Facility> getAvailableFacilities(List<Facility> facilities, String date) {
+	public List<Facility> getAvailableFacilities(List<Facility> facilities, String date, int slot) {
 	    List<Facility> available = new ArrayList<>();
 	    for (Facility f : facilities) {
 	        boolean isBooked = false;

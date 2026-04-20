@@ -1,14 +1,197 @@
-F001|KB|1|KB104|Lecture Hall|80|Available
-F002|KB|1|KB105|Lecture Hall|80|Available
-F003|KB|2|KB201|Lecture Hall|100|Available
-F004|KB|2|KB202|Computer Lab|40|Available
-F005|KB|3|KB301|Computer Lab|40|Under Maintenance
-F006|KB|G|KB-MPH|Multipurpose Hall|200|Available
-F007|KA|1|KA101|Lecture Hall|60|Available
-F008|KA|1|KA102|Lecture Hall|60|Available
-F009|KA|2|KA-DG01|Discussion Room|8|Available
-F010|KA|2|KA-DG02|Discussion Room|8|Available
-F011|KA|2|KA-DG03|Discussion Room|8|Available
-F012|KA|G|KA-SPORT1|Sports Court|20|Available
-F013|KA|G|KA-SPORT2|Sports Court|20|Available
-F014|KA|4|KA907|Staff room|59|Available
+F001|KA|G|KG01|Lecture Theatre 1|Lecture Hall|100|Available
+F002|KA|G|KG02|Lecture Theatre 2|Lecture Hall|100|Available
+F003|KA|G|KG03|Lecture Theatre 3|Lecture Hall|100|Available
+F004|KA|M|M001|Meeting Room|Discussion Room|15|Available
+F005|KA|M|M002|MRC Laboratory II|Laborotory|30|Available
+F006|KA|1|KA121|Cell and Tissue Culture Lab|Laborotory|25|Available
+F007|KA|1|KA122|Molecular Biology Lab|Laborotory|25|Available
+F008|KA|1|KA123|Reading Room|Discussion Room|40|Available
+F009|KA|2|KA201|Proposed Postgraduate Office and Lab|Discussion Room|20|Available
+F010|KA|2|KA202|Pathology Lab|Laborotory|40|Available
+F011|KA|2|KA203|Store/Multimedia Control Lab|Computer Lab|15|Available
+F012|KA|2|KA204|Anatomy and Physiology Lab|Laborotory|40|Available
+F013|KA|2|KA205|Clinical Science Lab|Laborotory|40|Available
+F014|KA|2|KA209|Tutorial Room 209|Tutorial Room|30|Available
+F015|KA|2|KA210|Tutorial Room 210|Tutorial Room|30|Available
+F016|KA|2|KA211|Tutorial Room 211|Tutorial Room|30|Available
+F017|KA|3|KA301|Wet Tutorial Room|Tutorial Room|30|Available
+F018|KA|3|KA302|Gymnasium|Sports Court|50|Available
+F019|KA|3|KA303|Tutorial Room 303|Tutorial Room|30|Available
+F020|KA|4|KA403|Computer and Internet Laboratory|Computer Lab|30|Available
+F021|KA|4|KA404|Computer and Internet Laboratory|Computer Lab|30|Available
+F022|KA|4|KA405|Computer and Internet Laboratory|Computer Lab|30|Available
+F023|KA|4|KA406|Computer and Internet Laboratory|Computer Lab|30|Available
+F024|KA|4|KA407|Computer and Internet Laboratory|Computer Lab|30|Available
+F025|KA|4|KA408|Computer and Internet Laboratory|Computer Lab|30|Available
+F026|KA|4|KA409|Computer and Internet Laboratory|Computer Lab|30|Available
+F027|KA|4|KA410|Computer and Internet Laboratory|Computer Lab|30|Available
+F028|KA|4|KA411|Computer and Internet Laboratory|Computer Lab|30|Available
+F029|KA|4|KA400A|Tutorial Room 400A|Tutorial Room|30|Available
+F030|KA|4|KA400B|Tutorial Room 400B|Tutorial Room|30|Available
+F031|KA|4|KA400C|Tutorial Room 400C|Tutorial Room|30|Available
+F032|KA|4|KA401|Lecture Room 401|Lecture Hall|60|Available
+F033|KA|4|KA402|Lecture Room 402|Lecture Hall|60|Available
+F034|KA|5|KA506|Lecture Room 506|Lecture Hall|60|Available
+F035|KA|5|KA512|Lecture Room 512|Lecture Hall|60|Available
+F036|KA|5|KA501|Tutorial Room 501|Tutorial Room|30|Available
+F037|KA|5|KA502|Tutorial Room 502|Tutorial Room|30|Available
+F038|KA|5|KA503|Tutorial Room 503|Tutorial Room|30|Available
+F039|KA|5|KA504|Tutorial Room 504|Tutorial Room|30|Available
+F040|KA|5|KA505|Tutorial Room 505|Tutorial Room|30|Available
+F041|KA|5|KA507|Tutorial Room 507|Tutorial Room|30|Available
+F042|KA|5|KA508|Tutorial Room 508|Tutorial Room|30|Available
+F043|KA|5|KA509|Tutorial Room 509|Tutorial Room|30|Available
+F044|KA|5|KA510|Tutorial Room 510|Tutorial Room|30|Available
+F045|KA|5|KA511|Tutorial Room 511|Tutorial Room|30|Available
+F046|KA|6|KA601|Meeting Room|Discussion Room|15|Available
+F047|KA|6|KA602|Post Graduate Room|Discussion Room|30|Available
+F048|KA|7|KA701|Lecture Hall|Lecture Hall|200|Available
+F049|KA|7|KA702|Lecture Room|Lecture Hall|80|Available
+F050|KA|8|KA800|Tutorial Room 800|Tutorial Room|30|Available
+F051|KA|8|KA801|Tutorial Room 801|Tutorial Room|30|Available
+F052|KA|8|KA802|Tutorial Room 802|Tutorial Room|30|Available
+F053|KA|8|KA803|Tutorial Room 803|Tutorial Room|30|Available
+F054|KA|8|KA804|Lecture Room 804|Lecture Hall|60|Available
+F055|KA|8|KA805|Lecture Room 805|Lecture Hall|60|Available
+F056|KB|G|KB003|Meeting Room 1|Discussion Room|15|Available
+F057|KB|G|KB004|Meeting Room 2|Discussion Room|15|Available
+F058|KB|G|KB005|Multi-Purpose Hall|Multipurpose Hall|400|Available
+F059|KB|1|KB100|Lecture Theatre 1|Lecture Hall|150|Available
+F060|KB|1|KB101|Tutorial Room 1|Tutorial Room|40|Available
+F061|KB|1|KB102|Tutorial Room 2|Tutorial Room|40|Available
+F062|KB|1|KB103|Lecture Theatre 2|Lecture Hall|150|Available
+F063|KB|1|KB104|Lecture Theatre 3|Lecture Hall|150|Available
+F064|KB|1|KB105|Lecture Theatre 4|Lecture Hall|150|Available
+F065|KB|1|KB106|Lecture Room 1|Lecture Hall|60|Available
+F066|KB|1|KB107|Lecture Room 2|Lecture Hall|60|Available
+F067|KB|1|KB110|Lecture Theatre 5|Lecture Hall|150|Available
+F068|KB|1|KB111|Tutorial Room 3|Tutorial Room|40|Available
+F069|KB|1|KB112|Tutorial Room 4|Tutorial Room|40|Available
+F070|KB|2|KB200|Lecture Room 3|Lecture Hall|60|Available
+F071|KB|2|KB201|Lecture Room 4|Lecture Hall|60|Available
+F072|KB|2|KB202|Tutorial Room 5|Tutorial Room|40|Available
+F073|KB|2|KB203|Tutorial Room 6|Tutorial Room|40|Available
+F074|KB|2|KB204|Lecture Room 5|Lecture Hall|60|Available
+F075|KB|2|KB205|Lecture Room 6|Lecture Hall|60|Available
+F076|KB|2|KB206|Lecture Room 7|Lecture Hall|60|Available
+F077|KB|2|KB207|Lecture Theatre 6|Lecture Hall|120|Available
+F078|KB|2|KB208|Lecture Theatre 7|Lecture Hall|120|Available
+F079|KB|2|KB209|Lecture Theatre 8|Lecture Hall|120|Available
+F080|KB|2|KB210|Lecture Room 8|Lecture Hall|60|Available
+F081|KB|2|KB211|Lecture Room 9|Lecture Hall|60|Available
+F082|KB|2|KB212|Lecture Room 10|Lecture Hall|60|Available
+F083|KB|2|KB213|Lecture Theatre 9|Lecture Hall|120|Available
+F084|KB|2|KB214|Lecture Theatre 10|Lecture Hall|120|Available
+F085|KB|2|KB215|Tutorial Room 7|Tutorial Room|40|Available
+F086|KB|2|KB216|Tutorial Room 8|Tutorial Room|40|Available
+F087|KB|3|KB300|Lecture Room 11|Lecture Hall|60|Available
+F088|KB|3|KB301|Lecture Room 12|Lecture Hall|60|Available
+F089|KB|3|KB303|Tutorial Room|Tutorial Room|35|Available
+F090|KB|3|KB304|Tutorial Room|Tutorial Room|35|Available
+F091|KB|3|KB305|Tutorial Room|Tutorial Room|35|Available
+F092|KB|3|KB306|Tutorial Room|Tutorial Room|35|Available
+F093|KB|3|KB307|Tutorial Room|Tutorial Room|35|Available
+F094|KB|3|KB308|Tutorial Room|Tutorial Room|35|Available
+F095|KB|3|KB309|Tutorial Room|Tutorial Room|35|Available
+F096|KB|3|KB310|Tutorial Room|Tutorial Room|35|Available
+F097|KB|3|KB311|Tutorial Room|Tutorial Room|35|Available
+F098|KB|3|KB312|Tutorial Room|Tutorial Room|35|Available
+F099|KB|3|KB313|Tutorial Room|Tutorial Room|35|Available
+F100|KB|3|KB314|Tutorial Room|Tutorial Room|35|Available
+F101|KB|3|KB315|Lecture Room 13|Lecture Hall|60|Available
+F102|KB|3|KB316|Lecture Room 14|Lecture Hall|60|Available
+F103|KB|3|KB318|Tutorial Room|Tutorial Room|35|Available
+F104|KB|3|KB319|Tutorial Room|Tutorial Room|35|Available
+F105|KB|3|KB320|Tutorial Room|Tutorial Room|35|Available
+F106|KB|3|KB321|Tutorial Room|Tutorial Room|35|Available
+F107|KB|3|KB322|Lecture Room 15|Lecture Hall|60|Available
+F108|KB|3|KB323|Lecture Room 16|Lecture Hall|60|Available
+F109|KB|3|KB324|Lecture Room 17|Lecture Hall|60|Available
+F110|KB|3|KB325|Tutorial Room|Tutorial Room|35|Available
+F111|KB|3|KB326|Tutorial Room|Tutorial Room|35|Available
+F112|KB|3A|KB402|Internet/Teaching Lab|Computer Lab|30|Available
+F113|KB|3A|KB403|Internet/Teaching Lab|Computer Lab|30|Available
+F114|KB|3A|KB404|Internet/Teaching Lab|Computer Lab|30|Available
+F115|KB|3A|KB405-1|Discussion Room 1|Discussion Room|10|Available
+F116|KB|3A|KB405-2|Discussion Room 2|Discussion Room|10|Available
+F117|KB|3A|KB405-3|Discussion Room 3|Discussion Room|10|Available
+F118|KB|3A|KB405-4|Discussion Room 4|Discussion Room|10|Available
+F119|KB|3A|KB405-5|Discussion Room 5|Discussion Room|10|Available
+F120|KB|3A|KB405-6|Discussion Room 6|Discussion Room|10|Available
+F121|KB|5|KB500|CFS Multipurpose Lab|Laborotory|30|Available
+F122|KB|5|KB501|CFS Chemistry Lab 1|Laborotory|30|Available
+F123|KB|5|KB502|CFS Preparation Lab|Laborotory|20|Available
+F124|KB|5|KB503|CFS Chemistry Lab II|Laborotory|30|Available
+F125|KB|5|KB504|CFS Biology Lab|Laborotory|30|Available
+F126|KB|5|KB505|CFS Physics Lab|Laborotory|30|Available
+F127|KB|5|KB508|LKCFES Unit Operation Lab|Laborotory|30|Available
+F128|KB|5|KB509|LKCFES Process Control & Reaction Engineering Lab|Laborotory|30|Available
+F129|KB|5|KB510|LKCFES Bioprocess & Environment Lab|Laborotory|30|Available
+F130|KB|5|KB511|LKCFES Instrumentation Lab|Laborotory|30|Available
+F131|KB|5|KB514|LKCFES Chemical Engineering Lab I|Laborotory|30|Available
+F132|KB|5|KB516|Tutorial Room|Tutorial Room|35|Available
+F133|KB|5|KB517|Tutorial Room|Tutorial Room|35|Available
+F134|KB|5|KB518|Tutorial Room|Tutorial Room|35|Available
+F135|KB|5|KB519|Tutorial Room|Tutorial Room|35|Available
+F136|KB|5|KB520|Lecture Room 520|Lecture Hall|60|Available
+F137|KB|5|KB521|Lecture Room 521|Lecture Hall|60|Available
+F138|KB|5|KB522|Lecture Room 522|Lecture Hall|60|Available
+F139|KB|5|KB523|Tutorial Room|Tutorial Room|35|Available
+F140|KB|5|KB524|Tutorial Room|Tutorial Room|35|Available
+F141|KB|6|KB600|LKCFES Physics Lab|Laborotory|30|Available
+F142|KB|6|KB601|LKCFES Telecommunication Lab|Laborotory|30|Available
+F143|KB|6|KB602|Electromagnetics Lab|Laborotory|30|Available
+F144|KB|6|KB603|LKCFES Electronics & Physical Science Lab|Laborotory|30|Available
+F145|KB|6|KB604|LKCFES Computer Teaching Lab|Computer Lab|30|Available
+F146|KB|6|KB605|LKCFES Computer Teaching Lab|Computer Lab|30|Available
+F147|KB|6|KB606|LKCFES Computer Teaching Lab|Computer Lab|30|Available
+F148|KB|6|KB607|LKCFES Computer Teaching Lab|Computer Lab|30|Available
+F149|KB|6|KB608|LKCFES Computer Teaching Lab|Computer Lab|30|Available
+F150|KB|6|KB609|LKCFES Computer Teaching Lab|Computer Lab|30|Available
+F151|KB|6|KB610|LKCFES Power & Machine Lab|Laborotory|30|Available
+F152|KB|6|KB611|LKCFES Digital Lab|Laborotory|30|Available
+F153|KB|6|KB612|LKCFES Analog Lab|Laborotory|30|Available
+F154|KB|6|KB613|LKCFES Robotics & Automation Lab|Laborotory|30|Available
+F155|KB|6|KB614|LKCFES Biomedical Engineering Lab|Laborotory|30|Available
+F156|KB|6|KB615|LKCFES Molecular & Tissue Engineering Lab|Laborotory|30|Available
+F157|KB|6|KB617|LKCFES Foundry Lab|Laborotory|30|Available
+F158|KB|6|KB619|LKCFES PCB Lab|Laborotory|30|Available
+F159|KB|7|KB700|FCI EH Lab|Laborotory|30|Available
+F160|KB|7|KB702|Tutorial Room|Tutorial Room|35|Available
+F161|KB|7|KB703|Tutorial Room|Tutorial Room|35|Available
+F162|KB|7|KB704|FCI Photo Lab|Laborotory|20|Available
+F163|KB|7|KB709|FCI Photo Lab|Laborotory|20|Available
+F164|KB|7|KB710|FCI Photo Lab|Laborotory|20|Available
+F165|KB|7|KB705|FCI Audio Lab|Laborotory|20|Available
+F166|KB|7|KB706|FCI Audio Lab|Laborotory|20|Available
+F167|KB|7|KB707|FCI Audio Lab|Laborotory|20|Available
+F168|KB|7|KB708|FCI Audio Lab|Laborotory|20|Available
+F169|KB|7|KB711|FCI PC Lab|Computer Lab|30|Available
+F170|KB|7|KB712|FCI PC Lab|Computer Lab|30|Available
+F171|KB|7|KB713|FCI PC Lab|Computer Lab|30|Available
+F172|KB|7|KB714|FCI PC Lab|Computer Lab|30|Available
+F173|KB|7|KB715|FCI PC Lab|Computer Lab|30|Available
+F174|KB|7|KB716|FCI PC Lab|Computer Lab|30|Available
+F175|KB|7|KB717|FCI Art Room|Discussion Room|25|Available
+F176|KB|7|KB718|FCI Game Room|Discussion Room|25|Available
+F177|KB|7|KB719|FCI Design Room|Discussion Room|25|Available
+F178|KB|7|KB722|LKCFES Traffic Engineering Lab|Laborotory|30|Available
+F179|KB|7|KB723|LKCFES Hydraulics Lab|Laborotory|30|Available
+F180|KB|7|KB724|LKCFES Manufacturing Engineering Lab|Laborotory|30|Available
+F181|KB|7|KB725|LKCFES Heat Treatment & Furnace Lab|Laborotory|30|Available
+F182|KB|7|KB728|LKCFES Chemical Engineering Lab II|Laborotory|30|Available
+F183|KB|7|KB729|LKCFES Applied Mechanics Lab|Laborotory|30|Available
+F184|KB|7|KB730|LKCFES Applied Mechanics Lab|Laborotory|30|Available
+F185|KB|7|KB732|LKCFES Microscopy Lab|Laborotory|20|Available
+F186|KB|7|KB733|LKCFES Advance Materials Lab|Laborotory|30|Available
+F187|KB|8|KB803|Meeting Room|Discussion Room|20|Available
+F188|KB|9|KB902|LKCFES Mechatronics Engineering Lab|Laborotory|30|Available
+F189|KB|9|KB903|LKCFES Actuarial Modeling & Simulation Lab|Computer Lab|35|Available
+F190|KB|9|KB904|Investment & Trading Strategies Lab|Computer Lab|35|Available
+F191|KB|9|KB905|Numerical & High Performance Computing Lab|Computer Lab|35|Available
+F192|KB|10|KB1001|Conference Room 1|Discussion Room|25|Available
+F193|KB|10|KB1002|Conference Room 2|Discussion Room|25|Available
+F194|KB|1|KB113|Ping Pong Table A|Sports Court|4|Available
+F195|KB|1|KB114|Ping Pong Table B|Sports Court|4|Available
+F196|KB|1|KB120|Dance Studio|Sports Court|25|Available
+F197|KB|9|KB906|Martial Arts Studio|Sports Court|30|Available

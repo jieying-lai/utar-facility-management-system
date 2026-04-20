@@ -2,7 +2,8 @@
 package my.edu.utar.ui;
 
 import java.io.File;
-
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.io.*;
 import java.util.Scanner;
 import java.util.List;
@@ -68,9 +69,20 @@ public class AdminMenu{
         }
     
     private void printAdminMenu() {
-        System.out.println("\n============================================");
-        System.out.println("   ADMIN DASHBOARD");
-        System.out.println("   " + currentAdmin.getName());
+    	LocalDateTime now = LocalDateTime.now();
+        String currentDate = now.format(DateTimeFormatter.ofPattern("dd MMMM yyyy"));
+        String currentTime = now.format(DateTimeFormatter.ofPattern("hh:mm a"));
+        
+        System.out.println("============================================");
+        System.out.println("    UTAR Smart Campus Management System     ");
+        System.out.println("               Admin Dashboard               ");
+        System.out.println("============================================");
+
+        System.out.println("  Date : " + currentDate);
+        System.out.println("  Time : " + currentTime);
+        
+        System.out.println("\nWelcome, " + currentAdmin.getName());
+        System.out.println("  Role: Admin" );
         System.out.println("============================================");
         System.out.println("[1] Search Facility Status");
         System.out.println("[2] Manage Facilities");
@@ -83,6 +95,7 @@ public class AdminMenu{
         System.out.println("[L] Logout");
         System.out.println("--------------------------------------------");
         System.out.print("Enter your choice: ");
+
     }
 
     private void showIssueAlerts() {
@@ -143,36 +156,116 @@ public class AdminMenu{
                 }
                 break;
 
-            case "2" :
-            	System.out.println("Please add a new facility by using format below.");
-            	System.out.println("facilityID|block|floor|roomNo|type|capacity|status");
-            	System.out.print("Enter facility ID (e.g. F001): ");
-            	String ID = input.nextLine();
-            	
-            	System.out.print("Enter block name (e.g. KB): ");
-            	String block = input.nextLine();
-                System.out.print("Enter floor number (e.g. 1): ");
-                String num = input.nextLine();
-                System.out.print("Enter roomNo (e.g. KB104): ");
-                String roomNo = input.nextLine();
-                System.out.print("Enter type of the facility (e.g. Lecture hall): ");
-                String type = input.nextLine();
-                System.out.print("Enter capacity of the facility (e.g. 80): ");
-                String cap = input.nextLine();
-                int capacity = Integer.parseInt(cap);
-                String status = "Available";
-                	
-                Facility f = new Facility(ID,block,num,roomNo,type,capacity,status);
+            case "2":
+                System.out.println("\n--- Add New Facility ---");
+
+                List<Facility> allCurrent = facilityService.getAllFacilities();
+                int nextIdNum = allCurrent.size() + 1;
+                String ID = String.format("F%03d", nextIdNum);
                 
-                String errorMessage = facilityService.addFacility(f);
-                
-                if (errorMessage != null) {
-                    System.out.println(errorMessage);
-                } else {
-                    System.out.println("The facility is successfully added!");
+                while (FileManager.isFacilityIdExists(ID)) {
+                    nextIdNum++;
+                    ID = String.format("F%03d", nextIdNum);
                 }
+                System.out.println("Generated Facility ID: " + ID);
+
+                String block;
+                while (true) {
+                    System.out.print("Enter block name (KA / KB): ");
+                    block = sc.nextLine().trim().toUpperCase();
+                    if (block.equals("KA") || block.equals("KB")) break;
+                    System.out.println("Invalid Block. Only KA or KB allowed.");
+                }
+
+                String floor;
+                while (true) {
+                    System.out.print("Enter floor (KA: 1-8, M, G, SB | KB: 1-10, G, SB): ");
+                    floor = sc.nextLine().trim().toUpperCase();
+                    boolean isValid = false;
+
+                    if (block.equals("KA")) {
+                        if (floor.equals("M") || floor.equals("G") || floor.equals("SB")) isValid = true;
+                        else if (Validator.isNumeric(floor)) {
+                            int fNum = Integer.parseInt(floor);
+                            if (fNum >= 1 && fNum <= 8) isValid = true;
+                        }
+                    } else {
+                        if (floor.equals("G") || floor.equals("SB")) isValid = true;
+                        else if (Validator.isNumeric(floor)) {
+                            int fNum = Integer.parseInt(floor);
+                            if (fNum >= 1 && fNum <= 10) isValid = true;
+                        }
+                    }
+
+                    if (isValid) break;
+                    System.out.println("Invalid floor for Block " + block);
+                }
+
+                String roomNo;
+                while (true) {
+                    System.out.print("Enter Room Number (Must start with " + block + "): ");
+                    roomNo = sc.nextLine().trim().toUpperCase();
+                    
+                    if (!roomNo.startsWith(block)) {
+                        System.out.println("Error: Room number must start with the block name " + block);
+                        continue;
+                    }
+
+                    boolean exists = false;
+                    for (Facility existing : allCurrent) {
+                        if (existing.getRoomNo().equalsIgnoreCase(roomNo)) {
+                            exists = true;
+                            break;
+                        }
+                    }
+                    
+                    if (exists) {
+                        System.out.println("Error: Room number " + roomNo + " already exists in the system.");
+                    } else {
+                        break;
+                    }
+                }
+
+                System.out.print("Enter Facility Name: ");
+                String description = sc.nextLine().trim();
+
+                String type = "";
+                while (true) {
+                    System.out.println("Select Facility Type:");
+                    for (int i = 0; i < Constants.FACILITY_TYPES.length; i++) {
+                        System.out.println("[" + (i + 1) + "] " + Constants.FACILITY_TYPES[i]);
+                    }
+                    System.out.print("Choice: ");
+                    String tChoice = sc.nextLine().trim();
+                    if (Validator.isValidMenuChoice(tChoice, 1, Constants.FACILITY_TYPES.length)) {
+                        type = Constants.FACILITY_TYPES[Integer.parseInt(tChoice) - 1];
+                        break;
+                    }
+                    System.out.println("Invalid choice.");
+                }
+
+                int capacity = 0;
+                while (true) {
+                    System.out.print("Enter capacity (0-300): ");
+                    String capInput = sc.nextLine().trim();
+                    if (Validator.isNumeric(capInput)) {
+                        capacity = Integer.parseInt(capInput);
+                        if (capacity >= 0 && capacity <= 300) break;
+                    }
+                    System.out.println("Invalid capacity. Please enter a number between 0 and 300.");
+                }
+
+                // 8. FINAL CREATION
+                String status = Constants.FACILITY_AVAILABLE;
+                Facility f = new Facility(ID, block, floor, roomNo, description, type, capacity, status);
                 
-            	break;
+                String error = facilityService.addFacility(f);
+                if (error == null) {
+                    System.out.println("\nSUCCESS: Facility " + roomNo + " added with ID " + ID);
+                } else {
+                    System.out.println("Error: " + error);
+                }
+                break;
             	
             case "3" :
             	System.out.println("------Facilities Removal Page------");
