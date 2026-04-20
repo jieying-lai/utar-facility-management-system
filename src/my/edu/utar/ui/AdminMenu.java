@@ -515,6 +515,7 @@ public class AdminMenu{
             System.out.println("User deleted successfully.");
         } else {
             System.out.println("Deletion cancelled.");
+            
         }
     }
     
