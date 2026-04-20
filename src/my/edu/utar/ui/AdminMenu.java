@@ -288,20 +288,44 @@ public class AdminMenu{
 
     private void facilityUsageTracking() {
         System.out.println("\n--- Facility Usage Tracking ---");
-  
+        
         List<Facility> allFacilities = facilityService.getAllFacilities();
         List<Booking> allBookings = bookingManager.getBookingList();
 
         for (Facility f : allFacilities) {
-            int count = 0; 
-                for (Booking booking : allBookings) {
-                    if (booking.getFacilityID().equals(f.getFacilityID())) {
-                        count++;
+            int approvedCount = 0;
+            int[] slotUsage = new int[5]; 
+
+            for (Booking b : allBookings) { 
+                if (b.getFacilityID().equals(f.getFacilityID()) && b.getStatus().equalsIgnoreCase("Approved")) {
+                    approvedCount++;
+                    
+                    if (b.getTimeSlot() >= 0 && b.getTimeSlot() < 5) {
+                        slotUsage[b.getTimeSlot()]++;
                     }
                 }
-                System.out.println("Facility: " + f.getFacilityID() + " | Total Usage: " + count);
+            }
+
+            int totalHours = approvedCount * 2;
+
+            int peakSlotIndex = 0;
+            for (int i = 1; i < slotUsage.length; i++) {
+                if (slotUsage[i] > slotUsage[peakSlotIndex]) {
+                    peakSlotIndex = i;
+                }
+            }
+            
+            String peakTime = (approvedCount > 0) ? my.edu.utar.util.Constants.TIME_SLOTS[peakSlotIndex] : "N/A";
+
+            System.out.println("--------------------------------------------");
+            System.out.println("Facility ID    : " + f.getFacilityID());
+            System.out.println("Room Name      : " + f.getRoomNo());
+            System.out.println("Total Bookings : " + approvedCount);
+            System.out.println("Total Hours    : " + totalHours + " hours");
+            System.out.println("Peak Time Slot : " + peakTime);
         }
     }
+
 
     private void viewSummaryReport() {
         System.out.println("\n--- GENERATE SUMMARY REPORT ---");

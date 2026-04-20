@@ -1,8 +1,11 @@
 package my.edu.utar.service;
 
-import my.edu.utar.model.Booking;
-import java.util.ArrayList;
+import java.util.List; 
+import java.util.ArrayList; 
+import java.util.Map;
 import java.util.HashMap;
+import my.edu.utar.model.Booking; 
+import my.edu.utar.model.Facility; 
 
 public class ReportGenerator {
 	
@@ -50,5 +53,42 @@ public class ReportGenerator {
 	            System.out.println("Most Used Facility : None");
 	        }
 	    }
+	 public void generateAdminAnalytics(List<Booking> allBookings, List<Facility> allFacilities) {
+	     System.out.println("\n===== SYSTEM ANALYTICS REPORT =====");
+	     
+	     for (Facility f : allFacilities) {
+	         int bookedSlots = 0;
+	         int[] slotDistribution = new int[6];
+
+	         for (Booking b : allBookings) {
+	             if (b.getFacilityID().equals(f.getFacilityID()) && b.getStatus().equalsIgnoreCase("Approved")) {
+	                 bookedSlots++;
+	                 if (b.getTimeSlot() >= 1 && b.getTimeSlot() <= 5) {
+	                     slotDistribution[b.getTimeSlot()]++;
+	                 }
+	             }
+	         }
+
+	         double utilization = (bookedSlots / 5.0) * 100; 
+
+	         int peakSlot = 1;
+	         for (int i = 2; i <= 5; i++) {
+	             if (slotDistribution[i] > slotDistribution[peakSlot]) peakSlot = i;
+	         }
+
+	         System.out.printf("Facility: %-10s | Utilization: %.1f%% | Peak Slot: %d | Total Hours: %d\n", 
+	             f.getFacilityID(), utilization, (bookedSlots > 0 ? peakSlot : 0), (bookedSlots * 2));
+	     }
+	 }
+	 
+	 public void showTopUsers(List<Booking> allBookings) {
+		    HashMap<String, Integer> userActivity = new HashMap<>();
+		    for (Booking b : allBookings) {
+		        if (b.getStatus().equalsIgnoreCase("Approved")) {
+		            userActivity.put(b.getUserID(), userActivity.getOrDefault(b.getUserID(), 0) + 1);
+		        }
+		    }
+		    System.out.println("Top Active Users based on Approved Bookings: " + userActivity);
+		}
 
 }
