@@ -112,34 +112,15 @@ public class BookingManager {
 	}
 	
 	public boolean approveBooking(String bookingID) {
-	    Booking request = findBooking(bookingID);
-	    if (request == null) return false;
-
-	    for (Booking b : bookingList) { 
-	        if (b.getStatus().equalsIgnoreCase("Approved") &&
-	            b.getFacilityID().equals(request.getFacilityID()) && 
-	            b.getTimeSlot() == request.getTimeSlot()) {
-	            
-	            System.out.println("Conflict detected!");
-	            return false;
-	        }
+	    Booking b = findBooking(bookingID);
+	    if (b != null) {
+	        b.setStatus("Approved");
+	        saveToFile();
+	        return true;
 	    }
-
-	    request.setStatus("Approved");
-	    
-	    for (Booking b : bookingList) {
-	        if (b.getStatus().equalsIgnoreCase("Pending") &&
-	            b.getFacilityID().equals(request.getFacilityID()) &&
-	            b.getTimeSlot() == request.getTimeSlot() &&
-	            !b.getBookingID().equals(bookingID)) {
-	            b.setStatus("Rejected");
-	        }
-	    }
-	    
-	    saveToFile();
-	    return true;
+	    return false;
 	}
-	
+
 	public void viewUserBookings(String userID) {
 		for(Booking b: bookingList) {
 			if(b.getUserID().equals(userID)) {
@@ -256,6 +237,50 @@ public class BookingManager {
             }
         }
         return false;
+    }
+    
+    public List<Booking> getPendingBookingsSorted() {
+        List<Booking> pending = new ArrayList<>();
+        for (Booking b : bookingList) {
+            if (b.getStatus().equalsIgnoreCase("Pending")) {
+                pending.add(b);
+            }
+        }
+        pending.sort((b1, b2) -> b1.getApplyDate().compareTo(b2.getApplyDate()));
+        return pending;
+    }
+    
+    public boolean hasConflict(Booking request) {
+        for (Booking b : bookingList) {
+            if (b.getStatus().equalsIgnoreCase("Approved") &&
+                b.getFacilityID().equals(request.getFacilityID()) &&
+                b.getBookingDate().equals(request.getBookingDate()) &&
+                b.getTimeSlot() == request.getTimeSlot()) {
+                return true; 
+            }
+        }
+        return false;
+    }
+    
+    public int rejectAllPendingForFacility(String facilityID, String reason) {
+        int count = 0;
+        for (Booking b : bookingList) {
+            if (b.getFacilityID().equalsIgnoreCase(facilityID) && b.getStatus().equalsIgnoreCase("Pending")) {
+                b.setStatus("Rejected");
+                b.setRejectReason(reason);
+                count++;
+            }
+        }
+        if (count > 0) saveToFile();
+        return count;
+    }
+
+    public boolean hasApprovedBookings(String facilityID) {
+        for (Booking b : bookingList) {
+            if (b.getFacilityID().equalsIgnoreCase(facilityID) && b.getStatus().equalsIgnoreCase("Approved")) {
+                return true;
+            }
+        }
     }
     
     public boolean hasFutureBookings(String userId) {
