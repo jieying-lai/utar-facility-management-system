@@ -807,12 +807,20 @@ public class UserMenu {
      * TODO Member 2: Implement the booking list display portion.
      */
     private void viewBookingHistory() {
-    	System.out.println("\n--- BOOKING HISTORY ---");
-    	bookingManager.viewUserBookings(currentUser.getId());
-    	
-    	ReportGenerator rg = new ReportGenerator();
-        rg.generateUserReport(currentUser.getId(), bookingManager.getBookingList());
+        System.out.println("\n--- BOOKING HISTORY ---");
+        
+        bookingManager.viewUserBookings(currentUser.getId());
+  
+        ReportGenerator rg = new ReportGenerator();
+   
+        List<Booking> bList = bookingManager.getBookingList();
+        
+        List<Facility> fList = my.edu.utar.data.FileManager.loadAllFacilities();
 
+        Booking[] bArray = bList.toArray(new Booking[0]);
+        Facility[] fArray = fList.toArray(new Facility[0]);
+
+        rg.generateUserReport(currentUser.getId(), bArray, fArray);
     }
     
  // 1. New Helper for Selection with "Back" capability
