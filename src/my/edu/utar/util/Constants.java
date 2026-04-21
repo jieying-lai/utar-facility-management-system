@@ -34,6 +34,8 @@ public class Constants {
     // ===================== FACILITY TYPES =====================
     public static final String[] FACILITY_TYPES = {
         "Lecture Hall",
+        "Tutorial Room",
+        "Laborotory",
         "Discussion Room",
         "Sports Court",
         "Computer Lab",

@@ -187,27 +187,30 @@ public class FileManager {
         return null;
     }
     
-    public static List<Facility> loadAllFacilities(){    
-    	List<Facility> facilities = new ArrayList<>();
+    public static List<Facility> loadAllFacilities() {    
+        List<Facility> facilities = new ArrayList<>();
         List<String> lines = readAllLines(Constants.FILE_FACILITIES);
         
         for (int i = 0; i < lines.size(); i++) {
-        	try {
-        		String[] parts = lines.get(i).split(Constants.DELIMITER_REGEX, -1);
-        		if (parts.length < 7) continue;
-        		
-        		facilities.add(new Facility(
-        				parts[0].trim(), 
-                        parts[1].trim(), 
-                        parts[2].trim(), 
-                        parts[3].trim(), 
-                        parts[4].trim(), 
-                        Integer.parseInt(parts[5].trim()), 
-                        parts[6].trim()
+            try {
+                String[] parts = lines.get(i).split(Constants.DELIMITER_REGEX, -1);
+                
+                // We now have 8 fields in the text file
+                if (parts.length < 8) continue;
+                
+                facilities.add(new Facility(
+                        parts[0].trim(), // ID
+                        parts[1].trim(), // Block
+                        parts[2].trim(), // Floor
+                        parts[3].trim(), // Room No
+                        parts[4].trim(), // Description
+                        parts[5].trim(), // Type (The NEW field)
+                        Integer.parseInt(parts[6].trim()), // Capacity (Shifted to index 6)
+                        parts[7].trim()  // Status (Shifted to index 7)
                 ));
-        	}catch (Exception e) {
-        		System.out.println("[WARNING] Error parsing facility on line " + (i + 1));
-        	}
+            } catch (Exception e) {
+                System.out.println("[WARNING] Error parsing facility on line " + (i + 1) + ": " + e.getMessage());
+            }
         }
         return facilities;
     }
@@ -326,7 +329,6 @@ public class FileManager {
     	return String.format("M%s%04d", datePart, count + 1);
     }
     
- // 在 FileManager.java 类里面添加这个静态方法
     public static void deleteUser(String userId) {
         List<User> users = loadAllUsers();
         
