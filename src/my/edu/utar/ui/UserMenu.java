@@ -128,12 +128,19 @@ public class UserMenu {
 
     private void updateName() {
         while (true) {
-            System.out.print("Enter new name: ");
+            System.out.print("Enter new name (or [C] to cancel): ");
             String input = sc.nextLine().trim();
+            
+            if ("C".equalsIgnoreCase(input)) {
+                System.out.println("Update name action cancelled.");
+                return;
+            }
+            
             if (Validator.isEmpty(input)) { 
                 System.out.println("Name cannot be empty."); 
                 continue; 
             }
+            
             currentUser.setName(input.toUpperCase());
             FileManager.updateUser(currentUser);
             System.out.println("Name updated successfully to: " + currentUser.getName());
@@ -143,8 +150,14 @@ public class UserMenu {
 
     private void updatePhone() {
         while (true) {
-            System.out.print("Enter new phone number (e.g. 0112345678): ");
+            System.out.print("Enter new phone number (or [C] to cancel): ");
             String input = sc.nextLine().trim();
+            
+            if ("C".equalsIgnoreCase(input)) {
+                System.out.println("Update phone action cancelled.");
+                return;
+            }
+
             if (Validator.isEmpty(input)) { 
                 System.out.println("Cannot be empty."); 
                 continue; 
@@ -159,18 +172,22 @@ public class UserMenu {
             break;
         }
     }
+
     private void updateFaculty() {
         while (true) {
             System.out.println("\nSelect new Faculty:");
             for (int i = 0; i < Constants.FACULTIES.length; i++) {
                 System.out.println("[" + (i + 1) + "] " + Constants.FACULTIES[i]);
             }
-            System.out.println("[B] Back");
+            System.out.println("[C] Cancel");
             System.out.print("Enter choice: ");
             String input = sc.nextLine().trim().toUpperCase();
 
+            if ("C".equals(input)) {
+                System.out.println("Update faculty action cancelled.");
+                return;
+            }
             if (Validator.isEmpty(input)) { System.out.println("Cannot be empty."); continue; }
-            if ("B".equals(input)) return;
             
             if (!Validator.isValidMenuChoice(input, 1, Constants.FACULTIES.length)) {
                 System.out.println("Invalid selection, please try again.");
@@ -181,9 +198,8 @@ public class UserMenu {
             String selectedFaculty = Constants.FACULTIES[index];
             currentUser.setFaculty(selectedFaculty);
             
-            // Automatically trigger Programme/Dept update to ensure consistency with the new Faculty
             System.out.println("Faculty updated to: " + selectedFaculty);
-            System.out.println("You must now update your Programme/Department to match the new Faculty.");
+            System.out.println("Note: You must now update your Programme/Department to maintain consistency.");
             updateProgrammeDept(); 
             
             FileManager.updateUser(currentUser);
@@ -198,29 +214,34 @@ public class UserMenu {
 
         while (true) {
             System.out.println("\nUpdate " + type + " for " + faculty);
-            System.out.print("Enter " + type + " abbreviation (or [B] to cancel): ");
-            
+            System.out.print("Enter " + type + " abbreviation (or [C] to cancel): ");
             String input = sc.nextLine().trim().toUpperCase();
 
-            if ("B".equals(input)) return;
+            if ("C".equals(input)) {
+                System.out.println("Update " + type + " action cancelled.");
+                return;
+            }
             if (Validator.isEmpty(input)) {
                 System.out.println("Error: " + type + " cannot be empty.");
                 continue;
             }
 
-            // Verification Logic (Matching your register behavior)
             Map<String, String> validMap = Constants.FACULTY_PROGRAMME_MAP.get(faculty);
             String fullName = (validMap != null) ? validMap.get(input) : null;
 
             if (fullName != null) {
                 System.out.println("  Verified " + type + ": " + fullName);
-                System.out.print("  Confirm update? [Y] Yes / [N] Re-enter: ");
+                System.out.print("  Confirm update? [Y] Yes / [N] Re-enter / [C] Cancel: ");
             } else {
                 System.out.println("  [WARNING] \"" + input + "\" is not registered under " + faculty + ".");
-                System.out.print("  Are you sure you want to use this code? [Y] Yes / [N] Re-enter: ");
+                System.out.print("  Are you sure? [Y] Yes / [N] Re-enter / [C] Cancel: ");
             }
 
             String confirm = sc.nextLine().trim().toUpperCase();
+            if ("C".equals(confirm)) {
+                System.out.println("Update " + type + " action cancelled.");
+                return;
+            }
             if ("Y".equals(confirm)) {
                 currentUser.setProgramme(input);
                 FileManager.updateUser(currentUser);
@@ -232,29 +253,35 @@ public class UserMenu {
 
     private void updatePassword() {
         while (true) {
-            System.out.print("Enter current password: ");
+            System.out.print("Enter current password (or [C] to cancel): ");
             String oldPass = sc.nextLine().trim();
-            if (Validator.isEmpty(oldPass)) { 
-                System.out.println("Cannot be empty."); 
-                continue; 
+            
+            if ("C".equalsIgnoreCase(oldPass)) {
+                System.out.println("Update password action cancelled.");
+                return;
             }
-            // Verify current password
+
             if (!oldPass.equals(currentUser.getPassword())) {
-                System.out.println("Incorrect current password. Please try again.");
+                System.out.println("Incorrect current password.");
                 continue;
             }
-            System.out.print("Enter new password (min 8 characters): ");
+
+            System.out.print("Enter new password (min 8 chars) (or [C] to cancel): ");
             String newPass = sc.nextLine().trim();
+            if ("C".equalsIgnoreCase(newPass)) return;
+
             if (!Validator.isValidPassword(newPass)) {
                 System.out.println("Password must be at least 8 characters.");
                 continue;
             }
+
             System.out.print("Confirm new password: ");
             String confirmPass = sc.nextLine().trim();
             if (!Validator.passwordsMatch(newPass, confirmPass)) {
-                System.out.println("Passwords do not match. Please try again.");
+                System.out.println("Passwords do not match. Restarting password update...");
                 continue;
             }
+
             currentUser.setPassword(newPass);
             FileManager.updateUser(currentUser);
             System.out.println("Password updated successfully!");
@@ -291,38 +318,63 @@ public class UserMenu {
         System.out.println("\n========== SEARCH AVAILABLE FACILITY ==========");
         System.out.println("(Type 'B' to go back, 'C' to cancel completely)");
 
+        String block = "", type = "", floor = "", room = "", formattedDate = "";
+        int selectedSlot = -1;
+        int step = 1;
+        
         List<Facility> allFacilities = FileManager.loadAllFacilities();
         if (allFacilities.isEmpty()) {
             System.out.println("No facilities found.");
             return;
         }
 
-        int step = 1;
-        String block = "", type = "", floor = "", room = "", formattedDate = "";
-        int selectedSlot = -1;
         boolean useSpecificRoom = false;
 
         while (step <= 7) {
             switch (step) {
-                case 1: // ---------------- Step 1: Block ----------------
-                    List<String> blocks = allFacilities.stream().map(Facility::getBlock).distinct().collect(java.util.stream.Collectors.toList());
-                    block = selectWithBack(blocks, "Block");
-                    if (block == null) return; // Cancelled
-                    step++;
-                    break;
+            case 1: // Block Selection
+                List<String> blocks = allFacilities.stream()
+                        .map(Facility::getBlock)
+                        .distinct()
+                        .collect(Collectors.toList());
 
-                case 2: // ---------------- Step 2: Facility Type ----------------
+                block = selectWithBack(blocks, "Block");
+
+                if (block == null) return;
+
+                if (block.equals("BACK")) {
+                    while (true) { 
+                        System.out.print("\nAre you sure you want to cancel this action and back to the previous page? (Y/N): ");
+                        String confirm = sc.nextLine().trim().toUpperCase();
+                        
+                        if (confirm.equals("Y")) {
+                            System.out.println("Returning to Main Menu...");
+                            return; 
+                        } else if (confirm.equals("N")) {
+                            System.out.println("Continuing with selection...");
+                            break;
+                        } else {
+                            System.out.println(">> Invalid input. Please enter 'Y' for Yes or 'N' for No.");
+                        }
+                    }
+                    break;
+                }
+
+                step++;
+                break;
+
+                case 2: // Facility Type
                     final String currentBlock = block;
                     List<String> types = allFacilities.stream()
                             .filter(f -> f.getBlock().equalsIgnoreCase(currentBlock))
                             .map(Facility::getType).distinct().collect(java.util.stream.Collectors.toList());
                     type = selectWithBack(types, "Facility Type");
-                    if (type == null) return; // Cancelled
+                    if (type == null) return;
                     if (type.equals("BACK")) { step--; break; }
                     step++;
                     break;
 
-                case 3: // ---------------- Step 3: Floor ----------------
+                case 3:
                     final String b3 = block, t3 = type;
                     List<String> floors = allFacilities.stream()
                             .filter(f -> f.getBlock().equalsIgnoreCase(b3) && f.getType().equalsIgnoreCase(t3))
@@ -333,89 +385,132 @@ public class UserMenu {
                     step++;
                     break;
 
-                case 4: // ---------------- Step 4: Room Choice ----------------
-                    System.out.println("\n--- Room Selection ---");
-                    System.out.println("[1] Select a specific room");
-                    System.out.println("[2] Search all rooms on this floor");
-                    System.out.println("[B] Back | [C] Cancel");
-                    System.out.print("Choice: ");
-                    String rChoice = sc.nextLine().trim().toUpperCase();
-                    if (rChoice.equals("C")) return;
-                    if (rChoice.equals("B")) { step--; break; }
-                    
-                    if (rChoice.equals("1")) {
-                        final String b4 = block, t4 = type, f4 = floor;
-                        List<String> rooms = allFacilities.stream()
-                                .filter(f -> f.getBlock().equalsIgnoreCase(b4) && f.getType().equalsIgnoreCase(t4) && f.getFloor().equalsIgnoreCase(f4))
-                                .map(Facility::getRoomNo).distinct().collect(java.util.stream.Collectors.toList());
-                        room = selectWithBack(rooms, "Room");
-                        if (room == null) return;
-                        if (room.equals("BACK")) break; // stay on step 4 to re-choose 1 or 2
-                        useSpecificRoom = true;
-                    } else {
-                        useSpecificRoom = false;
-                    }
-                    step++;
-                    break;
-
-                case 5: // ---------------- Step 5: Date ----------------
-                    System.out.print("\nEnter Date (YYYY-MM-DD) [B: Back, C: Cancel]: ");
-                    String dInput = sc.nextLine().trim().toUpperCase();
-                    if (dInput.equals("C")) return;
-                    if (dInput.equals("B")) { step--; break; }
-                    try {
-                        java.time.LocalDate d = java.time.LocalDate.parse(dInput);
-                        if (d.isBefore(java.time.LocalDate.now())) {
-                            System.out.println("Error: Past date.");
-                        } else if (d.isAfter(java.time.LocalDate.now().plusMonths(1))) {
-                            showAdminContact(); // Helper for Mr Lee's info
-                        } else {
-                            formattedDate = d.format(java.time.format.DateTimeFormatter.ofPattern("ddMMyyyy"));
-                            step++;
+                case 4: 
+                    while (true) {
+                        System.out.print("\nEnter Date (YYYY-MM-DD) [B: Back, C: Cancel]: ");
+                        String dInput = sc.nextLine().trim().toUpperCase();
+                        if (dInput.equals("C")) return;
+                        if (dInput.equals("B")) { step--; break; }
+                        
+                        if (my.edu.utar.util.Validator.isEmpty(dInput)) {
+                            System.out.println("Invalid input, please try again.");
+                            continue;
                         }
-                    } catch (Exception e) { System.out.println("Invalid format."); }
-                    break;
 
-                case 6: // ---------------- Step 6: Slot ----------------
-                    System.out.println("\n--- Time Slots ---");
-                    for (int i = 1; i < Constants.TIME_SLOTS.length; i++) System.out.println("[" + i + "] " + Constants.TIME_SLOTS[i]);
-                    System.out.print("Select (1-5) [B: Back, C: Cancel]: ");
-                    String sInput = sc.nextLine().trim().toUpperCase();
-                    if (sInput.equals("C")) return;
-                    if (sInput.equals("B")) { step--; break; }
-                    if (my.edu.utar.util.Validator.isValidMenuChoice(sInput, 1, 5)) {
-                        selectedSlot = Integer.parseInt(sInput);
-                        step++;
+                        try {
+                            java.time.LocalDate d = java.time.LocalDate.parse(dInput);
+                            if (d.isBefore(java.time.LocalDate.now())) {
+                                System.out.println("Error: Past date. Please try again.");
+                            } else if (d.isAfter(java.time.LocalDate.now().plusMonths(1))) {
+                                showAdminContact(); // Booking too far in advance
+                            } else {
+                                formattedDate = d.format(java.time.format.DateTimeFormatter.ofPattern("ddMMyyyy"));
+                                step++; break;
+                            }
+                        } catch (Exception e) { 
+                            System.out.println("Invalid date format, please use YYYY-MM-DD."); 
+                        }
                     }
                     break;
 
-                case 7: // ---------------- Step 7: Results & Book ----------------
-                    final String fb = block, ft = type, ff = floor, fr = room, fd = formattedDate;
-                    final boolean useR = useSpecificRoom;
+                case 5: 
+                    while (true) {
+                        System.out.println("\n--- Time Slots ---");
+                        for (int i = 1; i < Constants.TIME_SLOTS.length; i++) 
+                            System.out.println("[" + i + "] " + Constants.TIME_SLOTS[i]);
+                        System.out.print("Select (1-5) [B: Back, C: Cancel]: ");
+                        String sInput = sc.nextLine().trim().toUpperCase();
+
+                        if (sInput.equals("C")) return;
+                        if (sInput.equals("B")) { step--; break; }
+                        
+                        if (my.edu.utar.util.Validator.isValidMenuChoice(sInput, 1, 5)) {
+                            selectedSlot = Integer.parseInt(sInput);
+                            step++; break;
+                        } else {
+                            System.out.println("Invalid selection, please try again.");
+                        }
+                    }
+                    break;
+
+                case 6: // ---------------- Results & Decision ----------------
+                    final String fBlock = block, fType = type, fFloor = floor;
+                    
+                    // 1. Get ALL rooms matching the criteria (regardless of availability)
                     List<Facility> filtered = allFacilities.stream()
-                            .filter(f -> f.getBlock().equalsIgnoreCase(fb) && f.getType().equalsIgnoreCase(ft) && f.getFloor().equalsIgnoreCase(ff))
-                            .filter(f -> !useR || f.getRoomNo().equalsIgnoreCase(fr))
-                            .collect(java.util.stream.Collectors.toList());
+                            .filter(f -> f.getBlock().equalsIgnoreCase(fBlock))
+                            .filter(f -> f.getType().equalsIgnoreCase(fType))
+                            .filter(f -> f.getFloor().equalsIgnoreCase(fFloor))
+                            .collect(Collectors.toList());
 
-                    List<Facility> available = bookingManager.getAvailableFacilities(filtered, fd, selectedSlot);
-                    if (available.isEmpty()) {
-                        System.out.println("\nNo availability. [B] to go back and change criteria.");
-                        if (sc.nextLine().trim().equalsIgnoreCase("B")) { step--; break; }
+                    if (filtered.isEmpty()) {
+                        System.out.println("\n>> No facilities found for the selected criteria.");
+                        System.out.println("Press Enter to return to the main menu...");
+                        sc.nextLine();
                         return;
                     }
+
+                    // 2. Determine availability status for each room to show in the result table
+                    // We use the bookingManager to check which ones are free
+                    List<Facility> availableList = bookingManager.getAvailableFacilities(filtered, formattedDate, selectedSlot);
+                    java.time.LocalDate displayDate = java.time.LocalDate.parse(formattedDate, 
+                            java.time.format.DateTimeFormatter.ofPattern("ddMMyyyy"));
+                    String clearDate = displayDate.format(Constants.DATE_DISPLAY_FORMAT);
+                        
+                    System.out.println("\n========== SEARCH FACILITY RESULTS ==========");
+                    System.out.println("Block: " + block + " | Type: " + type + " | Floor: " + floor);
+                    System.out.println("Date : " + clearDate + " | Slot: " + Constants.TIME_SLOTS[selectedSlot]);
                     
-                    displayAvailable(available); // Helper to show table
-                    System.out.print("\nEnter ID to book [B: Back, C: Cancel]: ");
-                    String targetID = sc.nextLine().trim().toUpperCase();
-                    if (targetID.equals("C")) return;
-                    if (targetID.equals("B")) { step--; break; }
-                    
-                    if (available.stream().anyMatch(f -> f.getFacilityID().equalsIgnoreCase(targetID))) {
-                        createNewBooking(targetID, fd, selectedSlot);
-                        return;
+                    // Custom display showing ALL filtered rooms with their current status for that slot
+                    System.out.printf("%-4s | %-10s | %-35s | %-10s\n", "No.", "Room", "Name", "Status");
+                    System.out.println("----------------------------------------------------------------------");
+                    for (int i = 0; i < filtered.size(); i++) {
+                        Facility f = filtered.get(i);
+                        boolean isAvailable = availableList.contains(f);
+                        String currentStatus = isAvailable ? "AVAILABLE" : "OCCUPIED";
+                        
+                        System.out.printf("%-4d | %-10s | %-35s | %-10s\n", 
+                            (i + 1), f.getRoomNo(), f.getName(), currentStatus);
                     }
-                    System.out.println("Invalid ID.");
-                    break;
+                    System.out.println("----------------------------------------------------------------------");
+
+                    // 3. Ask to continue
+                    while (true) {
+                        System.out.print("\nDo you want to continue to create a booking? (Y/N): ");
+                        String proceed = sc.nextLine().trim().toUpperCase();
+
+                        if (proceed.equals("N")) {
+                            System.out.println("\nReturning to previous menu...");
+                            System.out.println("Press Enter to back to main menu.");
+                            sc.nextLine();
+                            return; // Back to main menu
+                        } 
+                        
+                        if (proceed.equals("Y")) {
+                            // 4. Selection Process
+                            while (true) {
+                                System.out.print("Select the respective result number to book: ");
+                                String choice = sc.nextLine().trim();
+
+                                if (Validator.isValidMenuChoice(choice, 1, filtered.size())) {
+                                    int index = Integer.parseInt(choice) - 1;
+                                    Facility selected = filtered.get(index);
+
+                                    // Check if the specific chosen room is available
+                                    if (availableList.contains(selected)) {
+                                        createNewBooking(selected.getFacilityID(), formattedDate, selectedSlot);
+                                        return; // Done
+                                    } else {
+                                        System.out.println(">> This facility is OCCUPIED. Please try again and select an AVAILABLE room.");
+                                    }
+                                } else {
+                                    System.out.println("Invalid input, please enter a number between 1 and " + filtered.size());
+                                }
+                            }
+                        } else {
+                            System.out.println("Invalid input, please enter 'Y' or 'N'.");
+                        }
+                    }
             }
         }
     }
@@ -423,33 +518,68 @@ public class UserMenu {
     private void createNewBooking(String facilityID, String dateStr, int slot) {
         System.out.println("\n--- Booking Details ---");
         
-        // 1. Get Purpose
-        System.out.print("Enter purpose of booking (e.g., Study, Meeting): ");
-        String purpose = sc.nextLine().trim();
-        if (purpose.isEmpty()) purpose = "General Use";
+        Facility selectedFacility = FileManager.loadAllFacilities().stream()
+                .filter(f -> f.getFacilityID().equalsIgnoreCase(facilityID))
+                .findFirst()
+                .orElse(null);
 
-        // 2. Get Pax
-        int pax = 1;
-        while (true) {
-            System.out.print("Enter number of people (Pax): ");
-            String paxInput = sc.nextLine().trim();
-            if (my.edu.utar.util.Validator.isNumeric(paxInput)) {
-                pax = Integer.parseInt(paxInput);
-                break;
-            }
-            System.out.println("Invalid number. Please try again.");
+        if (selectedFacility == null) {
+            System.out.println("Error: Facility information not found.");
+            return;
         }
 
-        // 3. Generate internal data
-        // Format: B + Today's Date + Sequence
-        String todayStr = java.time.LocalDate.now().format(java.time.format.DateTimeFormatter.ofPattern("yyyyMMdd"));
-        String bookingID = "B" + todayStr + String.format("%04d", bookingManager.getBookingList().size() + 1);
+        String purpose;
+        while (true) {
+
+            System.out.print("Enter purpose of booking (Max 50 chars) [B: Back, C: Cancel]: ");
+            purpose = sc.nextLine().trim();
+            if (purpose.equalsIgnoreCase("C")) return;
+            if (purpose.equalsIgnoreCase("B")) { break; }
+            if (my.edu.utar.util.Validator.isEmpty(purpose)) {
+                System.out.println("Invalid input: Purpose cannot be empty.");
+            } else if (purpose.length() > 50) {
+                System.out.println("Invalid input: Purpose is too long (Max 50 characters).");
+            } else {
+                break;
+            }
+        }
+        int pax = 1;
+        int capacity = selectedFacility.getCapacity();
         
-        // applyDate is today in DDMMYYYY format
+        while (true) {
+            System.out.print("Enter number of people (Pax) [B: Back, C: Cancel]: ");
+            String paxInput = sc.nextLine().trim().toUpperCase();
+            if (paxInput.equals("C")) return;
+            if (paxInput.equals("B")) { break; } 
+            
+            if (my.edu.utar.util.Validator.isEmpty(paxInput) || !my.edu.utar.util.Validator.isNumeric(paxInput)) {
+                System.out.println("Invalid input: Please enter a valid number.");
+                continue;
+            }
+            
+            pax = Integer.parseInt(paxInput);
+            if (pax <= 0) {
+                System.out.println("Invalid input: Pax must be at least 1.");
+                continue;
+            }
+
+            if (pax > capacity) {
+                System.out.println("\n[WARNING] Over Capacity!");
+                System.out.println("Room " + selectedFacility.getRoomNo() + " capacity is only " + capacity + ".");
+                System.out.println("You entered " + pax + " people.");
+                System.out.print("Are you sure you want to proceed? [Y] Yes / [N] Re-enter Pax: ");
+                
+                String confirm = sc.nextLine().trim().toUpperCase();
+                if (!"Y".equals(confirm)) {
+                    continue; 
+                }
+            }
+            break; 
+        }
+
+        String bookingID = generateBookingID();
         String applyDate = java.time.LocalDate.now().format(java.time.format.DateTimeFormatter.ofPattern("ddMMyyyy"));
 
-        // 4. Create the Booking Object with all 10 parameters
-        // Order: ID, UserID, FacilityID, ApplyDate, BookingDate, Slot, Purpose, Pax, Status, RejectReason
         Booking newBooking = new Booking(
             bookingID, 
             currentUser.getId(), 
@@ -460,21 +590,22 @@ public class UserMenu {
             purpose, 
             pax, 
             "Pending", 
-            "" // Reject reason is empty for new bookings
+            ""
         );
 
-        // 5. Save
         if (bookingManager.addBooking(newBooking)) {
             System.out.println("\n============================================");
             System.out.println("   SUCCESS: Booking Request Submitted!      ");
             System.out.println("============================================");
-            System.out.println("Booking ID : " + bookingID);
-            System.out.println("Status     : Pending Admin Approval");
+            System.out.println("Booking ID   : " + bookingID);
+            System.out.println("Facility     : " + selectedFacility.getRoomNo() + " (" + selectedFacility.getType() + ")");
+            System.out.println("Status       : Pending Admin Approval");
             System.out.println("============================================");
         } else {
             System.out.println(">> Error: Failed to save booking.");
         }
     }
+    
     private String generateBookingID() {
         String date = java.time.LocalDate.now()
                 .format(java.time.format.DateTimeFormatter.BASIC_ISO_DATE);
@@ -494,7 +625,6 @@ public class UserMenu {
             return;
         }
 
-        // Variables to hold selections
         int step = 1;
         String block = "", type = "", floor = "", room = "", bookingDateStr = "", purpose = "";
         java.time.LocalDate selectedDate = null;
@@ -504,14 +634,38 @@ public class UserMenu {
 
         while (step <= 8) {
             switch (step) {
-                case 1: // ---------------- Step 1: Block ----------------
-                    List<String> blocks = allFacilities.stream().map(Facility::getBlock).distinct().collect(Collectors.toList());
-                    block = selectWithBack(blocks, "Block");
-                    if (block == null) return; // Cancel
-                    step++;
-                    break;
+            case 1: 
+                List<String> blocks = allFacilities.stream()
+                        .map(Facility::getBlock)
+                        .distinct()
+                        .collect(Collectors.toList());
 
-                case 2: // ---------------- Step 2: Facility Type ----------------
+                block = selectWithBack(blocks, "Block");
+
+                if (block == null) return;
+
+                if (block.equals("BACK")) {
+                    while (true) { 
+                        System.out.print("\nAre you sure you want to cancel this action and back to the previous page? (Y/N): ");
+                        String confirm = sc.nextLine().trim().toUpperCase();
+                        
+                        if (confirm.equals("Y")) {
+                            System.out.println("Returning to Main Menu...");
+                            return;
+                        } else if (confirm.equals("N")) {
+                            System.out.println("Continuing with selection...");
+                            break; 
+                        } else {
+                            System.out.println(">> Invalid input. Please enter 'Y' for Yes or 'N' for No.");
+
+                        }
+                    }
+                    break; 
+                }
+                step++;
+                break;
+
+                case 2: 
                     final String b2 = block;
                     List<String> types = allFacilities.stream()
                             .filter(f -> f.getBlock().equalsIgnoreCase(b2))
@@ -522,7 +676,7 @@ public class UserMenu {
                     step++;
                     break;
 
-                case 3: // ---------------- Step 3: Floor ----------------
+                case 3: // Floor Selection
                     final String b3 = block, t3 = type;
                     List<String> floors = allFacilities.stream()
                             .filter(f -> f.getBlock().equalsIgnoreCase(b3) && f.getType().equalsIgnoreCase(t3))
@@ -533,7 +687,7 @@ public class UserMenu {
                     step++;
                     break;
 
-                case 4: // ---------------- Step 4: Room ----------------
+                case 4: // Room Selection
                     final String b4 = block, t4 = type, f4 = floor;
                     List<Facility> filteredRooms = allFacilities.stream()
                             .filter(f -> f.getBlock().equalsIgnoreCase(b4) && f.getType().equalsIgnoreCase(t4) && f.getFloor().equalsIgnoreCase(f4))
@@ -544,7 +698,6 @@ public class UserMenu {
                     if (room == null) return;
                     if (room.equals("BACK")) { step--; break; }
                     
-                    // Identify the specific facility object for capacity checks later
                     final String selectedRoomNo = room;
                     selectedFacility = filteredRooms.stream()
                             .filter(f -> f.getRoomNo().equalsIgnoreCase(selectedRoomNo))
@@ -552,70 +705,117 @@ public class UserMenu {
                     step++;
                     break;
 
-                case 5: // ---------------- Step 5: Date ----------------
-                    System.out.print("\nEnter Booking Date (YYYY-MM-DD) [B: Back, C: Cancel]: ");
-                    String dateIn = sc.nextLine().trim().toUpperCase();
-                    if (dateIn.equals("C")) return;
-                    if (dateIn.equals("B")) { step--; break; }
-                    
-                    try {
-                        java.time.LocalDate d = java.time.LocalDate.parse(dateIn);
-                        java.time.LocalDate today = java.time.LocalDate.now();
-                        if (d.isBefore(today)) {
-                            System.out.println(">> Error: Cannot book a date in the past.");
-                        } else if (d.isAfter(today.plusMonths(1))) {
-                            showAdminContact(); // Defined in previous response
-                        } else {
+                case 5: // Date Selection & Full-Day Occupancy Validation
+                    while (true) {
+                        System.out.print("\nEnter Booking Date (YYYY-MM-DD) [B: Back, C: Cancel]: ");
+                        String dateIn = sc.nextLine().trim().toUpperCase();
+                        if (dateIn.equals("C")) return;
+                        if (dateIn.equals("B")) { step--; break; }
+                        
+                        try {
+                            java.time.LocalDate d = java.time.LocalDate.parse(dateIn);
+                            if (d.isBefore(java.time.LocalDate.now())) {
+                                System.out.println(">> Error: Cannot book a date in the past.");
+                                continue;
+                            }
+
+                            String tempDateStr = d.format(java.time.format.DateTimeFormatter.ofPattern("ddMMyyyy"));
+                            
+                            // Check if ANY slots are available for this specific room
+                            boolean hasAnySlot = false;
+                            for (int i = 1; i <= 5; i++) {
+                                if (bookingManager.isSlotAvailable(selectedFacility.getFacilityID(), tempDateStr, i)) {
+                                    hasAnySlot = true;
+                                    break;
+                                }
+                            }
+
+                            if (!hasAnySlot) {
+                                System.out.println("\n[!] SORRY: No available time slots for " + selectedFacility.getRoomNo() + " on " + d.format(Constants.DATE_DISPLAY_FORMAT));
+                                System.out.println("Please select a different date or press [B] to choose another room.");
+                                continue;
+                            }
+
                             selectedDate = d;
-                            bookingDateStr = d.format(java.time.format.DateTimeFormatter.ofPattern("ddMMyyyy"));
-                            step++;
+                            bookingDateStr = tempDateStr;
+                            step++; break;
+                        } catch (Exception e) {
+                            System.out.println("Invalid format. Please use YYYY-MM-DD.");
                         }
-                    } catch (Exception e) {
-                        System.out.println(">> Invalid format. Use YYYY-MM-DD.");
                     }
                     break;
 
-                case 6: // ---------------- Step 6: Time Slot ----------------
-                    System.out.println("\n--- Time Slots ---");
-                    for (int i = 1; i < Constants.TIME_SLOTS.length; i++) 
-                        System.out.println("[" + i + "] " + Constants.TIME_SLOTS[i]);
-                    System.out.print("Select (1-5) [B: Back, C: Cancel]: ");
-                    String slotIn = sc.nextLine().trim().toUpperCase();
-                    if (slotIn.equals("C")) return;
-                    if (slotIn.equals("B")) { step--; break; }
-                    
-                    if (Validator.isValidMenuChoice(slotIn, 1, 5)) {
-                        selectedSlot = Integer.parseInt(slotIn);
-                        step++;
-                    } else {
-                        System.out.println(">> Invalid selection.");
-                    }
-                    break;
+                case 6: // Time Slot Selection (Filtered)
+                    while (true) {
+                        System.out.println("\n--- Available Time Slots for " + selectedDate.format(Constants.DATE_DISPLAY_FORMAT) + " ---");
+                        List<Integer> freeSlots = new ArrayList<>();
+                        
+                        for (int i = 1; i < Constants.TIME_SLOTS.length; i++) {
+                            if (bookingManager.isSlotAvailable(selectedFacility.getFacilityID(), bookingDateStr, i)) {
+                                System.out.println("[" + i + "] " + Constants.TIME_SLOTS[i]);
+                                freeSlots.add(i);
+                            } else {
+                                System.out.println("[X] " + Constants.TIME_SLOTS[i] + " (Occupied)");
+                            }
+                        }
 
-                case 7: // ---------------- Step 7: Purpose & Pax ----------------
-                    System.out.print("\nEnter purpose [B: Back, C: Cancel]: ");
-                    purpose = sc.nextLine().trim();
-                    if (purpose.equalsIgnoreCase("C")) return;
-                    if (purpose.equalsIgnoreCase("B")) { step--; break; }
-                    
-                    System.out.print("Enter Pax (Capacity: " + selectedFacility.getCapacity() + ") [B: Back, C: Cancel]: ");
-                    String paxIn = sc.nextLine().trim().toUpperCase();
-                    if (paxIn.equals("C")) return;
-                    if (paxIn.equals("B")) { /* No step-- here because we stay in Case 7 to re-enter purpose/pax */ break; }
-                    
-                    if (Validator.isNumeric(paxIn)) {
-                        pax = Integer.parseInt(paxIn);
-                        if (pax > 0 && pax <= selectedFacility.getCapacity()) {
-                            step++;
+                        System.out.print("Select Slot (1-5) [B: Back, C: Cancel]: ");
+                        String slotIn = sc.nextLine().trim().toUpperCase();
+                        if (slotIn.equals("C")) return;
+                        if (slotIn.equals("B")) { step--; break; }
+
+                        if (Validator.isNumeric(slotIn)) {
+                            int choice = Integer.parseInt(slotIn);
+                            if (freeSlots.contains(choice)) {
+                                selectedSlot = choice;
+                                step++; break;
+                            } else {
+                                System.out.println(">> Error: This slot is occupied. Please pick one without an [X].");
+                            }
                         } else {
-                            System.out.println(">> Error: Pax must be 1-" + selectedFacility.getCapacity());
+                            System.out.println("Invalid input.");
                         }
-                    } else {
-                        System.out.println(">> Invalid number.");
                     }
                     break;
 
-                case 8: // ---------------- Step 8: Final Submission ----------------
+                case 7: // Purpose & Pax
+                    // Sub-step: Purpose
+                    while (true) {
+                        System.out.print("\nEnter purpose of booking (Max 50 chars) [B: Back, C: Cancel]: ");
+                        purpose = sc.nextLine().trim();
+                        if (purpose.equalsIgnoreCase("C")) return;
+                        if (purpose.equalsIgnoreCase("B")) { step--; break; }
+                        if (!Validator.isEmpty(purpose) && purpose.length() <= 50) break;
+                        System.out.println("Invalid purpose (Cannot be empty or > 50 chars).");
+                    }
+                    if (step < 7) break; 
+
+                    // Sub-step: Pax
+                    while (true) {
+                        System.out.print("Enter Pax (Capacity: " + selectedFacility.getCapacity() + ") [B: Back, C: Cancel]: ");
+                        String paxIn = sc.nextLine().trim().toUpperCase();
+                        if (paxIn.equals("C")) return;
+                        if (paxIn.equals("B")) break; // Goes back to Purpose
+                        
+                        if (Validator.isNumeric(paxIn)) {
+                            pax = Integer.parseInt(paxIn);
+                            if (pax <= 0) {
+                                System.out.println("Pax must be at least 1.");
+                                continue;
+                            }
+                            if (pax > selectedFacility.getCapacity()) {
+                                System.out.println("\n[WARNING] Over Capacity! (Limit: " + selectedFacility.getCapacity() + ")");
+                                System.out.print("Proceed anyway? [Y/N]: ");
+                                if (!sc.nextLine().trim().equalsIgnoreCase("Y")) continue;
+                            }
+                            step++; break;
+                        } else {
+                            System.out.println("Invalid input.");
+                        }
+                    }
+                    break;
+
+                case 8: // Final Submission
                     String bookingID = generateBookingID();
                     String appDate = java.time.LocalDate.now().format(java.time.format.DateTimeFormatter.ofPattern("ddMMyyyy"));
 
@@ -624,128 +824,211 @@ public class UserMenu {
                         appDate, bookingDateStr, selectedSlot, purpose, pax, Constants.STATUS_PENDING, ""
                     );
 
-                    bookingManager.addBooking(b);
-                    System.out.println("\nSUCCESS: Booking " + bookingID + " submitted!");
-                    step++; // Exit loop
-                    break;
+                    if (bookingManager.addBooking(b)) {
+                        System.out.println("\n============================================");
+                        System.out.println("   SUCCESS: Booking " + bookingID + " Submitted!");
+                        System.out.println("============================================");
+                        System.out.println("Press [Enter] to return to the main menu...");
+                        sc.nextLine(); 
+                        return; 
+                    } else {
+                        System.out.println(">> Error: System could not save the booking.");
+                        return;
+                    }
             }
         }
     }
     private void modifyBooking() {
+        while (true) { // OUTER LOOP: Returns here if user cancels an action or presses 'B'
+            // 1. Refresh data from the manager
+            List<Booking> allBookings = bookingManager.getBookingList();
+            List<Booking> userBookings = allBookings.stream()
+                    .filter(b -> b.getUserID().equals(currentUser.getId()))
+                    .collect(Collectors.toList());
 
-        List<Booking> userBookings =
-                bookingManager.getBookingsByUser(currentUser.getId());
+            List<Booking> pendingBookings = userBookings.stream()
+                    .filter(b -> b.getStatus().equalsIgnoreCase("Pending"))
+                    .collect(Collectors.toList());
 
-        if (userBookings.isEmpty()) {
-            System.out.println("No pending bookings to modify.");
-            return;
-        }
+            long confirmedCount = userBookings.stream()
+                    .filter(b -> b.getStatus().equalsIgnoreCase("Approved")).count();
 
-        System.out.println("\n--- YOUR PENDING BOOKINGS ---");
+            // 2. Summary Header
+            System.out.println("\n========== MODIFY / CANCEL BOOKING ==========");
+            System.out.println("Status: Only PENDING bookings can be modified or cancelled.");
+            System.out.println("Confirmed Bookings Count: [" + confirmedCount + "]");
 
-        List<Booking> safeList = new ArrayList<>();
-
-        // ================= FILTER VALID BOOKINGS ONLY =================
-        for (Booking b : userBookings) {
-            if (b.getTimeSlot() >= 0 &&
-                b.getTimeSlot() < Constants.TIME_SLOTS.length) {
-
-                safeList.add(b);
-            } else {
-                System.out.println("[WARNING] Skipping corrupted booking: " + b.getBookingID());
-            }
-        }
-
-        if (safeList.isEmpty()) {
-            System.out.println("No valid bookings available to modify.");
-            return;
-        }
-
-        // ================= DISPLAY SAFE BOOKINGS =================
-        for (int i = 0; i < safeList.size(); i++) {
-            System.out.print("[" + (i + 1) + "] ");
-            safeList.get(i).display();
-            System.out.println("----------------------------");
-        }
-
-        // ================= SELECT BOOKING =================
-        System.out.print("Select booking number: ");
-
-        int index;
-        try {
-            index = Integer.parseInt(sc.nextLine().trim()) - 1;
-        } catch (Exception e) {
-            System.out.println("Invalid input.");
-            return;
-        }
-
-        if (index < 0 || index >= safeList.size()) {
-            System.out.println("Invalid selection.");
-            return;
-        }
-
-        Booking selected = safeList.get(index);
-
-        // ================= ACTION =================
-        System.out.println("[1] Modify");
-        System.out.println("[2] Cancel");
-        System.out.print("Choose action: ");
-
-        String action = sc.nextLine().trim();
-
-        // ================= CANCEL =================
-        if ("2".equals(action)) {
-            bookingManager.cancelBooking(selected.getBookingID());
-            System.out.println("Booking cancelled.");
-            return;
-        }
-
-        // ================= MODIFY =================
-        if ("1".equals(action)) {
-
-            // ---------- NEW DATE ----------
-            String newDate;
-            while (true) {
-                System.out.print("Enter new date (YYYY-MM-DD): ");
-                newDate = sc.nextLine().trim();
-
-                try {
-                    java.time.LocalDate.parse(newDate);
-                    break;
-                } catch (Exception e) {
-                    System.out.println("Invalid date format.");
-                }
-            }
-
-            // ---------- NEW TIME SLOT ----------
-            System.out.print("Enter new time slot (HH:MM-HH:MM): ");
-            String newSlot = sc.nextLine().trim();
-
-            int slotIndex = -1;
-
-            for (int i = 0; i < Constants.TIME_SLOTS.length; i++) {
-                if (Constants.TIME_SLOTS[i].equals(newSlot)) {
-                    slotIndex = i;
-                    break;
-                }
-            }
-
-            if (slotIndex == -1) {
-                System.out.println("Invalid time slot.");
+            if (pendingBookings.isEmpty()) {
+                System.out.println("\nNo pending bookings found to manage.");
+                System.out.println("Press Enter to return to Main Menu...");
+                sc.nextLine();
                 return;
             }
 
-            // ---------- UPDATE ----------
-            selected.setBookingDate(newDate);
-            selected.setTimeSlot(slotIndex);
+            // 3. Display Selection Table
+            System.out.println("\n--- PENDING BOOKING LIST ---");
+            System.out.printf("%-4s | %-10s | %-20s | %-15s\n", "No.", "Room No", "Booking Date", "Time Slot");
+            System.out.println("------------------------------------------------------------------");
+            
+            for (int i = 0; i < pendingBookings.size(); i++) {
+                Booking b = pendingBookings.get(i);
+                // Format ddMMyyyy -> 21 April 2026
+                String dateDisplay = java.time.LocalDate.parse(b.getBookingDate(), 
+                        java.time.format.DateTimeFormatter.ofPattern("ddMMyyyy"))
+                        .format(Constants.DATE_DISPLAY_FORMAT);
+                
+                System.out.printf("%-4d | %-10s | %-20s | %-15s\n", 
+                        (i + 1), b.getFacilityID(), dateDisplay, Constants.TIME_SLOTS[b.getTimeSlot()]);
+            }
 
-            bookingManager.updateBooking(selected);
+            // 4. Selection Input
+            System.out.print("\nSelect number to manage [B: Back to Main Menu]: ");
+            String input = sc.nextLine().trim().toUpperCase();
 
-            System.out.println("Booking modified successfully!");
-            return;
+            if (input.equals("B")) return;
+            if (!Validator.isValidMenuChoice(input, 1, pendingBookings.size())) {
+                System.out.println(">> Invalid selection. Please try again.");
+                continue; // Re-run the table display
+            }
+
+            Booking selected = pendingBookings.get(Integer.parseInt(input) - 1);
+            Facility f = FileManager.getFacilityById(selected.getFacilityID());
+
+            // 5. Display Full Details of Selection
+            String fullDate = java.time.LocalDate.parse(selected.getBookingDate(), 
+                    java.time.format.DateTimeFormatter.ofPattern("ddMMyyyy"))
+                    .format(Constants.DATE_DISPLAY_FORMAT);
+
+            System.out.println("\n--- SELECTED BOOKING DETAILS ---");
+            System.out.println("Booking ID      : " + selected.getBookingID());
+            System.out.println("Selected Date   : " + fullDate);
+            System.out.println("Booking Time    : " + Constants.TIME_SLOTS[selected.getTimeSlot()]);
+            System.out.println("Room No         : " + (f != null ? f.getRoomNo() : selected.getFacilityID()));
+            System.out.println("Facility Name   : " + (f != null ? f.getName() : "N/A"));
+            System.out.println("Facility Type   : " + (f != null ? f.getType() : "N/A"));
+            System.out.println("Booking Pax     : " + selected.getPax());
+            System.out.println("Purpose         : " + selected.getPurpose());
+            System.out.println("---------------------------------");
+
+            // 6. Action Choice Validation Loop
+            String action = "";
+            while (true) {
+                System.out.println("\nWhat would you like to do?");
+                System.out.println("[1] Update Booking");
+                System.out.println("[2] Cancel Booking");
+                System.out.println("[B] Back to List");
+                System.out.print("Choice: ");
+                action = sc.nextLine().trim().toUpperCase();
+
+                if (action.equals("1") || action.equals("2") || action.equals("B")) break;
+                System.out.println(">> Invalid choice. Please enter [1], [2], or [B].");
+            }
+
+            if (action.equals("B")) continue; // Goes back to table list
+
+            // ================= CANCEL BOOKING =================
+            if (action.equals("2")) {
+                while (true) {
+                    System.out.print("\nAre you sure you want to cancel this booking? (Y/N): ");
+                    String confirm = sc.nextLine().trim().toUpperCase();
+                    
+                    if (confirm.equals("Y")) {
+                        selected.setStatus(Constants.STATUS_CANCELLED);
+                        bookingManager.updateBooking(selected);
+                        System.out.println("\nSUCCESS: Booking successfully cancelled.");
+                        System.out.println("Press Enter to return to Main Menu...");
+                        sc.nextLine();
+                        return; // EXIT TO MAIN MENU
+                    } else if (confirm.equals("N")) {
+                        System.out.println("\nAction cancelled. Press Enter to back to Pending Booking list...");
+                        sc.nextLine();
+                        break; // EXIT confirmation loop to re-run 'continue' below
+                    } else {
+                        System.out.println(">> Invalid input. Please type 'Y' or 'N'.");
+                    }
+                }
+                continue; // Back to table list
+            }
+
+            // ================= UPDATE BOOKING =================
+            if (action.equals("1")) {
+                boolean success = false;
+                System.out.println("\n--- UPDATE MENU ---");
+                System.out.println("Note: Only Time Slot, Pax, and Purpose can be modified.");
+                System.out.println("[1] Modify Time Slot");
+                System.out.println("[2] Modify Pax");
+                System.out.println("[3] Modify Purpose");
+                System.out.println("[B] Back to List");
+                System.out.print("Selection: ");
+                String updateChoice = sc.nextLine().trim().toUpperCase();
+
+                if (updateChoice.equals("B")) continue;
+
+                switch (updateChoice) {
+                    case "1": // Time Slot
+                        System.out.println("\nAvailable slots for " + fullDate + ":");
+                        List<Integer> freeSlots = new ArrayList<>();
+                        for (int i = 1; i <= 5; i++) {
+                            if (bookingManager.isSlotAvailable(selected.getFacilityID(), selected.getBookingDate(), i)) {
+                                System.out.println("[" + i + "] " + Constants.TIME_SLOTS[i]);
+                                freeSlots.add(i);
+                            }
+                        }
+                        if (freeSlots.isEmpty()) {
+                            System.out.println("No other slots available for this date.");
+                        } else {
+                            System.out.print("Select new slot No: ");
+                            String sIn = sc.nextLine().trim();
+                            if (Validator.isNumeric(sIn) && freeSlots.contains(Integer.parseInt(sIn))) {
+                                selected.setTimeSlot(Integer.parseInt(sIn));
+                                success = true;
+                            } else {
+                                System.out.println("Invalid selection or slot occupied.");
+                            }
+                        }
+                        break;
+
+                    case "2": // Pax
+                        System.out.print("\nEnter new Pax (Capacity: " + (f != null ? f.getCapacity() : "N/A") + "): ");
+                        String pIn = sc.nextLine().trim();
+                        if (Validator.isNumeric(pIn)) {
+                            int p = Integer.parseInt(pIn);
+                            if (f != null && p > f.getCapacity()) {
+                                System.out.print("Warning: Over capacity. Proceed? (Y/N): ");
+                                if (!sc.nextLine().trim().equalsIgnoreCase("Y")) break;
+                            }
+                            selected.setPax(p);
+                            success = true;
+                        } else {
+                            System.out.println("Invalid input.");
+                        }
+                        break;
+
+                    case "3": // Purpose
+                        System.out.print("\nEnter new purpose (Max 50 chars): ");
+                        String purp = sc.nextLine().trim();
+                        if (!purp.isEmpty() && purp.length() <= 50) {
+                            selected.setPurpose(purp);
+                            success = true;
+                        } else {
+                            System.out.println("Invalid length.");
+                        }
+                        break;
+                }
+
+                if (success) {
+                    bookingManager.updateBooking(selected);
+                    System.out.println("\nSUCCESS: Booking updated successfully!");
+                    System.out.println("Press Enter to return to Main Menu...");
+                    sc.nextLine();
+                    return; // EXIT TO MAIN MENU
+                } else {
+                    System.out.println("\nNo changes were made. Press Enter to back to list...");
+                    sc.nextLine();
+                    continue; // Back to Table
+                }
+            }
         }
-
-        System.out.println("Invalid action selected.");
     }
 
     // ===================== MEMBER 2: VIEW BOOKING STATUS =====================
@@ -815,34 +1098,54 @@ public class UserMenu {
 
     }
     
- // 1. New Helper for Selection with "Back" capability
-    private String selectWithBack(List<String> options, String title) {
-        java.util.Collections.sort(options);
-        System.out.println("\n--- " + title + " ---");
-        for (int i = 0; i < options.size(); i++) System.out.println("[" + (i + 1) + "] " + options.get(i));
-        System.out.println("[B] Back | [C] Cancel");
-
+    private String selectWithBack(List<String> options, String label) {
         while (true) {
-            System.out.print("Choice: ");
-            String in = sc.nextLine().trim().toUpperCase();
-            if (in.equals("C")) return null;
-            if (in.equals("B")) return "BACK";
-            if (my.edu.utar.util.Validator.isValidMenuChoice(in, 1, options.size())) {
-                return options.get(Integer.parseInt(in) - 1);
+            System.out.println("\n--- Select " + label + " ---");
+            for (int i = 0; i < options.size(); i++) {
+                System.out.println("[" + (i + 1) + "] " + options.get(i));
             }
+            System.out.println("[B] Back | [C] Cancel");
+            System.out.print("Choice: ");
+            
+            String input = sc.nextLine().trim().toUpperCase();
+
+            if (input.equals("C")) return null;
+            if (input.equals("B")) return "BACK"; 
+
+            if (Validator.isValidMenuChoice(input, 1, options.size())) {
+                int index = Integer.parseInt(input) - 1;
+                return options.get(index);
+            }
+
+            System.out.println("Invalid input, please try again.");
         }
     }
 
-    // 2. Display Table Helper
     private void displayAvailable(List<Facility> list) {
         System.out.println("\n--- AVAILABLE FACILITIES ---");
-        System.out.printf("%-6s | %-10s | %-5s | %-10s\n", "ID", "Room", "Cap", "Status");
-        for (Facility f : list) {
-            System.out.printf("%-6s | %-10s | %-5d | %-10s\n", f.getFacilityID(), f.getRoomNo(), f.getCapacity(), f.getStatus());
+        
+        if (list.isEmpty()) {
+            System.out.println("No facilities available for the selected criteria.");
+            return;
         }
+        System.out.printf("%-4s | %-10s | %-35s | %-15s | %-5s | %-10s\n", 
+                          "No.", "Room", "Name", "Type", "Cap", "Status");
+        System.out.println("----------------------------------------------------------------------------------------------------");
+
+        for (int i = 0; i < list.size(); i++) {
+            Facility f = list.get(i);
+            System.out.printf("%-4d | %-10s | %-35s | %-15s | %-5d | %-10s\n",
+                (i + 1),
+                f.getRoomNo(),
+                (f.getName() != null ? f.getName() : "N/A"),
+                f.getType(),
+                f.getCapacity(),
+                f.getStatus()
+            );
+        }
+        System.out.println("----------------------------------------------------------------------------------------------------");
     }
 
-    // 3. Admin Info Helper
     private void showAdminContact() {
         System.out.println("\n[!] Online booking limit is 1 month.");
         System.out.println("Contact " + Constants.ADMIN_NAME + " (" + Constants.ADMIN_PHONE + ") for advanced bookings.");

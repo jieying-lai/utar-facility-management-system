@@ -86,19 +86,6 @@ public class BookingManager {
 		System.out.println("Only Pending bookings can be modified.");
 		return false;
 	}
-	/* I not sure if delete this will affect other functions
-	 * or not so i keep it first
-	public boolean approveBooking(String bookingID) {
-		Booking booking=findBooking(bookingID);
-		if(booking!=null) {
-			booking.setStatus("Approved");
-			saveToFile();
-			return true;
-		}
-		return false;
-	}
-	*/
-	
 
 	public boolean rejectBooking(String bookingID, String reason) {
 		Booking booking=findBooking(bookingID);
@@ -149,6 +136,7 @@ public class BookingManager {
 	    return true;
 	}
 	
+	
 	public void viewUpcomingBookings(String userID) {
         for (Booking b : bookingList) {
             if (b.getUserID().equals(userID) &&
@@ -159,19 +147,15 @@ public class BookingManager {
         }
     }
 	
+	public boolean isSlotAvailable(String facilityID, String date, int slot) {
+	    return isTimeSlotAvailable(facilityID, date, slot);
+	}
+	
 	public List<Facility> getAvailableFacilities(List<Facility> facilities, String date, int slot) {
 	    List<Facility> available = new ArrayList<>();
 	    for (Facility f : facilities) {
-	        boolean isBooked = false;
-	        for (Booking b : bookingList) {
-	            if (b.getFacilityID().equals(f.getFacilityID()) &&
-	                b.getBookingDate().equals(date) &&
-	                (b.getStatus().equalsIgnoreCase("Approved") || b.getStatus().equalsIgnoreCase("Pending"))) {
-	                isBooked = true;
-	                break;
-	            }
-	        }
-	        if (!isBooked && f.getStatus().equalsIgnoreCase("Available")) {
+	        // Use your existing isTimeSlotAvailable method here!
+	        if (isTimeSlotAvailable(f.getFacilityID(), date, slot) && f.getStatus().equalsIgnoreCase("Available")) {
 	            available.add(f);
 	        }
 	    }
@@ -278,19 +262,28 @@ public class BookingManager {
     public boolean hasApprovedBookings(String facilityID) {
         for (Booking b : bookingList) {
             if (b.getFacilityID().equalsIgnoreCase(facilityID) && b.getStatus().equalsIgnoreCase("Approved")) {
-                return true;
+                return true; // Match found, exit method immediately
             }
         }
+        
+        return false; // Loop finished with no matches found
     }
     
     public boolean hasFutureBookings(String userId) {
         LocalDate today = LocalDate.now();
+        java.time.format.DateTimeFormatter formatter = java.time.format.DateTimeFormatter.ofPattern("ddMMyyyy");
+        
         for (Booking b : bookingList) {
             if (b.getUserID().equals(userId)) {
-                LocalDate bookingDate = LocalDate.parse(b.getBookingDate()); 
-                if (!bookingDate.isBefore(today) && 
-                    !b.getStatus().equals(Constants.STATUS_CANCELLED)) {
-                    return true;
+                try {
+                    // Parse using your ddMMyyyy format
+                    LocalDate bookingDate = LocalDate.parse(b.getBookingDate(), formatter); 
+                    if (!bookingDate.isBefore(today) && 
+                        !b.getStatus().equals(Constants.STATUS_CANCELLED)) {
+                        return true;
+                    }
+                } catch (Exception e) {
+                    continue; // Skip lines with bad date formatting
                 }
             }
         }

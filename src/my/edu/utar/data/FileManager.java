@@ -215,6 +215,18 @@ public class FileManager {
         return facilities;
     }
     
+    public static Facility getFacilityById(String id) {
+        List<Facility> allFacilities = loadAllFacilities();
+        
+        for (Facility f : allFacilities) {
+            if (f.getFacilityID().equalsIgnoreCase(id)) {
+                return f; 
+            }
+        }
+        
+        return null;
+    }
+    
     public static void saveFacility(Facility f) {
         appendLine(Constants.FILE_FACILITIES, f.toFileString());
     }

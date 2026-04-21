@@ -8,19 +8,23 @@ import java.io.PrintWriter;
 
 public class FacilitiesService {
 	public List<Facility> searchFacilities(String keyword) {
-        List<Facility> allF = FileManager.loadAllFacilities();
-        List<Facility> searchResult = new ArrayList<>();
-        
-        for (Facility f : allF) {
-        	if (f.getFacilityID().toLowerCase().contains(keyword.toLowerCase()) || 
-        		    f.getBlock().toLowerCase().contains(keyword.toLowerCase()) ||
-        		    f.getType().toLowerCase().contains(keyword.toLowerCase())) {
-        		    
-        		    searchResult.add(f);
-        		}
-        }
-        return searchResult;
-    }
+	    List<Facility> allF = FileManager.loadAllFacilities();
+	    List<Facility> searchResult = new ArrayList<>();
+	    if (keyword == null) return searchResult;
+
+	    String lowerKeyword = keyword.toLowerCase();
+
+	    for (Facility f : allF) {
+	        if (f.getFacilityID().toLowerCase().contains(lowerKeyword) || 
+	            f.getBlock().toLowerCase().contains(lowerKeyword) ||
+	            f.getType().toLowerCase().contains(lowerKeyword) ||
+	            (f.getName() != null && f.getName().toLowerCase().contains(lowerKeyword))) {
+	            
+	            searchResult.add(f);
+	        }
+	    }
+	    return searchResult; 
+	}
 	
 	public List<Facility> getAllFacilities() {
         return FileManager.loadAllFacilities();

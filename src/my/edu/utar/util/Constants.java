@@ -43,14 +43,13 @@ public class Constants {
     };
 
     // ===================== TIME SLOTS =====================
-    // Code 1-5 maps to these slots
     public static final String[] TIME_SLOTS = {
         "",             // index 0 unused
-        "8am - 10am",   // index 1
-        "10am - 12pm",  // index 2
-        "12pm - 2pm",   // index 3
-        "2pm - 4pm",    // index 4
-        "4pm - 6pm"     // index 5
+        " 8 a.m. - 10 a.m ",   // index 1
+        "10 a.m. - 12 p.m.",  // index 2
+        "12 p.m. -  2 p.m.",   // index 3
+        " 2 p.m. -  4 p.m.",    // index 4
+        " 4 p.m. -  6 p.m."     // index 5
     };
     public static final int[] TIME_SLOT_START_HOUR = { 0, 8, 10, 12, 14, 16 };
     public static final int TOTAL_SLOTS = 5;
@@ -176,4 +175,7 @@ public class Constants {
     public static final String ADMIN_NAME    = "Mr Lee";
     public static final String ADMIN_EMAIL   = "lee@utar.edu.my";
     public static final String ADMIN_PHONE   = "012345678";
+    
+    public static final java.time.format.DateTimeFormatter DATE_DISPLAY_FORMAT = 
+    	    java.time.format.DateTimeFormatter.ofPattern("dd MMMM yyyy");
 }
