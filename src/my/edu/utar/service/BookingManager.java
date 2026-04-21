@@ -272,6 +272,7 @@ public class BookingManager {
                 return true;
             }
         }
+        return false;
     }
     
     public boolean hasFutureBookings(String userId) {
