@@ -252,6 +252,10 @@ public class BookingManager {
     
     public boolean hasConflict(Booking request) {
         for (Booking b : bookingList) {
+            if (b.getBookingID().equals(request.getBookingID())) {
+                continue;
+            }
+
             if (b.getStatus().equalsIgnoreCase("Approved") &&
                 b.getFacilityID().equals(request.getFacilityID()) &&
                 b.getBookingDate().equals(request.getBookingDate()) &&

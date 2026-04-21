@@ -8,6 +8,7 @@ import java.io.*;
 import java.util.Scanner;
 import java.util.List;
 import my.edu.utar.service.BookingManager;
+import my.edu.utar.service.ReportGenerator;
 import my.edu.utar.model.Booking;
 import my.edu.utar.data.FileManager;
 import my.edu.utar.model.Admin;
@@ -353,31 +354,68 @@ public class AdminMenu{
      }
     
     private void approval() {
-    	Scanner input = new Scanner(System.in);
         System.out.print("Enter Booking ID to process: ");
-        String id = input.nextLine();
+        String id = sc.nextLine().trim();
 
-        System.out.println("(1) Approve or (2) Reject this booking?");
-        System.out.print("Selection: ");
-        String choice = input.nextLine();
+        Booking b = bookingManager.findBooking(id); 
+        
+        if (b == null) {
+            System.out.println("Error: Booking ID not found.");
+            return;
+        }
+ 
+        if (!b.getStatus().equalsIgnoreCase("Pending")) {
+            System.out.println("Error: This booking has already been processed (Status: " + b.getStatus() + ").");
+            return;
+        }
+ 
+        System.out.println("\n--- Booking Details ---");
+        b.display();
+        System.out.println("-----------------------");
 
-        if (choice.equals("1")) {
+        System.out.println("Action: [A] Approve | [R] Reject | [S] Skip/Back");
+        System.out.print("Enter choice: ");
+        String action = sc.nextLine().trim().toUpperCase();
+
+        if (action.equals("A")) {
+            if (bookingManager.hasConflict(b)) {
+                System.out.println("\nWARNING: Conflicting booking exists for [" + b.getFacilityID() + 
+                                   "] on [" + b.getBookingDate() + "] at [Slot " + b.getTimeSlot() + "].");
+                System.out.print("Do you still want to approve? [Y/N]: ");
+                
+                String confirm = sc.nextLine().trim().toUpperCase();
+                if (!confirm.equals("Y")) {
+                    System.out.println("Approval cancelled. Request remains Pending.");
+                    return;
+                }
+            }
+
             if (bookingManager.approveBooking(id)) {
-                System.out.println("Booking approved successfully!");
+                System.out.println("Success: Booking " + id + " has been approved!");
             } else {
-                System.out.println("Error: Booking ID not found or already processed.");
+                System.out.println("Error: Critical failure during approval.");
             }
-        } else if (choice.equals("2")) {
-            System.out.print("Enter reason for rejection: ");
-            String reason = input.nextLine();
-            
+
+        } else if (action.equals("R")) {
+            String reason = "";
+            while (reason.isEmpty()) {
+                System.out.print("Enter rejection reason (cannot be empty): ");
+                reason = sc.nextLine().trim();
+                if (reason.isEmpty()) {
+                    System.out.println("Error: You must provide a reason for rejection.");
+                }
+            }
+ 
             if (bookingManager.rejectBooking(id, reason)) {
-                System.out.println("Booking rejected. Reason recorded.");
+                System.out.println("Success: Booking " + id + " has been rejected.");
             } else {
-                System.out.println("Error: Failed to reject the booking.");
+                System.out.println("Error: Critical failure during rejection.");
             }
+
+        } else if (action.equals("S")) {
+            System.out.println("Skipped. Returning to Admin Menu.");
         } else {
-            System.out.println("Invalid selection.");
+            System.out.println("Invalid selection. Operation aborted.");
         }
     }
     
@@ -420,59 +458,34 @@ public class AdminMenu{
             System.out.println("Peak Time Slot : " + peakTime);
         }
     }
-
-
+    
     private void viewSummaryReport() {
-        try {
-            File facilityFile = new File("data/facilities.txt");
-            File bookingFile = new File("data/bookings.txt");
-
-            if (!facilityFile.exists() || !bookingFile.exists()) {
-                System.out.println("Error: Required data files are missing.");
-                return;
-            }
-
-            System.out.println("========== FACILITIES BOOKING SUMMARY REPORT ==========\" ");
-            System.out.printf("%-6s | %-6s | %-6s | %-10s | %-15s | %-5s\n", 
-                    "ID", "Block", "Floor", "Room", "Name", "Total Booking Number");
-            System.out.println("---------------------------------------------------------------------------");
-
-            Scanner facScanner = new Scanner(facilityFile);
-            while (facScanner.hasNextLine()) {
-                String facLine = facScanner.nextLine();
-                String[] fParts = facLine.split("\\|");
-                
-                if (fParts.length >= 5) {
-                    String ID = fParts[0];
-                    String Block = fParts[1];
-                    String floor = fParts[2];
-                    String RoomNum = fParts[3];
-                    String name = fParts[4];
-                    
-                    int count = 0;
-
-                    Scanner bookScanner = new Scanner(bookingFile);
-                    while (bookScanner.hasNextLine()) {
-                        String bookLine = bookScanner.nextLine();
-                        String[] bParts = bookLine.split("\\|");
-                        
-                        if (bParts.length > 2 && bParts[2].equals(ID)) {
-                            count++;
-                        }
-                    }
-                    bookScanner.close();
-
-                    System.out.printf("%-6s | %-6s | %-6s | %-10s | %-15s | %-5d\n", 
-                            ID, Block, floor, RoomNum, name, count);
-                }
-            }
-            facScanner.close();
-        } catch (FileNotFoundException e) {
-            System.out.println("File not found: " + e.getMessage());
-        }
+        System.out.println("\n--- GENERATE SUMMARY REPORT ---");
         
-        System.out.println("======================================================\n");
+        System.out.print("Enter specific period to analyze (e.g., 2026-04): ");
+        String period = sc.nextLine().trim();
 
+        if (my.edu.utar.util.Validator.isEmpty(period)) {
+            System.out.println("Period cannot be empty.");
+            return;
+        }
+
+        List<Booking> bookingList = bookingManager.getBookingList();
+        List<Facility> facilityList = facilityService.getAllFacilities();
+
+        Booking[] bookingArray = bookingList.toArray(new Booking[0]);
+        Facility[] facilityArray = facilityList.toArray(new Facility[0]);
+
+        ReportGenerator rg = new ReportGenerator();
+
+        System.out.println("\n============================================");
+        System.out.println("   OFFICIAL ANALYTICS REPORT: " + period);
+        System.out.println("============================================");
+
+        rg.generateAdminSummaryReport(bookingArray, facilityArray, period); 
+
+        System.out.println("============================================");
+        System.out.println("Report Generation Complete.");
     }
 
     private void manageUsers() {
