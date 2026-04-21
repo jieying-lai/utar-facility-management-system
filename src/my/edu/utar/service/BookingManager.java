@@ -86,19 +86,6 @@ public class BookingManager {
 		System.out.println("Only Pending bookings can be modified.");
 		return false;
 	}
-	/* I not sure if delete this will affect other functions
-	 * or not so i keep it first
-	public boolean approveBooking(String bookingID) {
-		Booking booking=findBooking(bookingID);
-		if(booking!=null) {
-			booking.setStatus("Approved");
-			saveToFile();
-			return true;
-		}
-		return false;
-	}
-	*/
-	
 
 	public boolean rejectBooking(String bookingID, String reason) {
 		Booking booking=findBooking(bookingID);
