@@ -202,16 +202,6 @@ public class BookingManager {
         }
     }
     
-    public List<Booking> getBookingsByUser(String userID) {
-        List<Booking> list = new ArrayList<>();
-        for (Booking b : bookingList) {
-            if (b.getUserID().equals(userID) && b.getStatus().equalsIgnoreCase("Pending")) {
-                list.add(b);
-            }
-        }
-        return list;
-    }
-    
     public boolean updateBooking(Booking booking) {
         for (int i = 0; i < bookingList.size(); i++) {
             if (bookingList.get(i).getBookingID().equals(booking.getBookingID())) {
@@ -262,11 +252,11 @@ public class BookingManager {
     public boolean hasApprovedBookings(String facilityID) {
         for (Booking b : bookingList) {
             if (b.getFacilityID().equalsIgnoreCase(facilityID) && b.getStatus().equalsIgnoreCase("Approved")) {
-                return true; // Match found, exit method immediately
+                return true;
             }
         }
         
-        return false; // Loop finished with no matches found
+        return false; 
     }
     
     public boolean hasFutureBookings(String userId) {
@@ -276,18 +266,27 @@ public class BookingManager {
         for (Booking b : bookingList) {
             if (b.getUserID().equals(userId)) {
                 try {
-                    // Parse using your ddMMyyyy format
                     LocalDate bookingDate = LocalDate.parse(b.getBookingDate(), formatter); 
                     if (!bookingDate.isBefore(today) && 
                         !b.getStatus().equals(Constants.STATUS_CANCELLED)) {
                         return true;
                     }
                 } catch (Exception e) {
-                    continue; // Skip lines with bad date formatting
+                    continue; 
                 }
             }
         }
         return false;
+    }
+    
+    public List<Booking> getBookingsByUser(String userID) {
+        List<Booking> list = new ArrayList<>();
+        for (Booking b : bookingList) {
+            if (b.getUserID().equals(userID)) {
+                list.add(b); 
+            }
+        }
+        return list;
     }
     
     public void loadFromFile() {
@@ -314,6 +313,24 @@ public class BookingManager {
         }
     }
 	
+    public boolean isAvailable(String facilityID, String date, int slot) {
+        // Make sure you are calling the method or variable that holds your data
+        List<Booking> bookings = getBookingList(); 
+        
+        for (Booking b : bookings) {
+            if (b.getFacilityID().equals(facilityID) && 
+                b.getBookingDate().equals(date) && 
+                b.getTimeSlot() == slot) {
+                
+                String status = b.getStatus();
+                if (status.equalsIgnoreCase("Pending") || status.equalsIgnoreCase("Confirmed")) {
+                    return false; 
+                }
+            }
+        }
+        return true;
+    }
+    
     private void saveToFile() {
         List<String> lines = new ArrayList<>();
         for (Booking b : bookingList) {

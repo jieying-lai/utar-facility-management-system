@@ -16,6 +16,9 @@ import my.edu.utar.model.Facility;
 import my.edu.utar.util.Constants;
 import my.edu.utar.util.Validator;
 import my.edu.utar.service.FacilitiesService;
+import java.util.stream.Collectors;
+import java.time.LocalDate;
+
 public class AdminMenu{
 
     private Scanner sc;
@@ -103,29 +106,150 @@ public class AdminMenu{
     }
 
     private void searchFacility() {
-        System.out.println("\n--- Search The Facility Status ---");
-        System.out.println("Example Keyword:facilityID,block,floor,roomNo,type,capacity,status");
-        System.out.println("Enter Search Keyword: ");
-        String input = sc.nextLine().trim().toLowerCase();
+        Scanner sc = new Scanner(System.in);
+        System.out.println("\n========== ADMIN: FACILITY SCHEDULE VIEW ==========");
+        System.out.println("(Type 'B' to go back, 'C' to cancel)");
 
-        if(input.isEmpty()) {
-        	return;
+        String block = "", type = "", formattedDate = "";
+        int step = 1;
+
+        List<Facility> allFacilities = FileManager.loadAllFacilities();
+        if (allFacilities.isEmpty()) {
+            System.out.println(">> No facilities found.");
+            return;
         }
-        
-        List<Facility> results = facilityService.searchFacilities(input);
 
-        if (results.isEmpty()) {
-            System.out.println("No matching facility found. Please Try Again.");
-        } else {
-        	System.out.printf("%-10s %-8s %-8s %-10s %-15s %-10s %-15s\n", 
-                    "ID", "Block", "Floor", "Room", "Type", "Capacity", "Status");
-            for (Facility f : results) {
-                System.out.printf("%-10s %-8s %-8s %-10s %-15s %-10s %-15s\n", f.getFacilityID(), f.getBlock(), f.getFloor(), f.getRoomNo(),
-                        f.getType(), f.getCapacity(), f.getStatus());
+        while (step <= 4) {
+            switch (step) {
+                case 1: // 1. Select Block
+                    List<String> blocks = allFacilities.stream()
+                            .map(Facility::getBlock).distinct().collect(Collectors.toList());
+                    block = selectWithBack(blocks, "Block");
+                    if (block == null) { handleCancellation(); return; }
+                    if (block.equals("BACK")) return;
+                    step++;
+                    break;
+
+                case 2: // 2. Select Facility Type
+                    final String b2 = block;
+                    List<String> types = allFacilities.stream()
+                            .filter(f -> f.getBlock().equalsIgnoreCase(b2))
+                            .map(Facility::getType).distinct().collect(Collectors.toList());
+                    type = selectWithBack(types, "Facility Type");
+                    if (type == null) { handleCancellation(); return; }
+                    if (type.equals("BACK")) { step--; break; }
+                    step++;
+                    break;
+
+                case 3: // 3. Select Date
+                    while (true) {
+                        System.out.print("\nEnter Date (YYYY-MM-DD) [B: Back, C: Cancel]: ");
+                        String dInput = sc.nextLine().trim().toUpperCase();
+                        if (dInput.equals("C")) { handleCancellation(); return; }
+                        if (dInput.equals("B")) { step--; break; }
+
+                        try {
+                            java.time.LocalDate d = java.time.LocalDate.parse(dInput);
+                            formattedDate = d.format(java.time.format.DateTimeFormatter.ofPattern("ddMMyyyy"));
+                            step++; 
+                            break;
+                        } catch (Exception e) {
+                            System.out.println(">> Invalid date format. Please use YYYY-MM-DD.");
+                        }
+                    }
+                    break;
+
+                case 4: // 4. Display Matrix Results
+                    displayScheduleTable(block, type, formattedDate, allFacilities);
+                    
+                    // --- LOOP FOR VALID INPUT HANDLING ---
+                    boolean validChoice = false;
+                    while (!validChoice) {
+                        System.out.print("\n[Enter: New Search, B: Change Date, C: Back to Main Menu]: ");
+                        String endInput = sc.nextLine().trim().toUpperCase();
+                        
+                        if (endInput.equals("C")) {
+                            handleCancellation();
+                            return; 
+                        } else if (endInput.equals("B")) {
+                            step = 3; 
+                            validChoice = true;
+                        } else if (endInput.equals("") || endInput.equals("ENTER")) { // Empty string is "Enter"
+                            step = 1; 
+                            validChoice = true;
+                        } else {
+                            System.out.println(">> Invalid input '" + endInput + "'. Please choose Enter, B, or C.");
+                            // Stays in this while loop to ask again
+                        }
+                    }
+                    break;
             }
         }
     }
 
+    // --- HELPER: CANCELLATION MESSAGE ---
+    private void handleCancellation() {
+        System.out.println("\n>> Action Cancelled. Returning to Main Menu...");
+        System.out.println("Press Enter to continue...");
+        new Scanner(System.in).nextLine();
+    }
+
+    // --- HELPER: TABLE DRAWING (To keep code clean) ---
+    private void displayScheduleTable(String block, String type, String fDate, List<Facility> allFacilities) {
+        List<Facility> filtered = allFacilities.stream()
+                .filter(f -> f.getBlock().equalsIgnoreCase(block) && f.getType().equalsIgnoreCase(type))
+                .collect(Collectors.toList());
+
+        java.time.LocalDate d = java.time.LocalDate.parse(fDate, java.time.format.DateTimeFormatter.ofPattern("ddMMyyyy"));
+        
+        System.out.println("\n" + "=".repeat(110));
+        System.out.println("SCHEDULE FOR : " + d.format(java.time.format.DateTimeFormatter.ofPattern("dd MMMM yyyy")));
+        System.out.println("BLOCK        : " + block + " | TYPE: " + type);
+        System.out.println("LEGEND       : [/] Available   [X] Occupied/Pending");
+        System.out.println("=".repeat(110));
+        
+        System.out.printf("%-10s", "Room ID");
+        for (int slot = 1; slot <= Constants.TOTAL_SLOTS; slot++) {
+            System.out.printf(" | %-17s", Constants.TIME_SLOTS[slot].trim());
+        }
+        System.out.println("\n" + "-".repeat(110));
+
+        for (Facility f : filtered) {
+            System.out.printf("%-10s", f.getRoomNo());
+            for (int slot = 1; slot <= Constants.TOTAL_SLOTS; slot++) {
+                boolean free = bookingManager.isAvailable(f.getFacilityID(), fDate, slot);
+                System.out.printf(" | %-17s", "        " + (free ? "/" : "X"));
+            }
+            System.out.println();
+        }
+        System.out.println("=".repeat(110));
+    }
+
+    private String selectWithBack(List<String> options, String label) {
+        while (true) {
+            System.out.println("\n--- Select " + label + " ---");
+            for (int i = 0; i < options.size(); i++) {
+                System.out.println("[" + (i + 1) + "] " + options.get(i));
+            }
+            System.out.print("Selection [B: Back, C: Cancel]: ");
+            String input = sc.nextLine().trim().toUpperCase();
+            
+            if (input.equals("C")) return null;
+            if (input.equals("B")) return "BACK";
+            
+            try {
+                int choice = Integer.parseInt(input);
+                if (choice >= 1 && choice <= options.size()) {
+                    return options.get(choice - 1);
+                } else {
+                    System.out.println(">> Invalid selection. Please try again.");
+                }
+            } catch (NumberFormatException e) {
+                System.out.println(">> Please enter a valid number, 'B', or 'C'.");
+            }
+        }
+    }
+    
     private void manageFacility() {
     	Scanner input = new Scanner (System.in);
     	while (true) {

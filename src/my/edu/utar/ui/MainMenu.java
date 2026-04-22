@@ -340,7 +340,9 @@ public class MainMenu {
             System.out.println("============================================");
 
             System.out.print("  Enter ID (or 'B' to back): ");
-            String id = sc.nextLine().trim();
+
+	        String id = sc.nextLine().trim().toUpperCase();
+
 
             if (id.equalsIgnoreCase("B")) {
                 return; 
