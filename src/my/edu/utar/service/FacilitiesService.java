@@ -36,6 +36,15 @@ public class FacilitiesService {
         }
     }
 
+    public String getFacilityNameById(String roomId) {
+        List<Facility> facilities = getAllFacilities();
+        for (Facility f : facilities) {
+            if (f.getFacilityID().equalsIgnoreCase(roomId)) {
+                return f.getName(); // Returns "test" from your example
+            }
+        }
+        return "Unknown Facility";
+    }
     private String formatFacilityLine(Facility f) {
         return String.format("%s|%s|%s|%s|%s|%s|%d|%s",
                 f.getFacilityID(), f.getBlock(), f.getFloor(), 

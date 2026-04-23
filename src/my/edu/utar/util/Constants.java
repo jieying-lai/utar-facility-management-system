@@ -45,11 +45,11 @@ public class Constants {
     // ===================== TIME SLOTS =====================
     public static final String[] TIME_SLOTS = {
         "",             // index 0 unused
-        " 8 a.m. - 10 a.m ",   // index 1
+        "8 a.m. - 10 a.m ",   // index 1
         "10 a.m. - 12 p.m.",  // index 2
         "12 p.m. -  2 p.m.",   // index 3
-        " 2 p.m. -  4 p.m.",    // index 4
-        " 4 p.m. -  6 p.m."     // index 5
+        "2 p.m. -  4 p.m.",    // index 4
+        "4 p.m. -  6 p.m."     // index 5
     };
     public static final int[] TIME_SLOT_START_HOUR = { 0, 8, 10, 12, 14, 16 };
     public static final int TOTAL_SLOTS = 5;

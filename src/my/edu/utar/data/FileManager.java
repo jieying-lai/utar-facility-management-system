@@ -384,7 +384,25 @@ public class FileManager {
             System.out.println(">> Error: User ID not found in database.");
         }
     }
-    
+    public static List<String[]> loadAllBookings() {
+        List<String[]> bookings = new ArrayList<>();
+        // Use the constant for your file path
+        File file = new File(Constants.FILE_BOOKINGS); 
+
+        if (!file.exists()) return bookings;
+
+        try (BufferedReader br = new BufferedReader(new FileReader(file))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                if (line.trim().isEmpty()) continue;
+
+                bookings.add(line.split("\\|"));
+            }
+        } catch (IOException e) {
+            System.out.println("Error reading bookings: " + e.getMessage());
+        }
+        return bookings;
+    }
     public static void saveAllUsers(List<User> users) {
         try (PrintWriter writer = new PrintWriter(new FileWriter("data/users.txt"))) {
             for (User u : users) {

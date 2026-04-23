@@ -18,18 +18,24 @@ import my.edu.utar.util.Validator;
 import my.edu.utar.service.FacilitiesService;
 import java.util.stream.Collectors;
 import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.Map;
+import java.util.HashMap;
 
-public class AdminMenu{
+public class AdminMenu {
 
     private Scanner sc;
     private Admin currentAdmin;
-    
-    private FacilitiesService facilityService = new FacilitiesService();
-    private BookingManager bookingManager = new BookingManager();
+    private BookingManager bookingManager;
+    private FacilitiesService facilitiesService; // Use this consistent name
 
     public AdminMenu(Scanner sc, Admin currentAdmin) {
         this.sc = sc;
         this.currentAdmin = currentAdmin;
+        
+        // Initialize them here
+        this.bookingManager = new BookingManager();
+        this.facilitiesService = new FacilitiesService();
     }
 
     public void show() {
@@ -49,7 +55,7 @@ public class AdminMenu{
                 		  break;
                 case "2": manageFacility();       
                 		  break;
-                case "3": approval();    
+                case "3": approval(sc);    
                 		  break;
                 case "4": facilityUsageTracking();
                           break;
@@ -116,7 +122,6 @@ public class AdminMenu{
         List<Facility> allFacilities = FileManager.loadAllFacilities();
         if (allFacilities.isEmpty()) {
             System.out.println(">> No facilities found.");
-            sc.close();
             return;
         }
 
@@ -185,7 +190,6 @@ public class AdminMenu{
                     }
                     break;
             }
-            sc.close();
         }
     }
 
@@ -263,7 +267,7 @@ public class AdminMenu{
         while (true) {
             // CRITICAL FIX: Refresh data from the file at the start of every loop
             // This ensures the program "sees" new additions or deletions immediately
-            List<Facility> allFacilities = facilityService.getAllFacilities();
+            List<Facility> allFacilities = facilitiesService.getAllFacilities();
 
             System.out.println("\n============================================");
             System.out.println("         FACILITIES MANAGEMENT PAGE         ");
@@ -407,7 +411,7 @@ public class AdminMenu{
 
                     Facility newFacility = new Facility(ID, block, floor, roomNo, description, type, capacity, Constants.FACILITY_AVAILABLE);
                     
-                    if (facilityService.addFacility(newFacility) == null) {
+                    if (facilitiesService.addFacility(newFacility) == null) {
                         System.out.println("\n============================================");
                         System.out.println("        FACILITY SUCCESSFULLY ADDED         ");
                         System.out.println("============================================");
@@ -690,7 +694,7 @@ public class AdminMenu{
         }
 
         // FINAL SAVE to text file
-        if (facilityService.updateFacilities(allF)) {
+        if (facilitiesService.updateFacilities(allF)) {
             System.out.println("\n==============================================");
             System.out.println(">> UPDATE SUCCESSFUL: File data has been saved.");
             System.out.println("==============================================");
@@ -704,7 +708,7 @@ public class AdminMenu{
         boolean hasActive = FileManager.hasActiveBookings(target.getFacilityID());
         
         if (hasActive) {
-            System.out.println("\n[!] ERROR: Cannot delete facility " + target.getFacilityID());
+            System.out.println("\nERROR: Cannot delete facility " + target.getFacilityID());
             System.out.println(">> This facility has Active/Confirmed/Pending bookings.");
             System.out.println(">> Please resolve or cancel those bookings before deleting.");
             System.out.println("Press Enter to return...");
@@ -729,7 +733,7 @@ public class AdminMenu{
             allF.remove(target);
             
             // Overwrite the file with the updated list
-            if (facilityService.updateFacilities(allF)) {
+            if (facilitiesService.updateFacilities(allF)) {
                 System.out.println("\n>> SUCCESS: Facility [" + target.getRoomNo() + "] removed permanently.");
             } else {
                 System.out.println("\n>> [!] SYSTEM ERROR: Failed to update database file.");
@@ -741,54 +745,295 @@ public class AdminMenu{
         System.out.println("Press Enter to continue...");
         sc.nextLine();
     }
-    
-    private void approval() {
-    	Scanner input = new Scanner(System.in);
-        System.out.print("Enter Booking ID to process: ");
-        String id = input.nextLine();
+    private void approval(Scanner sc) {
+        // 1. Fetch pending bookings from your manager
+        List<Booking> pendingList = bookingManager.getPendingBookingsSorted();
 
-        System.out.println("(1) Approve or (2) Reject this booking?");
-        System.out.print("Selection: ");
-        String choice = input.nextLine();
-
-        if (choice.equals("1")) {
-            if (bookingManager.approveBooking(id)) {
-                System.out.println("Booking approved successfully!");
-            } else {
-                System.out.println("Error: Booking ID not found or already processed.");
-            }
-        } else if (choice.equals("2")) {
-            System.out.print("Enter reason for rejection: ");
-            String reason = input.nextLine();
-            
-            if (bookingManager.rejectBooking(id, reason)) {
-                System.out.println("Booking rejected. Reason recorded.");
-            } else {
-                System.out.println("Error: Failed to reject the booking.");
-            }
-        } else {
-            System.out.println("Invalid selection.");
+        if (pendingList.isEmpty()) {
+            System.out.println("\n[!] No pending booking requests found.");
+            return;
         }
-        input.close();
+
+        // 2. Load users once from the file to avoid "File Not Found" errors in the loop
+        // Ensure Constants.FILE_USERS matches the path in your FileManager
+        List<String> userLines = FileManager.readAllLines(Constants.FILE_USERS);
+
+        System.out.println("\n" + "=".repeat(100));
+        System.out.println("                                PENDING BOOKING REQUESTS                                  ");
+        System.out.println("=".repeat(100));
+        
+        // Widths: No(4), UserID(10), Name(15), RoomID(10), Facility(25), Status(10)
+        String format = "%-4s | %-10s | %-15s | %-10s | %-25s | %-10s%n";
+        
+        System.out.printf(format, "No", "User ID", "User Name", "Room ID", "Facility", "Status");
+        System.out.println("-".repeat(100));
+
+        for (int i = 0; i < pendingList.size(); i++) {
+            Booking b = pendingList.get(i);
+            String userId = b.getUserID();
+            
+            // Find User Name from the pre-loaded list
+            String uName = "Unknown";
+            for (String uLine : userLines) {
+                String[] uData = uLine.split("\\|");
+                if (uData.length >= 2 && uData[0].equals(userId)) {
+                    uName = uData[1];
+                    break;
+                }
+            }
+
+            // Get Facility Name using the ID (B001, F008, etc.)
+            String fName = facilitiesService.getFacilityNameById(b.getFacilityID());
+
+            System.out.printf(format, 
+                              (i + 1), 
+                              userId, 
+                              (uName.length() > 15 ? uName.substring(0, 12) + "..." : uName), 
+                              b.getFacilityID(), 
+                              (fName.length() > 25 ? fName.substring(0, 22) + "..." : fName), 
+                              b.getStatus());
+        }
+        System.out.println("=".repeat(100));
+
+        // 3. Admin Decision Logic
+        System.out.print("\nSelect No. to process (B to back): ");
+        String inputStr = sc.nextLine();
+        
+        if (inputStr.equalsIgnoreCase("B")) return;
+
+        try {
+            int index = Integer.parseInt(inputStr) - 1;
+            if (index >= 0 && index < pendingList.size()) {
+                processDecision(pendingList.get(index).getBookingID(), sc);
+            } else {
+                System.out.println("Invalid selection number.");
+            }
+        } catch (NumberFormatException e) {
+            System.out.println("Invalid input. Please enter a number or 'B'.");
+        }
     }
-    
+
+    private void processDecision(String bookingID, Scanner sc) {
+        // 1. Fetch the full booking object
+        Booking b = bookingManager.findBooking(bookingID);
+        
+        if (b == null) {
+            System.out.println("Error: Booking details not found.");
+            return;
+        }
+
+        // 2. Fetch related details for the "Profile"
+        String uName = getUserName(b.getUserID());
+        String fName = facilitiesService.getFacilityNameById(b.getFacilityID());
+        
+        // Safety check for Time Slot index
+        String slotTime = "Unknown Slot";
+        if (b.getTimeSlot() >= 1 && b.getTimeSlot() < Constants.TIME_SLOTS.length) {
+            slotTime = Constants.TIME_SLOTS[b.getTimeSlot()];
+        }
+
+        // 3. Display Detailed View
+        // Inside processDecision method:
+
+        System.out.println("\n==================================================");
+        System.out.println("                BOOKING DETAILS                   ");
+        System.out.println("==================================================");
+        System.out.printf("Booking ID:          %s%n", b.getBookingID());
+
+        // Apply formatDate here
+        System.out.printf("Apply Date:          %s%n", formatDate(b.getApplyDate())); 
+
+        System.out.println("--------------------------------------------------");
+        System.out.printf("User ID:             %s%n", b.getUserID());
+        System.out.printf("User Name:           %s%n", uName);
+        System.out.println("--------------------------------------------------");
+        System.out.printf("Room ID:             %s%n", b.getFacilityID());
+        System.out.printf("Facility Name:       %s%n", fName);
+
+        // Apply formatDate here
+        System.out.printf("Booked Date:         %s%n", formatDate(b.getBookingDate())); 
+        System.out.printf("Booked Time Slot:    %s%n", slotTime);
+        System.out.println("--------------------------------------------------");
+
+        // 4. Action Menu
+        System.out.println("\nHow would you like to proceed?");
+        System.out.println("[1] Approve");
+        System.out.println("[2] Reject");
+        System.out.println("[B] Back to list (No changes)");
+        System.out.print("Selection: ");
+        
+        String choice = sc.nextLine().toUpperCase();
+
+        switch (choice) {
+        case "1":
+            if (bookingManager.approveBooking(bookingID)) {
+                System.out.println("Booking Approved successfully!");
+            }
+            System.out.println("\nPress Enter to continue...");
+            sc.nextLine(); // Pause for the Admin
+            break;
+
+        case "2":
+            String reason = "";
+            while (true) {
+                System.out.print("Enter reason for rejection (or 'B' to cancel): ");
+                reason = sc.nextLine().trim();
+
+                if (reason.equalsIgnoreCase("B")) {
+                    processDecision(bookingID, sc); // Go back to the Detail view
+                    return; 
+                }
+
+                if (reason.isEmpty()) {
+                    System.out.println("Error: Rejection reason cannot be empty. Please provide a reason.");
+                } else {
+                    break; // Valid reason provided
+                }
+            }
+
+            if (bookingManager.rejectBooking(bookingID, reason)) {
+                System.out.println("Booking Rejected. Reason recorded.");
+            }
+            System.out.println("\nPress Enter to continue...");
+            sc.nextLine(); // Pause
+            break;
+
+        case "B":
+            // Returning to list - no pause needed as they requested to go back
+            break;
+
+        default:
+            System.out.println("Invalid choice.");
+            System.out.println("Press Enter to continue...");
+            sc.nextLine();
+            break;
+    }
+    }
+
     private void facilityUsageTracking() {
-        System.out.println("\n--- Facility Usage Tracking ---");
-  
-        List<Facility> allFacilities = facilityService.getAllFacilities();
+        List<Facility> allFacilities = facilitiesService.getAllFacilities();
         List<Booking> allBookings = bookingManager.getBookingList();
 
-        for (Facility f : allFacilities) {
-            int count = 0; 
-                for (Booking booking : allBookings) {
-                    if (booking.getFacilityID().equals(f.getFacilityID())) {
-                        count++;
-                    }
+        // 1. Calculate Summary Stats
+        int pending = 0, approved = 0, rejected = 0, cancelled = 0;
+        Map<String, Integer> typeUsageMap = new HashMap<>();
+
+        for (Booking b : allBookings) {
+            String status = b.getStatus();
+            if (status.equalsIgnoreCase(Constants.STATUS_PENDING)) pending++;
+            else if (status.equalsIgnoreCase(Constants.STATUS_APPROVED)) approved++;
+            else if (status.equalsIgnoreCase(Constants.STATUS_REJECTED)) rejected++;
+            else if (status.equalsIgnoreCase(Constants.STATUS_CANCELLED)) cancelled++;
+            
+            // Track usage by Type
+            String fId = b.getFacilityID();
+            // Look up the type for this facility ID
+            for (Facility f : allFacilities) {
+                if (f.getFacilityID().equals(fId)) {
+                    typeUsageMap.put(f.getType(), typeUsageMap.getOrDefault(f.getType(), 0) + 1);
+                    break;
                 }
-                System.out.println("Facility: " + f.getFacilityID() + " | Total Usage: " + count);
+            }
+        }
+
+        // --- DASHBOARD HEADER ---
+        System.out.println("\n" + "=".repeat(60));
+        System.out.println("                CAMPUS BOOKING DASHBOARD                 ");
+        System.out.println("=".repeat(60));
+        System.out.printf(" PENDING: %-4d | APPROVED: %-4d | REJECTED: %-4d | CANCELLED: %-4d%n", 
+                          pending, approved, rejected, cancelled);
+        System.out.println("=".repeat(65));
+
+        // --- SECTION 1: TOP 3 ROOMS ---
+        System.out.println("\nTOP 3 MOST POPULAR ROOMS");
+        System.out.println("-".repeat(65));
+        System.out.printf("%-5s | %-10s | %-20s | %-8s%n", "Rank", "Room ID", "Type", "Usage");
+        
+        // Sort facilities by count
+        class RoomCount {
+            String id, type;
+            int count;
+            RoomCount(String id, String type, int count) { this.id = id; this.type = type; this.count = count; }
+        }
+        
+        List<RoomCount> roomCounts = new ArrayList<>();
+        for (Facility f : allFacilities) {
+            int count = 0;
+            for (Booking b : allBookings) {
+                if (b.getFacilityID().equals(f.getFacilityID())) count++;
+            }
+            roomCounts.add(new RoomCount(f.getFacilityID(), f.getType(), count));
+        }
+        roomCounts.sort((a, b) -> Integer.compare(b.count, a.count));
+
+        // Display only Top 3
+        for (int i = 0; i < Math.min(3, roomCounts.size()); i++) {
+            RoomCount rc = roomCounts.get(i);
+            System.out.printf("%-5d | %-10s | %-20s | %-8d%n", (i+1), rc.id, rc.type, rc.count);
+        }
+
+        // --- SECTION 2: USAGE BY FACILITY TYPE ---
+        System.out.println("\nUSAGE BY FACILITY CATEGORY");
+        System.out.println("-".repeat(60));
+        System.out.printf("%-25s | %-10s%n", "Facility Type", "Total Bookings");
+        System.out.println("-".repeat(60));
+        
+        // Convert Map to List so we can sort types by popularity too
+        List<Map.Entry<String, Integer>> sortedTypes = new ArrayList<>(typeUsageMap.entrySet());
+        sortedTypes.sort((a, b) -> b.getValue().compareTo(a.getValue()));
+
+        for (Map.Entry<String, Integer> entry : sortedTypes) {
+            System.out.printf("%-25s | %-10d%n", entry.getKey(), entry.getValue());
+        }
+
+        System.out.println("=".repeat(60));
+        System.out.println("Press Enter to return to Main Menu...");
+        sc.nextLine();
+    }
+    
+    private String getUserName(String userId) {
+        // USE THE CONSTANT instead of "user.txt"
+        // Also, don't print the error inside the loop to keep the table clean
+        try {
+            List<String> lines = FileManager.readAllLines(Constants.FILE_USERS); 
+            for (String line : lines) {
+                String[] data = line.split("\\|");
+                if (data.length >= 2 && data[0].equals(userId)) {
+                    return data[1]; 
+                }
+            }
+        } catch (Exception e) {
+            // Just return Unknown quietly so it doesn't break the table layout
+            return "Unknown";
+        }
+        return "Unknown";
+    }
+    
+    private String formatDate(String dateStr) {
+        if (dateStr == null || dateStr.isEmpty()) return "N/A";
+        
+        // Define the formats your text files use
+        java.time.format.DateTimeFormatter inputFormat1 = java.time.format.DateTimeFormatter.ofPattern("ddMMyyyy");
+        java.time.format.DateTimeFormatter inputFormat2 = java.time.format.DateTimeFormatter.ofPattern("yyyyMMdd");
+        // Define your desired output format
+        java.time.format.DateTimeFormatter outputFormat = java.time.format.DateTimeFormatter.ofPattern("d MMMM yyyy");
+
+        try {
+            java.time.LocalDate date;
+            // Try parsing ddMMyyyy first (Apply Date style)
+            if (dateStr.length() == 8 && !dateStr.startsWith("20")) {
+                date = java.time.LocalDate.parse(dateStr, inputFormat1);
+            } else {
+                // Try parsing yyyyMMdd (Booked Date style)
+                date = java.time.LocalDate.parse(dateStr, inputFormat2);
+            }
+            return date.format(outputFormat);
+        } catch (Exception e) {
+            // If it's already in a weird format, just return the original string
+            return dateStr;
         }
     }
-
+    
     private void viewSummaryReport() {
         try {
             File facilityFile = new File("data/facilities.txt");

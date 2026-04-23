@@ -288,6 +288,18 @@ public class BookingManager {
         }
         return list;
     }
+    public List<String[]> getPendingBookings() {
+        List<String[]> allBookings = FileManager.loadAllBookings(); // Use your existing FileManager method
+        List<String[]> pending = new ArrayList<>();
+        
+        for (String[] row : allBookings) {
+            // Based on your example, index 8 is the status
+            if (row.length > 8 && row[8].equalsIgnoreCase("Pending")) {
+                pending.add(row);
+            }
+        }
+        return pending;
+    }
     
     public void loadFromFile() {
         bookingList = new ArrayList<>();

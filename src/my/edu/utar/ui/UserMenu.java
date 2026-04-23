@@ -1080,7 +1080,6 @@ public class UserMenu {
             } catch (Exception e) {
                 System.out.println(">> Invalid input. Please enter a number or 'B'.");
             }
-            sc.close();
         }
     }
 
@@ -1123,7 +1122,6 @@ public class UserMenu {
         List<Facility> allFacilities = FileManager.loadAllFacilities();
         if (allFacilities.isEmpty()) {
             System.out.println("No facilities found in system.");
-            sc.close();
             return;
         }
 
@@ -1284,7 +1282,6 @@ public class UserMenu {
                     }
                     break;
             }
-            sc.close();
         }
     }
 
@@ -1365,7 +1362,6 @@ public class UserMenu {
             } catch (NumberFormatException e) {
                 System.out.println(">> Please enter a valid number or 'B'.");
             }
-            sc.close();
         }
     }
 
