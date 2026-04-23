@@ -913,7 +913,7 @@ public class UserMenu {
                     if (confirm.equals("Y")) {
                         selected.setStatus(Constants.STATUS_CANCELLED);
                         bookingManager.updateBooking(selected);
-                        System.out.println("\nSUCCESS: Booking successfully cancelled.");
+                        System.out.println("\nSUCCESS: Booking successfully cancelled. This time slot is now available for others.");
                         System.out.println("Press Enter to return to Main Menu...");
                         sc.nextLine();
                         return; // EXIT TO MAIN MENU
