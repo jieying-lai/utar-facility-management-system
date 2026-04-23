@@ -13,8 +13,6 @@ import java.util.Map;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
-import java.util.HashSet;
 import java.util.stream.Collectors;
 
 import java.time.LocalDateTime;
@@ -289,36 +287,11 @@ public class UserMenu {
         }
     }
     
-    
- // ===================== MEMBER 2: SEARCH FACILITY =====================
-
-    private String selectFromMenu(Scanner sc, List<String> options, String title) {
-        java.util.Collections.sort(options);
-        System.out.println("\n--- Available " + title + " ---");
-        for (int i = 0; i < options.size(); i++) {
-            System.out.println("[" + (i + 1) + "] " + options.get(i));
-        }
-        System.out.println("[C] Cancel and Return to Menu");
-
-        while (true) {
-            System.out.print("Select " + title + " (1-" + options.size() + ") or 'C': ");
-            String input = sc.nextLine().trim();
-
-            if (input.equalsIgnoreCase("C")) {
-                return null; // Return null to signal cancellation
-            }
-
-            if (my.edu.utar.util.Validator.isValidMenuChoice(input, 1, options.size())) {
-                return options.get(Integer.parseInt(input) - 1);
-            }
-            System.out.println(">> Invalid selection. Enter 1-" + options.size() + " or 'C'.");
-        }
-    }
     private void searchAvailableFacility() {
         System.out.println("\n========== SEARCH AVAILABLE FACILITY ==========");
         System.out.println("(Type 'B' to go back, 'C' to cancel completely)");
 
-        String block = "", type = "", floor = "", room = "", formattedDate = "";
+        String block = "", type = "", floor = "", formattedDate = "";
         int selectedSlot = -1;
         int step = 1;
         
@@ -328,7 +301,6 @@ public class UserMenu {
             return;
         }
 
-        boolean useSpecificRoom = false;
 
         while (step <= 7) {
             switch (step) {
@@ -1108,6 +1080,7 @@ public class UserMenu {
             } catch (Exception e) {
                 System.out.println(">> Invalid input. Please enter a number or 'B'.");
             }
+            sc.close();
         }
     }
 
@@ -1150,6 +1123,7 @@ public class UserMenu {
         List<Facility> allFacilities = FileManager.loadAllFacilities();
         if (allFacilities.isEmpty()) {
             System.out.println("No facilities found in system.");
+            sc.close();
             return;
         }
 
@@ -1241,9 +1215,11 @@ public class UserMenu {
                         String reportTime = java.time.LocalTime.now().format(java.time.format.DateTimeFormatter.ofPattern("HH:mm"));
                         String issueID = "M" + reportDate + String.format("%04d", System.currentTimeMillis() % 10000);
 
-                        // --- INNER LOOP FOR CONFIRMATION ---
+                     // --- Step: Confirmation Summary ---
                         boolean confirmed = false;
-                        while (true) {
+
+                        // We use 'confirmed' as the gatekeeper for this specific loop
+                        while (!confirmed) {
                             System.out.println("\n==============================================");
                             System.out.println("         PRE-REPORT SUMMARY");
                             System.out.println("==============================================");
@@ -1259,29 +1235,44 @@ public class UserMenu {
                             System.out.println("----------------------------------------------");
 
                             System.out.print("Confirm report? [Y: Confirm, B: Back to Edit, C: Cancel]: ");
-                            String confirm = sc.nextLine().trim().toUpperCase();
+                            String confirmChoice = sc.nextLine().trim().toUpperCase();
 
-                            if (confirm.equals("Y")) {
+                            if (confirmChoice.equals("Y")) {
+                                // Construct the data string for the text file
                                 String maintenanceData = String.format("%s|%s|%s|%s|%s|%s|%s|%s|%s",
-                                        issueID, selectedFacility.getFacilityID(), currentUser.getId(),
-                                        selectedIssueType, desc, reportDate, Constants.MAINT_REPORTED, "None", "None");
+                                        issueID, 
+                                        selectedFacility.getFacilityID(), 
+                                        currentUser.getId(),
+                                        selectedIssueType, 
+                                        desc, 
+                                        reportDate, 
+                                        Constants.MAINT_REPORTED, 
+                                        "None", 
+                                        "None");
                                 
                                 saveMaintenanceRecord(maintenanceData);
+                                
                                 System.out.println("\n>> Issue reported successfully!");
                                 System.out.println(">> Admin will resolve the problem as soon as possible.");
                                 System.out.println("\nPress Enter to return to main page...");
                                 sc.nextLine();
-                                return; 
+                                
+                                confirmed = true; // This ends the 'while' loop
+                                return;           // This exits the method and goes back to Main Menu
                             } 
-                            else if (confirm.equals("B")) {
-                                confirmed = false;
-                                break;
+                            else if (confirmChoice.equals("B")) {
+                                // To go "Back", we exit this loop but DON'T return.
+                                // This allows the outer 'step' logic to take over.
+                                confirmed = true; 
+                                // Note: If you are using a 'step' variable (e.g., step = 2), 
+                                // make sure you set 'step = 2;' before breaking.
+                                break; 
                             } 
-                            else if (confirm.equals("C")) {
+                            else if (confirmChoice.equals("C")) {
                                 System.out.println("\n>> Issue report action cancelled.");
                                 System.out.println("Press Enter to return to main menu...");
                                 sc.nextLine();
-                                return;
+                                return; // Exits the method immediately
                             } 
                             else {
                                 System.out.println(">> Invalid input. Please enter 'Y', 'B', or 'C'.");
@@ -1293,6 +1284,7 @@ public class UserMenu {
                     }
                     break;
             }
+            sc.close();
         }
     }
 
@@ -1373,6 +1365,7 @@ public class UserMenu {
             } catch (NumberFormatException e) {
                 System.out.println(">> Please enter a valid number or 'B'.");
             }
+            sc.close();
         }
     }
 
@@ -1427,31 +1420,6 @@ public class UserMenu {
 
             System.out.println("Invalid input, please try again.");
         }
-    }
-
-    private void displayAvailable(List<Facility> list) {
-        System.out.println("\n--- AVAILABLE FACILITIES ---");
-        
-        if (list.isEmpty()) {
-            System.out.println("No facilities available for the selected criteria.");
-            return;
-        }
-        System.out.printf("%-4s | %-10s | %-35s | %-15s | %-5s | %-10s\n", 
-                          "No.", "Room", "Name", "Type", "Cap", "Status");
-        System.out.println("----------------------------------------------------------------------------------------------------");
-
-        for (int i = 0; i < list.size(); i++) {
-            Facility f = list.get(i);
-            System.out.printf("%-4d | %-10s | %-35s | %-15s | %-5d | %-10s\n",
-                (i + 1),
-                f.getRoomNo(),
-                (f.getName() != null ? f.getName() : "N/A"),
-                f.getType(),
-                f.getCapacity(),
-                f.getStatus()
-            );
-        }
-        System.out.println("----------------------------------------------------------------------------------------------------");
     }
 
     private void showAdminContact() {

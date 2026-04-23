@@ -5,7 +5,7 @@ F004|KA|M|M001|Meeting Room|Discussion Room|15|Available
 F005|KA|M|M002|MRC Laboratory II|Laborotory|30|Available
 F006|KA|1|KA121|Cell and Tissue Culture Lab|Laborotory|25|Available
 F007|KA|1|KA122|Molecular Biology Lab|Laborotory|25|Available
-F008|KA|1|KA123|Reading Room|Discussion Room|40|Available
+F008|KA|1|KA123|Reading Room|Discussion Room|50|Available
 F009|KA|2|KA201|Proposed Postgraduate Office and Lab|Discussion Room|20|Available
 F010|KA|2|KA202|Pathology Lab|Laborotory|40|Available
 F011|KA|2|KA203|Store/Multimedia Control Lab|Computer Lab|15|Available
@@ -195,3 +195,7 @@ F194|KB|1|KB113|Ping Pong Table A|Sports Court|4|Available
 F195|KB|1|KB114|Ping Pong Table B|Sports Court|4|Available
 F196|KB|1|KB120|Dance Studio|Sports Court|25|Available
 F197|KB|9|KB906|Martial Arts Studio|Sports Court|30|Available
+F198|KA|G|KA001|testing|Lecture Hall|200|Available
+F199|KA|G|KA888|test|Lecture Hall|200|Available
+F200|KA|SB|KA999|testing3|Lecture Hall|200|Available
+F201|KA|G|KA003|testing999|Lecture Hall|200|Available

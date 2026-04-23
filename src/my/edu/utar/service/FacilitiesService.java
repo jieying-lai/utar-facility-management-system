@@ -1,70 +1,45 @@
 package my.edu.utar.service;
 
+import java.io.*;
+import java.util.*;
 import my.edu.utar.model.Facility;
 import my.edu.utar.data.FileManager;
-import java.util.*;
 import my.edu.utar.util.Constants;
-import java.io.PrintWriter;
 
 public class FacilitiesService {
-	public List<Facility> searchFacilities(String keyword) {
-	    List<Facility> allF = FileManager.loadAllFacilities();
-	    List<Facility> searchResult = new ArrayList<>();
-	    if (keyword == null) return searchResult;
 
-	    String lowerKeyword = keyword.toLowerCase();
-
-	    for (Facility f : allF) {
-	        if (f.getFacilityID().toLowerCase().contains(lowerKeyword) || 
-	            f.getBlock().toLowerCase().contains(lowerKeyword) ||
-	            f.getType().toLowerCase().contains(lowerKeyword) ||
-	            (f.getName() != null && f.getName().toLowerCase().contains(lowerKeyword))) {
-	            
-	            searchResult.add(f);
-	        }
-	    }
-	    return searchResult; 
-	}
-	
 	public List<Facility> getAllFacilities() {
-        return FileManager.loadAllFacilities();
-    }
-
+	    // DO NOT return a static list. 
+	    // Always call the FileManager to read the file again.
+	    return FileManager.loadAllFacilities();
+	}
     public String addFacility(Facility f) {
+        // Validation
         if (FileManager.isFacilityIdExists(f.getFacilityID())) {
-            return ("ID " + f.getFacilityID() + " exists in the system. Try another ID.");
+            return "ID already exists.";
         }
-        if (FileManager.isExactFacilityDuplicate(f)) {
-            return ("Facility added failed. It already exists in the system.");
-        }
+        // Direct save to file via FileManager
         FileManager.saveFacility(f);
         return null; 
     }
 
-    public void removeFacility(String targetID) {
-        List<Facility> all = FileManager.loadAllFacilities();
-        try {
-            new PrintWriter(Constants.FILE_FACILITIES).close();
-            for (Facility f : all) {
-                if (!f.getFacilityID().equalsIgnoreCase(targetID)) {
-                    FileManager.saveFacility(f);
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
     public boolean updateFacilities(List<Facility> updatedList) {
-        try {
-            new PrintWriter(Constants.FILE_FACILITIES).close();
+        // OVERWRITE the file with the new list
+        try (PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter(Constants.FILE_FACILITIES, false)))) {
             for (Facility f : updatedList) {
-                FileManager.saveFacility(f);
+                out.println(formatFacilityLine(f));
             }
             return true;
-        } catch (Exception e) {
+        } catch (IOException e) {
+            e.printStackTrace();
             return false;
         }
     }
 
+    private String formatFacilityLine(Facility f) {
+        return String.format("%s|%s|%s|%s|%s|%s|%d|%s",
+                f.getFacilityID(), f.getBlock(), f.getFloor(), 
+                f.getRoomNo(), f.getName(), f.getType(), 
+                f.getCapacity(), f.getStatus());
+    }
 }

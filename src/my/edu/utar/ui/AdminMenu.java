@@ -17,7 +17,7 @@ import my.edu.utar.util.Constants;
 import my.edu.utar.util.Validator;
 import my.edu.utar.service.FacilitiesService;
 import java.util.stream.Collectors;
-import java.time.LocalDate;
+import java.util.Arrays;
 
 public class AdminMenu{
 
@@ -116,6 +116,7 @@ public class AdminMenu{
         List<Facility> allFacilities = FileManager.loadAllFacilities();
         if (allFacilities.isEmpty()) {
             System.out.println(">> No facilities found.");
+            sc.close();
             return;
         }
 
@@ -184,6 +185,7 @@ public class AdminMenu{
                     }
                     break;
             }
+            sc.close();
         }
     }
 
@@ -191,9 +193,9 @@ public class AdminMenu{
     private void handleCancellation() {
         System.out.println("\n>> Action Cancelled. Returning to Main Menu...");
         System.out.println("Press Enter to continue...");
-        new Scanner(System.in).nextLine();
+        
+        this.sc.nextLine(); 
     }
-
     // --- HELPER: TABLE DRAWING (To keep code clean) ---
     private void displayScheduleTable(String block, String type, String fDate, List<Facility> allFacilities) {
         List<Facility> filtered = allFacilities.stream()
@@ -251,230 +253,494 @@ public class AdminMenu{
     }
     
     private void manageFacility() {
-    	Scanner input = new Scanner (System.in);
-    	while (true) {
-    		System.out.println("Facilities Management Page");
-            System.out.println("[1] View all current facilities");
-            System.out.println("[2] Add new facilities");
-            System.out.println("[3] Remove unused facilities");
-            System.out.println("[4] Edit current facilities details");
-            System.out.println("[0] Return to Main Menu");
-            System.out.println("Please enter your choice: ");
-            String choice = sc.nextLine().trim().toUpperCase();
+        // DECLARE VARIABLES HERE for scope
+        String block = "";
+        String type = "";
+        String floor = "";
+        int step = 1;
+        Facility selectedFacility = null;
+
+        while (true) {
+            // CRITICAL FIX: Refresh data from the file at the start of every loop
+            // This ensures the program "sees" new additions or deletions immediately
+            List<Facility> allFacilities = facilityService.getAllFacilities();
+
+            System.out.println("\n============================================");
+            System.out.println("         FACILITIES MANAGEMENT PAGE         ");
+            System.out.println("============================================");
+            System.out.println("  [1] View all current facilities");
+            System.out.println("  [2] Add new facilities");
+            System.out.println("  [3] Modify / Delete facilities");
+            System.out.println("  [0] Return to Main Menu");
+            System.out.println("--------------------------------------------");
+            System.out.print("Please enter your choice: ");
             
-            if (Validator.isEmpty(choice)) {
-                System.out.println("Cannot be empty. Please try again.");
+            String menuChoice = sc.nextLine().trim();
+
+            if (Validator.isEmpty(menuChoice)) {
+                System.out.println(">> Error: Input cannot be empty!");
                 continue;
             }
             
-            if (choice.equals("0")) {
-            	return;
-            }
-            
-            switch (choice) {
-            case "1" :
-            	List<Facility> all = facilityService.getAllFacilities();
-                System.out.println("Current facilities List");
-                for (Facility f : all) {
-                	System.out.println(f.toFileString());
-                }
-                break;
+            if (menuChoice.equals("0")) return;
 
-            case "2":
-                System.out.println("\n--- Add New Facility ---");
-
-                List<Facility> allCurrent = facilityService.getAllFacilities();
-                int nextIdNum = allCurrent.size() + 1;
-                String ID = String.format("F%03d", nextIdNum);
-                
-                while (FileManager.isFacilityIdExists(ID)) {
-                    nextIdNum++;
-                    ID = String.format("F%03d", nextIdNum);
-                }
-                System.out.println("Generated Facility ID: " + ID);
-
-                String block;
-                while (true) {
-                    System.out.print("Enter block name (KA / KB): ");
-                    block = sc.nextLine().trim().toUpperCase();
-                    if (block.equals("KA") || block.equals("KB")) break;
-                    System.out.println("Invalid Block. Only KA or KB allowed.");
-                }
-
-                String floor;
-                while (true) {
-                    System.out.print("Enter floor (KA: 1-8, M, G, SB | KB: 1-10, G, SB): ");
-                    floor = sc.nextLine().trim().toUpperCase();
-                    boolean isValid = false;
-
-                    if (block.equals("KA")) {
-                        if (floor.equals("M") || floor.equals("G") || floor.equals("SB")) isValid = true;
-                        else if (Validator.isNumeric(floor)) {
-                            int fNum = Integer.parseInt(floor);
-                            if (fNum >= 1 && fNum <= 8) isValid = true;
-                        }
-                    } else {
-                        if (floor.equals("G") || floor.equals("SB")) isValid = true;
-                        else if (Validator.isNumeric(floor)) {
-                            int fNum = Integer.parseInt(floor);
-                            if (fNum >= 1 && fNum <= 10) isValid = true;
-                        }
+            switch (menuChoice) {
+                case "1": { // PAGINATION VIEW
+                    if (allFacilities.isEmpty()) {
+                        System.out.println("No facilities found.");
+                        break;
                     }
 
-                    if (isValid) break;
-                    System.out.println("Invalid floor for Block " + block);
+                    int pageSize = 10, currentPage = 0;
+                    int totalFacilities = allFacilities.size();
+                    int totalPages = (int) Math.ceil((double) totalFacilities / pageSize);
+
+                    boolean viewing = true;
+                    while (viewing) {
+                        System.out.println("\n================ CURRENT FACILITIES ================");
+                        System.out.printf("%-5s | %-12s | %-15s%n", "No.", "Room No", "Type");
+                        System.out.println("----------------------------------------------------");
+                        
+                        int start = currentPage * pageSize;
+                        int end = Math.min(start + pageSize, totalFacilities);
+
+                        for (int i = start; i < end; i++) {
+                            Facility f = allFacilities.get(i);
+                            System.out.printf("%-5d | %-12s | %-15s%n", (i + 1), f.getRoomNo(), f.getType());
+                        }
+
+                        System.out.println("----------------------------------------------------");
+                        System.out.printf("Page %d of %d | [N] Next | [P] Previous | [X] Exit%n", (currentPage + 1), totalPages);
+                        System.out.print("Action: ");
+                        String nav = sc.nextLine().toUpperCase();
+
+                        if (nav.equals("N") && (currentPage + 1) < totalPages) currentPage++;
+                        else if (nav.equals("P") && currentPage > 0) currentPage--;
+                        else if (nav.equals("X")) viewing = false;
+                        else System.out.println(">> Invalid move or end of list.");
+                    }
+                    break;
                 }
 
-                String roomNo;
-                while (true) {
-                    System.out.print("Enter Room Number (Must start with " + block + "): ");
-                    roomNo = sc.nextLine().trim().toUpperCase();
+                case "2": { // ADD NEW FACILITY
+                    System.out.println("\n============================================");
+                    System.out.println("          ADD NEW CAMPUS FACILITY           ");
+                    System.out.println("============================================");
+
+                    // Auto-ID Generation based on current list
+                    int nextIdNum = 1;
+                    for (Facility existing : allFacilities) {
+                        try {
+                            int currentIdNum = Integer.parseInt(existing.getFacilityID().substring(1));
+                            if (currentIdNum >= nextIdNum) nextIdNum = currentIdNum + 1;
+                        } catch (Exception e) { }
+                    }
+                    String ID = String.format("F%03d", nextIdNum);
+                    System.out.println("Generated Facility ID: " + ID);
+
+                    // Select Block
+                    while (true) {
+                        System.out.print("Select Block [1] KA [2] KB: ");
+                        String bChoice = sc.nextLine().trim();
+                        if (bChoice.equals("1")) { block = "KA"; break; }
+                        if (bChoice.equals("2")) { block = "KB"; break; }
+                        System.out.println(">> Invalid choice.");
+                    }
+
+                    // Select Floor
+                    String[] kaFloors = {"SB", "G", "M", "1", "2", "3", "4", "5", "6", "7", "8"};
+                    String[] kbFloors = {"SB", "G", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10"};
+                    String[] targetFloors = block.equals("KA") ? kaFloors : kbFloors;
+
+                    while (true) {
+                        System.out.println("Available Floors: " + Arrays.toString(targetFloors));
+                        System.out.print("Select Floor: ");
+                        floor = sc.nextLine().trim().toUpperCase();
+                        final String fSearch = floor;
+                        if (Arrays.stream(targetFloors).anyMatch(f -> f.equals(fSearch))) break;
+                        System.out.println(">> Invalid Floor.");
+                    }
+
+                    // Room Number & Duplicate Check
+                    String roomNo;
+                    while (true) {
+                        System.out.print("Enter Facility Number (Start with " + block + "): ");
+                        roomNo = sc.nextLine().trim().toUpperCase();
+                        final String rSearch = roomNo;
+                        if (roomNo.startsWith(block) && allFacilities.stream().noneMatch(f -> f.getRoomNo().equals(rSearch))) break;
+                        System.out.println(">> Invalid or Duplicate Room Number.");
+                    }
+
+                    System.out.print("Enter Facility Name: ");
+                    String description = sc.nextLine().trim();
+
+                    // Select Type
+                    while (true) {
+                        System.out.println("\nSelect Facility Type:");
+                        for (int i = 0; i < Constants.FACILITY_TYPES.length; i++) {
+                            // %-2d  : Two digits, left-aligned
+                            // %-20s : String, 20 characters wide, left-aligned
+                            System.out.printf("[%d] %-20s ", (i + 1), Constants.FACILITY_TYPES[i]);
+                            
+                            // Print a newline every 2 items to create 2 columns
+                            if ((i + 1) % 2 == 0) {
+                                System.out.println();
+                            }
+                        }
+                        
+                        // Add a newline if the total number of items was odd
+                        if (Constants.FACILITY_TYPES.length % 2 != 0) {
+                            System.out.println();
+                        }
+
+                        System.out.print("Choice: ");
+                        String tChoice = sc.nextLine().trim();
+                        if (Validator.isValidMenuChoice(tChoice, 1, Constants.FACILITY_TYPES.length)) {
+                            type = Constants.FACILITY_TYPES[Integer.parseInt(tChoice) - 1];
+                            break;
+                        }
+                        System.out.println(">> Invalid choice. Please try again.");
+                    }
+
+                    System.out.print("Enter Capacity (1-300): ");
+                    int capacity = Integer.parseInt(sc.nextLine().trim());
+
+                    Facility newFacility = new Facility(ID, block, floor, roomNo, description, type, capacity, Constants.FACILITY_AVAILABLE);
                     
-                    if (!roomNo.startsWith(block)) {
-                        System.out.println("Error: Room number must start with the block name " + block);
-                        continue;
+                    if (facilityService.addFacility(newFacility) == null) {
+                        System.out.println("\n============================================");
+                        System.out.println("        FACILITY SUCCESSFULLY ADDED         ");
+                        System.out.println("============================================");
+                        System.out.printf("  %-15s : %s%n", "Facility ID", newFacility.getFacilityID());
+                        System.out.printf("  %-15s : %s%n", "Room Number", newFacility.getRoomNo());
+                        System.out.printf("  %-15s : %s%n", "Name", newFacility.getName());
+                        System.out.printf("  %-15s : %s%n", "Type", newFacility.getType());
+                        System.out.printf("  %-15s : %s%n", "Location", newFacility.getBlock() + " - Level " + newFacility.getFloor());
+                        System.out.printf("  %-15s : %d%n", "Capacity", newFacility.getCapacity());
+                        System.out.printf("  %-15s : %s%n", "Status", newFacility.getStatus());
+                        System.out.println("============================================");
+                        
+                        System.out.println("\nPress Enter to continue...");
+                        sc.nextLine();
+                    } else {
+                        System.out.println("\n[!] Error: Could not save the facility. Please check the data logs.");
                     }
+                    break;
+                }
 
-                    boolean exists = false;
-                    for (Facility existing : allCurrent) {
-                        if (existing.getRoomNo().equalsIgnoreCase(roomNo)) {
-                            exists = true;
+                case "3": { // MODIFY / DELETE
+                    step = 1;
+                    boolean inModifyMode = true;
+                    while (inModifyMode) {
+                        switch (step) {
+                            case 1: // Select Block
+                                List<String> blocks = allFacilities.stream().map(Facility::getBlock).distinct().sorted().collect(Collectors.toList());
+                                block = selectWithBack(blocks, "Block");
+                                if (block == null || block.equals("BACK")) { inModifyMode = false; break; }
+                                step++; break;
+
+                            case 2: // Select Floor
+                                final String b2 = block;
+                                List<String> floors = allFacilities.stream().filter(f -> f.getBlock().equals(b2)).map(Facility::getFloor).distinct().sorted().collect(Collectors.toList());
+                                floor = selectWithBack(floors, "Floor");
+                                if (floor == null) { inModifyMode = false; break; }
+                                if (floor.equals("BACK")) { step--; break; }
+                                step++; break;
+
+                            case 3: // Select Type
+                                final String b3 = block, f3 = floor;
+                                List<String> types = allFacilities.stream().filter(f -> f.getBlock().equals(b3) && f.getFloor().equals(f3)).map(Facility::getType).distinct().sorted().collect(Collectors.toList());
+                                type = selectWithBack(types, "Facility Type");
+                                if (type == null) { inModifyMode = false; break; }
+                                if (type.equals("BACK")) { step--; break; }
+                                step++; break;
+
+                            case 4: // Select Specific Facility
+                                final String b4 = block, f4 = floor, t4 = type;
+                                // Filter the list based on previous selections
+                                List<Facility> filtered = allFacilities.stream()
+                                        .filter(f -> f.getBlock().equalsIgnoreCase(b4) 
+                                                  && f.getFloor().equalsIgnoreCase(f4) 
+                                                  && f.getType().equalsIgnoreCase(t4))
+                                        .collect(Collectors.toList());
+
+                                if (filtered.isEmpty()) { 
+                                    System.out.println("\n>> No facilities found for this selection. Returning to start..."); 
+                                    step = 1; 
+                                    break; 
+                                }
+
+                                System.out.println("\n==============================================");
+                                System.out.println("            SELECT SPECIFIC FACILITY          ");
+                                System.out.println("==============================================");
+                                // Table Header for alignment
+                                System.out.printf("%-5s | %-12s | %-20s\n", "No.", "Room No", "Facility Name");
+                                System.out.println("----------------------------------------------");
+
+                                for (int i = 0; i < filtered.size(); i++) {
+                                    Facility f = filtered.get(i);
+                                    // Using %-12s and %-20s ensures columns stay perfectly straight
+                                    System.out.printf("[%d]   | %-12s | %-20s\n", (i + 1), f.getRoomNo(), f.getName());
+                                }
+                                System.out.println("----------------------------------------------");
+                                System.out.print("Select Number [B: Back, C: Cancel]: ");
+                                String sel = sc.nextLine().trim().toUpperCase();
+
+                                // 1. Check for Navigation
+                                if (sel.equals("C")) { inModifyMode = false; break; }
+                                if (sel.equals("B")) { step--; break; }
+
+                                // 2. Validate Numeric Input
+                                if (Validator.isValidMenuChoice(sel, 1, filtered.size())) {
+                                    selectedFacility = filtered.get(Integer.parseInt(sel) - 1);
+                                    step++; // Move to Case 5 (Action)
+                                } else {
+                                    System.out.println(">> Error: Invalid selection. Please choose a number from the list.");
+                                    // We don't increment step, so it stays on Case 4 and shows the list again
+                                }
+                                break;
+
+                            case 5: // Action: Modify or Delete
+                                System.out.println("\n==============================================");
+                                System.out.println("           FACILITY ACTION MENU               ");
+                                System.out.println("==============================================");
+                                // Show current details before action
+                                selectedFacility.display(); 
+                                System.out.println("----------------------------------------------");
+                                System.out.println("[1] Modify Details");
+                                System.out.println("[2] Delete Facility");
+                                System.out.print("Action [B: Back, C: Cancel]: ");
+                                String action = sc.nextLine().trim().toUpperCase();
+
+                                if (action.equals("C")) { 
+                                    inModifyMode = false; 
+                                    break; 
+                                }
+                                if (action.equals("B")) { 
+                                    step--; 
+                                    break; 
+                                }
+
+                                if (action.equals("1")) {
+                                    // performModification usually returns boolean or the updated object
+                                    performModification(selectedFacility, allFacilities);
+                                    
+                                    // Show updated details as a receipt
+                                    System.out.println("\n>> FACILITY UPDATED SUCCESSFULLY!");
+                                    System.out.println("==============================================");
+                                    selectedFacility.display(); 
+                                    System.out.println("==============================================");
+                                    System.out.println("Press Enter to continue...");
+                                    sc.nextLine();
+                                    inModifyMode = false; 
+                                } 
+                                else if (action.equals("2")) {
+                                    // Store ID before it gets deleted for the final message
+                                    String deletedID = selectedFacility.getFacilityID();
+                                    
+                                    performDeletion(selectedFacility, allFacilities);
+                                    
+                                    System.out.println("\n>> SUCCESS: Facility [" + deletedID + "] has been removed.");
+                                    System.out.println("Press Enter to continue...");
+                                    sc.nextLine();
+                                    inModifyMode = false;
+                                } 
+                                else {
+                                    // The "Try Again" logic for invalid input
+                                    System.out.println("\n>> [!] Invalid action. Please enter '1', '2', 'B', or 'C'.");
+                                    System.out.println(">> Please try again.");
+                                    // We do NOT change step or inModifyMode, so the loop repeats this case
+                                }
+                                break;
+                        }
+                    }
+                    break;
+                }
+                default:
+                    System.out.println(">> Invalid selection.");
+            }
+        }
+    }
+       
+    private void performModification(Facility target, List<Facility> allF) {
+        // 1. Check Booking Dependency
+        boolean isBooked = FileManager.isFacilityInBookings(target.getFacilityID());
+        if (isBooked) {
+            System.out.println("\n[!] WARNING: This facility (ID: " + target.getFacilityID() + ") has existing bookings.");
+            System.out.print("Modifying details may cause data inconsistency. Modify anyway? (Y/N): ");
+            if (!sc.nextLine().trim().equalsIgnoreCase("Y")) return;
+        }
+
+        // Keep a backup of the original state in case they select "Cancel"
+        Facility original = new Facility(target.getFacilityID(), target.getBlock(), target.getFloor(), 
+                                        target.getRoomNo(), target.getName(), target.getType(), 
+                                        target.getCapacity(), target.getStatus());
+
+        while (true) {
+            System.out.println("\n==============================================");
+            System.out.println("            MODIFICATION MENU                 ");
+            System.out.println("==============================================");
+            System.out.printf("[1] Block        : %s\n", target.getBlock());
+            System.out.printf("[2] Floor        : %s\n", target.getFloor());
+            System.out.printf("[3] Room Number  : %s\n", target.getRoomNo());
+            System.out.printf("[4] Facility Name: %s\n", target.getName());
+            System.out.printf("[5] Facility Type: %s\n", target.getType());
+            System.out.printf("[6] Capacity     : %d\n", target.getCapacity());
+            System.out.println("----------------------------------------------");
+            System.out.println("[S] Save and Exit");
+            System.out.println("[C] Cancel All Changes");
+            System.out.print("Select field to edit: ");
+            
+            String mChoice = sc.nextLine().trim().toUpperCase();
+
+            if (mChoice.equals("C")) {
+                // Restore original values
+                target.setBlock(original.getBlock());
+                target.setFloor(original.getFloor());
+                target.setRoomNo(original.getRoomNo());
+                target.setName(original.getName());
+                target.setType(original.getType());
+                target.setCapacity(original.getCapacity());
+                System.out.println(">> Modifications discarded.");
+                return;
+            }
+            if (mChoice.equals("S")) break;
+
+            switch (mChoice) {
+                case "1": // Block Modification with Logic Check
+                    System.out.print("New Block [1] KA [2] KB: ");
+                    String bInput = sc.nextLine().trim();
+                    String newBlock = bInput.equals("1") ? "KA" : "KB";
+                    
+                    if (!target.getRoomNo().startsWith(newBlock)) {
+                        System.out.println("\n[!] CONFLICT: The Room Number (" + target.getRoomNo() + ") belongs to " + target.getBlock() + ".");
+                        System.out.print("Are you sure you want to change the Block to " + newBlock + "? (Y/N): ");
+                        if (!sc.nextLine().trim().equalsIgnoreCase("Y")) {
+                            System.out.println(">> Change cancelled.");
                             break;
                         }
                     }
+                    target.setBlock(newBlock);
+                    break;
+
+                case "2": // Floor Selection Menu
+                    String[] kaFloors = {"SB", "G", "M", "1", "2", "3", "4", "5", "6", "7", "8"};
+                    String[] kbFloors = {"SB", "G", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10"};
+                    String[] targetFloors = target.getBlock().equals("KA") ? kaFloors : kbFloors;
                     
-                    if (exists) {
-                        System.out.println("Error: Room number " + roomNo + " already exists in the system.");
+                    System.out.println("\nAvailable Floors for Block " + target.getBlock() + ": " + Arrays.toString(targetFloors));
+                    System.out.print("Enter New Floor: ");
+                    String fInput = sc.nextLine().trim().toUpperCase();
+                    if (Arrays.asList(targetFloors).contains(fInput)) {
+                        target.setFloor(fInput);
                     } else {
-                        break;
+                        System.out.println(">> [!] Invalid Floor for this block. Try again.");
                     }
-                }
+                    break;
 
-                System.out.print("Enter Facility Name: ");
-                String description = sc.nextLine().trim();
+                case "3": // Room Number with Block Logic
+                    System.out.print("Enter New Room No: ");
+                    String newRoom = sc.nextLine().trim().toUpperCase();
+                    if (!newRoom.startsWith(target.getBlock())) {
+                        System.out.println("\n[!] WARNING: New Room Number " + newRoom + " does not start with current Block " + target.getBlock() + ".");
+                        System.out.print("Proceed anyway? (Y/N): ");
+                        if (!sc.nextLine().trim().equalsIgnoreCase("Y")) break;
+                    }
+                    target.setRoomNo(newRoom);
+                    break;
 
-                String type = "";
-                while (true) {
-                    System.out.println("Select Facility Type:");
+                case "4": // Facility Name Validation
+                    System.out.print("Enter New Facility Name: ");
+                    String newName = sc.nextLine().trim();
+                    if (!Validator.isEmpty(newName)) {
+                        target.setName(newName);
+                    } else {
+                        System.out.println(">> [!] Name cannot be empty.");
+                    }
+                    break;
+
+                case "5": // Facility Type Selection
+                    System.out.println("\nSelect New Type:");
                     for (int i = 0; i < Constants.FACILITY_TYPES.length; i++) {
-                        System.out.println("[" + (i + 1) + "] " + Constants.FACILITY_TYPES[i]);
+                        System.out.printf("[%d] %-20s ", (i + 1), Constants.FACILITY_TYPES[i]);
+                        if ((i + 1) % 2 == 0) System.out.println();
                     }
-                    System.out.print("Choice: ");
+                    System.out.print("\nChoice: ");
                     String tChoice = sc.nextLine().trim();
                     if (Validator.isValidMenuChoice(tChoice, 1, Constants.FACILITY_TYPES.length)) {
-                        type = Constants.FACILITY_TYPES[Integer.parseInt(tChoice) - 1];
-                        break;
+                        target.setType(Constants.FACILITY_TYPES[Integer.parseInt(tChoice) - 1]);
                     }
-                    System.out.println("Invalid choice.");
-                }
+                    break;
 
-                int capacity = 0;
-                while (true) {
-                    System.out.print("Enter capacity (0-300): ");
-                    String capInput = sc.nextLine().trim();
-                    if (Validator.isNumeric(capInput)) {
-                        capacity = Integer.parseInt(capInput);
-                        if (capacity >= 0 && capacity <= 300) break;
-                    }
-                    System.out.println("Invalid capacity. Please enter a number between 0 and 300.");
-                }
-
-                // 8. FINAL CREATION
-                String status = Constants.FACILITY_AVAILABLE;
-                Facility f = new Facility(ID, block, floor, roomNo, description, type, capacity, status);
-                
-                String error = facilityService.addFacility(f);
-                if (error == null) {
-                    System.out.println("\nSUCCESS: Facility " + roomNo + " added with ID " + ID);
-                } else {
-                    System.out.println("Error: " + error);
-                }
-                break;
-            	
-            case "3" :
-            	System.out.println("------Facilities Removal Page------");
-            	System.out.println("Enter the facility ID that you would like to remove:");
-            	String theremovingID = input.nextLine().trim();
-            	facilityService.removeFacility(theremovingID);
-                System.out.println("The Facility list has been updated.");
-                break;
-            	
-            case "4" :
-            	System.out.println("------Edit Facilities Details Page------");
-            	System.out.println("Enter the facility ID that you would like to remove:");
-            	String theeditingID = input.nextLine().trim();
-            	
-            	List<Facility> allF = facilityService.getAllFacilities();
-            	Facility target = null;
-            	
-            	for(Facility f1 : allF) {
-            		if(f1.getFacilityID().equalsIgnoreCase(theeditingID)) {
-            			target = f1;
-            			break;
-            		}
-            	}
-            	
-            	if(target == null) {
-            		System.out.println("The facility ID is not existed.");
-            		return;
-            	} else {
-            		System.out.println("------Current Details of the Facility ID------");
-                	target.display();
-                  	System.out.println("What would you like to edit?");
-                	System.out.println("[1] Block name");
-                	System.out.println("[2] Floor number");
-                	System.out.println("[3] Room number");
-                	System.out.println("[4] Facility type");
-                	System.out.println("[5] Faciltiy capacity");
-                	System.out.println("[6] Facility status");
-                	System.out.print("Choice: ");
-                	int Choice = Integer.parseInt(input.nextLine());
-                    
-                    switch(Choice) {
-                    case 1:
-                    	System.out.println("Enter new block name:(e.g. KB) ");
-                    	target.setBlock(input.nextLine());
-                    	break;
-                    case 2:
-                    	System.out.println("Enter new floor number:(e.g. 1) ");
-                    	target.setFloor(input.nextLine());
-                    	break;
-                    case 3:
-                    	System.out.println("Enter new room number:(KB104) ");
-                    	target.setRoomNo(input.nextLine());
-                    	break;
-                    case 4:
-                    	System.out.println("Enter new facility type:(lecture hall) ");
-                    	target.setType(input.nextLine());
-                    	break;
-                    case 5:
-                    	System.out.println("Enter new facility capacity: (e.g. 80) ");
-                    	target.setCapacity(Integer.parseInt(input.nextLine()));
-                    	break;
-                    case 6:
-                    	System.out.println("Enter new facility status: (e.g. active) ");
-                    	target.setStatus(input.nextLine());
-                    	break;
-                    default:
-                    	System.out.println("Only choice 1 to 6 make changes. Please try again.");
-                    	break;
-                    }
-                    
-                    if (facilityService.updateFacilities(allF)) {
-                        System.out.println("Successfully Edited!");
+                case "6": // Capacity Validation
+                    System.out.print("Enter New Capacity (1-300): ");
+                    String capStr = sc.nextLine().trim();
+                    if (Validator.isNumeric(capStr)) {
+                        int c = Integer.parseInt(capStr);
+                        if (c >= 1 && c <= 300) target.setCapacity(c);
+                        else System.out.println(">> [!] Capacity must be 1-300.");
                     } else {
-                        System.out.println("Error on saving edited file.");
+                        System.out.println(">> [!] Invalid numeric input.");
                     }
-                    	
-            	}
-                break;
+                    break;
                 
-            default:
-                System.out.println("Invalid selection.");
-                break;
+                default:
+                    System.out.println(">> [!] Invalid selection. Please try again.");
             }
-    	}
-     }
+        }
+
+        // FINAL SAVE to text file
+        if (facilityService.updateFacilities(allF)) {
+            System.out.println("\n==============================================");
+            System.out.println(">> UPDATE SUCCESSFUL: File data has been saved.");
+            System.out.println("==============================================");
+        } else {
+            System.out.println("\n[!] SYSTEM ERROR: Failed to update the database file.");
+        }
+    }
+        
+    private void performDeletion(Facility target, List<Facility> allF) {
+        // 1. Check for ACTIVE bookings only
+        boolean hasActive = FileManager.hasActiveBookings(target.getFacilityID());
+        
+        if (hasActive) {
+            System.out.println("\n[!] ERROR: Cannot delete facility " + target.getFacilityID());
+            System.out.println(">> This facility has Active/Confirmed/Pending bookings.");
+            System.out.println(">> Please resolve or cancel those bookings before deleting.");
+            System.out.println("Press Enter to return...");
+            sc.nextLine();
+            return;
+        }
+
+        // 2. Show details of what is about to be deleted
+        System.out.println("\n==============================================");
+        System.out.println("           CONFIRM DELETION                   ");
+        System.out.println("==============================================");
+        System.out.printf("%-15s : %s\n", "ID", target.getFacilityID());
+        System.out.printf("%-15s : %s\n", "Room No", target.getRoomNo());
+        System.out.printf("%-15s : %s\n", "Name", target.getName());
+        System.out.println("----------------------------------------------");
+        System.out.print("Are you absolutely sure? (Y/N): ");
+        
+        String confirm = sc.nextLine().trim().toUpperCase();
+
+        if (confirm.equals("Y")) {
+            // Remove from the current list
+            allF.remove(target);
+            
+            // Overwrite the file with the updated list
+            if (facilityService.updateFacilities(allF)) {
+                System.out.println("\n>> SUCCESS: Facility [" + target.getRoomNo() + "] removed permanently.");
+            } else {
+                System.out.println("\n>> [!] SYSTEM ERROR: Failed to update database file.");
+            }
+        } else {
+            System.out.println("\n>> Deletion cancelled. Facility is safe.");
+        }
+        
+        System.out.println("Press Enter to continue...");
+        sc.nextLine();
+    }
     
     private void approval() {
     	Scanner input = new Scanner(System.in);
@@ -503,6 +769,7 @@ public class AdminMenu{
         } else {
             System.out.println("Invalid selection.");
         }
+        input.close();
     }
     
     private void facilityUsageTracking() {

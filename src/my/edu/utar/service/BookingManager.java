@@ -314,7 +314,6 @@ public class BookingManager {
     }
 	
     public boolean isAvailable(String facilityID, String date, int slot) {
-        // Make sure you are calling the method or variable that holds your data
         List<Booking> bookings = getBookingList(); 
         
         for (Booking b : bookings) {

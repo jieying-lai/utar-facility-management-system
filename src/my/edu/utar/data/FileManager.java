@@ -8,6 +8,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
 
 public class FileManager {
 
@@ -227,6 +228,36 @@ public class FileManager {
         return null;
     }
     
+    public static boolean isFacilityInBookings(String facilityID) {
+        File file = new File("data/bookings.txt"); // Ensure this path matches your project structure
+        
+        // If the file doesn't exist yet, there are no bookings, so it's safe
+        if (!file.exists()) {
+            return false;
+        }
+
+        try (Scanner fileScanner = new Scanner(file)) {
+            while (fileScanner.hasNextLine()) {
+                String line = fileScanner.nextLine().trim();
+                
+                // Skip empty lines
+                if (line.isEmpty()) continue;
+
+                String[] parts = line.split("\\|");
+                
+                // Check if the line has enough parts and if the 3rd part (index 2) matches
+                // Booking format: BookingID|UserID|FacilityID|Date|...
+                if (parts.length > 2 && parts[2].equalsIgnoreCase(facilityID)) {
+                    return true; // Found a match!
+                }
+            }
+        } catch (FileNotFoundException e) {
+            System.out.println("Error reading bookings file: " + e.getMessage());
+        }
+        
+        return false; // No matching booking found
+    }
+    
     public static void saveFacility(Facility f) {
         appendLine(Constants.FILE_FACILITIES, f.toFileString());
     }
@@ -364,5 +395,30 @@ public class FileManager {
             System.out.println("Error saving users: " + e.getMessage());
         }
     }
-    
+    public static boolean hasActiveBookings(String facilityID) {
+        try (Scanner scanner = new Scanner(new File("data/bookings.txt"))) {
+            while (scanner.hasNextLine()) {
+                String line = scanner.nextLine();
+                if (line.trim().isEmpty()) continue;
+                
+                String[] parts = line.split("\\|");
+                // Parts index depends on your bookings.txt structure. 
+                // Assuming: BookingID | UserID | FacilityID | Status | ...
+                if (parts.length > 3) {
+                    String fID = parts[2];
+                    String status = parts[3]; 
+
+                    if (fID.equals(facilityID)) {
+                        // Only block deletion if the status is NOT Cancelled
+                        if (!status.equalsIgnoreCase("Cancelled")) {
+                            return true; 
+                        }
+                    }
+                }
+            }
+        } catch (FileNotFoundException e) {
+            // If file doesn't exist, there are no bookings
+        }
+        return false;
+    }
 }
