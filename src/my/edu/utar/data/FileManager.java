@@ -350,28 +350,6 @@ public class FileManager {
     	}
     }
     
-    public static void appendMaintenanceReport(MaintenanceReport reports)
-    {
-    	try (BufferedWriter bw = new BufferedWriter(new FileWriter(Constants.FILE_MAINTENANCE, true)))
-    	{
-            bw.write(reports.toFileString());
-            bw.newLine();
-    	}
-    	catch (IOException e)
-    	{
-    		System.out.println("File error: try again.");
-    	}
-    }
-    
-    public static String generateMaintenanceID()
-    {
-    	LocalDate today = LocalDate.now();
-    	String datePart = today.format(DateTimeFormatter.ofPattern("yyyyMMdd"));
-    	List<MaintenanceReport> all = readMaintenanceReports();
-    	long count = all.stream().filter(r -> r.getIssueID().startsWith("M" + datePart)).count();
-    	return String.format("M%s%04d", datePart, count + 1);
-    }
-    
     public static void deleteUser(String userId) {
         List<User> users = loadAllUsers();
         
@@ -438,5 +416,51 @@ public class FileManager {
             // If file doesn't exist, there are no bookings
         }
         return false;
+    }
+
+    public static void appendMaintenanceReport(MaintenanceReport report) {
+        appendLine(Constants.FILE_MAINTENANCE, report.toFileString());
+    }
+    public static List<MaintenanceReport> loadAllMaintenanceReports() {
+        List<MaintenanceReport> reports = new ArrayList<>();
+        try (BufferedReader br = new BufferedReader(new FileReader(Constants.FILE_MAINTENANCE))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                if (line.trim().isEmpty()) continue;
+                String[] parts = line.split("\\|", -1);
+                if (parts.length >= 9) {
+                    reports.add(new MaintenanceReport(
+                        parts[0], parts[1], parts[2], parts[3], parts[4], 
+                        parts[5], parts[6], parts[7], parts[8]
+                    ));
+                }
+            }
+        } catch (IOException e) {
+            System.out.println("Error reading maintenance file: " + e.getMessage());
+        }
+        return reports;
+    }
+
+    // Use this to overwrite the file when an Admin updates a status
+    public static void saveAllMaintenanceReports(List<MaintenanceReport> reports) {
+        List<String> lines = new ArrayList<>();
+        for (MaintenanceReport r : reports) {
+            lines.add(r.toFileString());
+        }
+        writeAllLines(Constants.FILE_MAINTENANCE, lines);
+    }
+
+    // Fixed ID Generator for M + YYYYMMDD + 0001 format
+    public static String generateMaintenanceID() {
+        LocalDate today = LocalDate.now();
+        String datePart = today.format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+        List<MaintenanceReport> all = loadAllMaintenanceReports();
+        
+        // Count how many reports exist for today to determine the sequence
+        long count = all.stream()
+                        .filter(r -> r.getIssueID().contains(datePart))
+                        .count();
+                        
+        return String.format("M%s%04d", datePart, count + 1);
     }
 }
