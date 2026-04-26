@@ -44,12 +44,12 @@ public class Constants {
 
     // ===================== TIME SLOTS =====================
     public static final String[] TIME_SLOTS = {
-        "",             // index 0 unused
-        "8 a.m. - 10 a.m ",   // index 1
-        "10 a.m. - 12 p.m.",  // index 2
-        "12 p.m. -  2 p.m.",   // index 3
-        "2 p.m. -  4 p.m.",    // index 4
-        "4 p.m. -  6 p.m."     // index 5
+        "", 
+        "8 a.m. - 10 a.m ",  
+        "10 a.m. - 12 p.m.", 
+        "12 p.m. -  2 p.m.", 
+        "2 p.m. -  4 p.m.", 
+        "4 p.m. -  6 p.m."   
     };
     public static final int[] TIME_SLOT_START_HOUR = { 0, 8, 10, 12, 14, 16 };
     public static final int TOTAL_SLOTS = 5;
@@ -58,7 +58,6 @@ public class Constants {
     public static final String MAINT_REPORTED    = "Reported";
     public static final String MAINT_IN_PROGRESS = "In Progress";
     public static final String MAINT_RESOLVED    = "Resolved";
-    public static final String MAINT_CLOSED      = "Closed";
 
     // ===================== ISSUE TYPES =====================
     public static final String[] ISSUE_TYPES = {
@@ -163,13 +162,6 @@ public class Constants {
     public static final String[] ADVANCE_2HR_TYPES = {
         "Lecture Hall", "Computer Lab", "Multipurpose Hall"
     };
-
-    // ===================== REMINDER DAYS =====================
-    public static final int REMINDER_DAYS_AHEAD = 3;
-
-    // ===================== MAINTENANCE ALERT THRESHOLDS =====================
-    public static final int ALERT_ISSUE_COUNT    = 3;   
-    public static final int ALERT_OVERDUE_DAYS   = 7;   
 
     // ===================== ADMIN CONTACT =====================
     public static final String ADMIN_NAME    = "Mr Lee";

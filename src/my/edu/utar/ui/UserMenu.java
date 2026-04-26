@@ -11,15 +11,10 @@ import my.edu.utar.util.Constants;
 import my.edu.utar.util.Validator;
 import java.util.Map;
 import my.edu.utar.model.MaintenanceReport; 
-
-import java.util.List;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-
 import java.util.stream.Collectors;
 
-import java.time.LocalDateTime;
+import java.util.List;
+import java.util.ArrayList;
 
 import java.util.Scanner;
 
@@ -53,10 +48,23 @@ public class UserMenu {
                 case "3": newBooking();                 break;
                 case "4": modifyBooking();              break;
                 case "5": viewBookingRequestStatus();   break;
-                case "6": reportIssue();                break;
+                case "6":
+                    System.out.println("\n--- ISSUE REPORTING ---");
+                    System.out.println("[1] Report New Issue");
+                    System.out.println("[2] View My Reported Issues");
+                    System.out.println("[B] Back");
+                    System.out.print("Choice: ");
+                    String issueChoice = sc.nextLine().trim().toUpperCase();
+                    
+                    if (issueChoice.equals("1")) {
+                        reportIssue(); 
+                    } else if (issueChoice.equals("2")) {
+                        viewMyReportedIssues(); 
+                    }
+                    break;
                 case "7": viewBookingHistory();         break;
                 case "L":
-                    System.out.println("Logged out successfully. Goodbye, " + currentUser.getName() + "!");
+                    System.out.println("Logged out successfully. Goodbye, " + currentUser.getName() + "!\n\n");
                     return;
                 default:
                     System.out.println("Invalid selection, please try again.");
@@ -64,37 +72,32 @@ public class UserMenu {
         }
     }
 
-    private void printUserMenu() {
-        LocalDateTime now = LocalDateTime.now();
-        String currentDate = now.format(DateTimeFormatter.ofPattern("dd MMMM yyyy"));
-        String currentTime = now.format(DateTimeFormatter.ofPattern("hh:mm a"));
-
-        System.out.println("============================================");
-        System.out.println("    UTAR Smart Campus Management System     ");
-        System.out.println("============================================");
-        System.out.println("  Date : " + currentDate);
-        System.out.println("  Time : " + currentTime);
-        System.out.println("\n  Welcome, " + currentUser.getName());
-        System.out.println("  Role: " + currentUser.getRole());
-        showReminders();
-        System.out.println("============================================");
-        System.out.println("[1] Update Profile");
-        System.out.println("[2] Search Available Facility");
-        System.out.println("[3] New Booking");
-        System.out.println("[4] Modify / Cancel Booking");
-        System.out.println("[5] View Booking Request Status");
-        System.out.println("[6] Report Issue");
-        System.out.println("[7] View Booking History & Summary");
-        System.out.println("[L] Logout");
-        System.out.println("--------------------------------------------");
-        System.out.print("Enter your choice: ");
+    public void printUserMenu() {
+        System.out.println("\n============================================================");
+        System.out.println("            UTAR Smart Campus Management System");
+        System.out.println("============================================================");
+        
+        System.out.printf("  Date : %-15s | Time : %s\n", 
+            java.time.LocalDate.now().format(java.time.format.DateTimeFormatter.ofPattern("dd MMM yyyy")),
+            java.time.LocalTime.now().format(java.time.format.DateTimeFormatter.ofPattern("hh:mm a")));
+        System.out.println("  Welcome, " + currentUser.getName() + " (" + currentUser.getRole() + ")");
+        System.out.println("------------------------------------------------------------");
+        
+        showReminders(); 
+        
+        System.out.println("------------------------------------------------------------");
+        
+        System.out.println("  [1] Update Profile            [2] Search Facility");
+        System.out.println("  [3] New Booking               [4] Modify / Cancel");
+        System.out.println("  [5] Request Status            [6] Report Issue");
+        System.out.println("  [7] History & Summary         [L] Logout");
+        System.out.println("------------------------------------------------------------");
+        System.out.print("  Enter your choice: ");
     }
 
     private void showReminders() {
-        System.out.println("\n--- REMINDERS ---");
         NotificationService ns = new NotificationService();
-        ns.showReminders(currentUser.getId(), bookingManager.getBookingList());
-        System.out.println("-----------------");
+        ns.showReminders(currentUser.getId(), bookingManager.getBookingList(), bookingManager);
     }
 
     private void updateProfile() {
@@ -297,6 +300,8 @@ public class UserMenu {
         String block = "", type = "", floor = "", formattedDate = "";
         int selectedSlot = -1;
         int step = 1;
+        List<Facility> filtered = new ArrayList<>();
+        List<Facility> availableList = new ArrayList<>();
         
         List<Facility> allFacilities = FileManager.loadAllFacilities();
         if (allFacilities.isEmpty()) {
@@ -304,10 +309,9 @@ public class UserMenu {
             return;
         }
 
-
-        while (step <= 7) {
+        while (step <= 6) {
             switch (step) {
-            case 1: // Block Selection
+            case 1:
                 List<String> blocks = allFacilities.stream()
                         .map(Facility::getBlock)
                         .distinct()
@@ -338,7 +342,7 @@ public class UserMenu {
                 step++;
                 break;
 
-                case 2: // Facility Type
+                case 2: 
                     final String currentBlock = block;
                     List<String> types = allFacilities.stream()
                             .filter(f -> f.getBlock().equalsIgnoreCase(currentBlock))
@@ -377,7 +381,7 @@ public class UserMenu {
                             if (d.isBefore(java.time.LocalDate.now())) {
                                 System.out.println("Error: Past date. Please try again.");
                             } else if (d.isAfter(java.time.LocalDate.now().plusMonths(1))) {
-                                showAdminContact(); // Booking too far in advance
+                                showAdminContact(); 
                             } else {
                                 formattedDate = d.format(java.time.format.DateTimeFormatter.ofPattern("ddMMyyyy"));
                                 step++; break;
@@ -408,84 +412,88 @@ public class UserMenu {
                     }
                     break;
 
-                case 6: // ---------------- Results & Decision ----------------
+                case 6:
                     final String fBlock = block, fType = type, fFloor = floor;
                     
-                    // 1. Get ALL rooms matching the criteria (regardless of availability)
-                    List<Facility> filtered = allFacilities.stream()
-                            .filter(f -> f.getBlock().equalsIgnoreCase(fBlock))
-                            .filter(f -> f.getType().equalsIgnoreCase(fType))
-                            .filter(f -> f.getFloor().equalsIgnoreCase(fFloor))
+                    filtered = allFacilities.stream()
+                            .filter(f -> f.getBlock().equalsIgnoreCase(fBlock) && 
+                                         f.getType().equalsIgnoreCase(fType) && 
+                                         f.getFloor().equalsIgnoreCase(fFloor))
                             .collect(Collectors.toList());
 
                     if (filtered.isEmpty()) {
                         System.out.println("\n>> No facilities found for the selected criteria.");
-                        System.out.println("Press Enter to return to the main menu...");
+                        System.out.println("Press Enter to return to menu...");
                         sc.nextLine();
                         return;
                     }
 
-                    // 2. Determine availability status for each room to show in the result table
-                    // We use the bookingManager to check which ones are free
-                    List<Facility> availableList = bookingManager.getAvailableFacilities(filtered, formattedDate, selectedSlot);
-                    java.time.LocalDate displayDate = java.time.LocalDate.parse(formattedDate, 
-                            java.time.format.DateTimeFormatter.ofPattern("ddMMyyyy"));
-                    String clearDate = displayDate.format(Constants.DATE_DISPLAY_FORMAT);
-                        
-                    System.out.println("\n========== SEARCH FACILITY RESULTS ==========");
-                    System.out.println("Block: " + block + " | Type: " + type + " | Floor: " + floor);
-                    System.out.println("Date : " + clearDate + " | Slot: " + Constants.TIME_SLOTS[selectedSlot]);
+                    availableList = bookingManager.getAvailableFacilities(filtered, formattedDate, selectedSlot);
                     
-                    // Custom display showing ALL filtered rooms with their current status for that slot
-                    System.out.printf("%-4s | %-10s | %-35s | %-10s\n", "No.", "Room", "Name", "Status");
-                    System.out.println("----------------------------------------------------------------------");
+                    java.time.LocalDate dDate = java.time.LocalDate.parse(formattedDate, java.time.format.DateTimeFormatter.ofPattern("ddMMyyyy"));
+                    
+                    System.out.println("\n========== SEARCH FACILITY RESULTS ==========");
+                    System.out.println("Date : " + dDate.format(java.time.format.DateTimeFormatter.ofPattern("dd MMMM yyyy")));
+                    System.out.println("Slot : " + Constants.TIME_SLOTS[selectedSlot]);
+                    System.out.printf("%-4s | %-10s | %-30s | %-15s\n", "No.", "Room", "Name", "Status");
+                    System.out.println("-".repeat(70));
+
                     for (int i = 0; i < filtered.size(); i++) {
                         Facility f = filtered.get(i);
-                        boolean isAvailable = availableList.contains(f);
-                        String currentStatus = isAvailable ? "AVAILABLE" : "OCCUPIED";
                         
-                        System.out.printf("%-4d | %-10s | %-35s | %-10s\n", 
+                        boolean isUnderRepair = FileManager.loadAllMaintenanceReports().stream()
+                                .anyMatch(r -> r.getFacilityID().equalsIgnoreCase(f.getFacilityID()) && 
+                                               r.getStatus().equalsIgnoreCase(Constants.MAINT_IN_PROGRESS));
+
+                        String currentStatus;
+                        if (isUnderRepair) {
+                            currentStatus = "MAINTENANCE";
+                        } else if (availableList.contains(f)) {
+                            currentStatus = "AVAILABLE";
+                        } else {
+                            currentStatus = "OCCUPIED";
+                        }
+
+                        System.out.printf("%-4d | %-10s | %-30s | %-15s\n", 
                             (i + 1), f.getRoomNo(), f.getName(), currentStatus);
                     }
-                    System.out.println("----------------------------------------------------------------------");
+                    System.out.println("-".repeat(70));
 
-                    // 3. Ask to continue
                     while (true) {
                         System.out.print("\nDo you want to continue to create a booking? (Y/N): ");
                         String proceed = sc.nextLine().trim().toUpperCase();
 
-                        if (proceed.equals("N")) {
-                            System.out.println("\nReturning to previous menu...");
-                            System.out.println("Press Enter to back to main menu.");
-                            sc.nextLine();
-                            return; // Back to main menu
-                        } 
+                        if (proceed.equals("N")) return;
                         
                         if (proceed.equals("Y")) {
-                            // 4. Selection Process
                             while (true) {
-                                System.out.print("Select the respective result number to book: ");
+                                System.out.print("Select No. to book [B: Back]: ");
                                 String choice = sc.nextLine().trim();
+                                if (choice.equalsIgnoreCase("B")) break;
 
                                 if (Validator.isValidMenuChoice(choice, 1, filtered.size())) {
-                                    int index = Integer.parseInt(choice) - 1;
-                                    Facility selected = filtered.get(index);
+                                    Facility selected = filtered.get(Integer.parseInt(choice) - 1);
+                                    
+                                    boolean isMaint = FileManager.loadAllMaintenanceReports().stream()
+                                        .anyMatch(r -> r.getFacilityID().equalsIgnoreCase(selected.getFacilityID()) && 
+                                                       r.getStatus().equalsIgnoreCase(Constants.MAINT_IN_PROGRESS));
 
-                                    // Check if the specific chosen room is available
-                                    if (availableList.contains(selected)) {
+                                    if (isMaint) {
+                                        System.out.println(">> This room is under MAINTENANCE and cannot be booked.");
+                                    } else if (availableList.contains(selected)) {
                                         createNewBooking(selected.getFacilityID(), formattedDate, selectedSlot);
-                                        return; // Done
+                                        return; 
                                     } else {
-                                        System.out.println(">> This facility is OCCUPIED. Please try again and select an AVAILABLE room.");
+                                        System.out.println(">> This facility is OCCUPIED. Please select an AVAILABLE room.");
                                     }
                                 } else {
-                                    System.out.println("Invalid input, please enter a number between 1 and " + filtered.size());
+                                    System.out.println(">> Invalid input.");
                                 }
                             }
-                        } else {
-                            System.out.println("Invalid input, please enter 'Y' or 'N'.");
+                            break;
                         }
                     }
+                    break;
             }
         }
     }
@@ -508,7 +516,11 @@ public class UserMenu {
 
             System.out.print("Enter purpose of booking (Max 50 chars) [B: Back, C: Cancel]: ");
             purpose = sc.nextLine().trim();
-            if (purpose.equalsIgnoreCase("C")) return;
+            if (purpose.equalsIgnoreCase("C")) {
+                System.out.println("\n>> Booking process cancelled. Press Enter to continue...");
+                sc.nextLine();
+                return; 
+            }
             if (purpose.equalsIgnoreCase("B")) { break; }
             if (my.edu.utar.util.Validator.isEmpty(purpose)) {
                 System.out.println("Invalid input: Purpose cannot be empty.");
@@ -524,7 +536,11 @@ public class UserMenu {
         while (true) {
             System.out.print("Enter number of people (Pax) [B: Back, C: Cancel]: ");
             String paxInput = sc.nextLine().trim().toUpperCase();
-            if (paxInput.equals("C")) return;
+            if (paxInput.equals("C")) {
+                System.out.println("\n>> Booking process cancelled. Press Enter to continue...");
+                sc.nextLine(); 
+                return;
+            }
             if (paxInput.equals("B")) { break; } 
             
             if (my.edu.utar.util.Validator.isEmpty(paxInput) || !my.edu.utar.util.Validator.isNumeric(paxInput)) {
@@ -651,7 +667,7 @@ public class UserMenu {
                     step++;
                     break;
 
-                case 3: // Floor Selection
+                case 3:
                     final String b3 = block, t3 = type;
                     List<String> floors = allFacilities.stream()
                             .filter(f -> f.getBlock().equalsIgnoreCase(b3) && f.getType().equalsIgnoreCase(t3))
@@ -662,10 +678,12 @@ public class UserMenu {
                     step++;
                     break;
 
-                case 4: // Room Selection
+                case 4: 
                     final String b4 = block, t4 = type, f4 = floor;
                     List<Facility> filteredRooms = allFacilities.stream()
-                            .filter(f -> f.getBlock().equalsIgnoreCase(b4) && f.getType().equalsIgnoreCase(t4) && f.getFloor().equalsIgnoreCase(f4))
+                            .filter(f -> f.getBlock().equalsIgnoreCase(b4) && 
+                                         f.getType().equalsIgnoreCase(t4) && 
+                                         f.getFloor().equalsIgnoreCase(f4))
                             .collect(Collectors.toList());
                     
                     List<String> roomNumbers = filteredRooms.stream().map(Facility::getRoomNo).collect(Collectors.toList());
@@ -673,14 +691,16 @@ public class UserMenu {
                     if (room == null) return;
                     if (room.equals("BACK")) { step--; break; }
                     
-                    final String selectedRoomNo = room;
-                    selectedFacility = filteredRooms.stream()
-                            .filter(f -> f.getRoomNo().equalsIgnoreCase(selectedRoomNo))
+                    final String targetRoom = room;
+                    Facility found = filteredRooms.stream()
+                            .filter(f -> f.getRoomNo().equalsIgnoreCase(targetRoom))
                             .findFirst().orElse(null);
+                    
+                    selectedFacility = found;
                     step++;
                     break;
 
-                case 5: // Date Selection & Full-Day Occupancy Validation
+                case 5:
                     while (true) {
                         System.out.print("\nEnter Booking Date (YYYY-MM-DD) [B: Back, C: Cancel]: ");
                         String dateIn = sc.nextLine().trim().toUpperCase();
@@ -689,72 +709,99 @@ public class UserMenu {
                         
                         try {
                             java.time.LocalDate d = java.time.LocalDate.parse(dateIn);
-                            if (d.isBefore(java.time.LocalDate.now())) {
+                            java.time.LocalDate today = java.time.LocalDate.now();
+
+                            if (d.isBefore(today)) {
                                 System.out.println(">> Error: Cannot book a date in the past.");
                                 continue;
                             }
 
+                            if (d.isAfter(today.plusMonths(1))) {
+                                System.out.println("\n[!] Online booking limit is 1 month.");
+                                System.out.println("Contact Mr Lee (012345678) for advanced bookings.");
+                                continue;
+                            }
+
                             String tempDateStr = d.format(java.time.format.DateTimeFormatter.ofPattern("ddMMyyyy"));
-                            
-                            // Check if ANY slots are available for this specific room
+                            final Facility currentRoom = selectedFacility; 
+
+                            boolean isUnderMaintenance = FileManager.loadAllMaintenanceReports().stream()
+                                .anyMatch(r -> r.getFacilityID().equalsIgnoreCase(currentRoom.getFacilityID()) && 
+                                               r.getStatus().equalsIgnoreCase(Constants.MAINT_IN_PROGRESS));
+
+                            if (isUnderMaintenance) {
+                                System.out.println("\n[!] SORRY: " + currentRoom.getRoomNo() + " is currently under MAINTENANCE.");
+                                System.out.println("Please select another room or try again later.");
+                                System.out.print("Press [B] to pick another room or any key to pick another date: ");
+                                if(sc.nextLine().trim().equalsIgnoreCase("B")) {
+                                    step = 4; break; 
+                                }
+                                continue;
+                            }
+
                             boolean hasAnySlot = false;
                             for (int i = 1; i <= 5; i++) {
-                                if (bookingManager.isSlotAvailable(selectedFacility.getFacilityID(), tempDateStr, i)) {
+                                if (bookingManager.isTimeSlotAvailable(currentRoom.getFacilityID(), tempDateStr, i)) {
                                     hasAnySlot = true;
                                     break;
                                 }
                             }
 
                             if (!hasAnySlot) {
-                                System.out.println("\n[!] SORRY: No available time slots for " + selectedFacility.getRoomNo() + " on " + d.format(Constants.DATE_DISPLAY_FORMAT));
-                                System.out.println("Please select a different date or press [B] to choose another room.");
+                                System.out.println("\n[!] SORRY: No available time slots for " + currentRoom.getRoomNo() + " on " + d.format(Constants.DATE_DISPLAY_FORMAT));
+                                System.out.println("The room is fully booked for this day.");
                                 continue;
                             }
 
                             selectedDate = d;
                             bookingDateStr = tempDateStr;
-                            step++; break;
+                            step++; 
+                            break; 
                         } catch (Exception e) {
                             System.out.println("Invalid format. Please use YYYY-MM-DD.");
                         }
                     }
                     break;
 
-                case 6: // Time Slot Selection (Filtered)
+                case 6:
                     while (true) {
-                        System.out.println("\n--- Available Time Slots for " + selectedDate.format(Constants.DATE_DISPLAY_FORMAT) + " ---");
+                        final Facility snapshot = selectedFacility;
+                        
+                        System.out.println("\n--- Slots for " + snapshot.getRoomNo() + " ---");
                         List<Integer> freeSlots = new ArrayList<>();
                         
                         for (int i = 1; i < Constants.TIME_SLOTS.length; i++) {
-                            if (bookingManager.isSlotAvailable(selectedFacility.getFacilityID(), bookingDateStr, i)) {
+                            if (bookingManager.isTimeSlotAvailable(snapshot.getFacilityID(), bookingDateStr, i)) {
                                 System.out.println("[" + i + "] " + Constants.TIME_SLOTS[i]);
                                 freeSlots.add(i);
                             } else {
-                                System.out.println("[X] " + Constants.TIME_SLOTS[i] + " (Occupied)");
+                                boolean isMaint = FileManager.loadAllMaintenanceReports().stream()
+                                    .anyMatch(r -> r.getFacilityID().equalsIgnoreCase(snapshot.getFacilityID()) && 
+                                                   r.getStatus().equalsIgnoreCase(Constants.MAINT_IN_PROGRESS));
+                                
+                                String reason = isMaint ? "(Maintenance)" : "(Occupied)";
+                                System.out.println("[X] " + Constants.TIME_SLOTS[i] + " " + reason);
                             }
                         }
-
+                        
                         System.out.print("Select Slot (1-5) [B: Back, C: Cancel]: ");
-                        String slotIn = sc.nextLine().trim().toUpperCase();
-                        if (slotIn.equals("C")) return;
-                        if (slotIn.equals("B")) { step--; break; }
+                        String sIn = sc.nextLine().trim().toUpperCase();
+                        if (sIn.equals("C")) return;
+                        if (sIn.equals("B")) { step--; break; }
 
-                        if (Validator.isNumeric(slotIn)) {
-                            int choice = Integer.parseInt(slotIn);
+                        if (my.edu.utar.util.Validator.isNumeric(sIn)) {
+                            int choice = Integer.parseInt(sIn);
                             if (freeSlots.contains(choice)) {
                                 selectedSlot = choice;
                                 step++; break;
                             } else {
-                                System.out.println(">> Error: This slot is occupied. Please pick one without an [X].");
+                                System.out.println(">> Slot unavailable.");
                             }
-                        } else {
-                            System.out.println("Invalid input.");
                         }
                     }
                     break;
 
-                case 7: // Purpose & Pax
-                    // Sub-step: Purpose
+                case 7: 
                     while (true) {
                         System.out.print("\nEnter purpose of booking (Max 50 chars) [B: Back, C: Cancel]: ");
                         purpose = sc.nextLine().trim();
@@ -765,12 +812,11 @@ public class UserMenu {
                     }
                     if (step < 7) break; 
 
-                    // Sub-step: Pax
                     while (true) {
                         System.out.print("Enter Pax (Capacity: " + selectedFacility.getCapacity() + ") [B: Back, C: Cancel]: ");
                         String paxIn = sc.nextLine().trim().toUpperCase();
                         if (paxIn.equals("C")) return;
-                        if (paxIn.equals("B")) break; // Goes back to Purpose
+                        if (paxIn.equals("B")) break; 
                         
                         if (Validator.isNumeric(paxIn)) {
                             pax = Integer.parseInt(paxIn);
@@ -790,32 +836,45 @@ public class UserMenu {
                     }
                     break;
 
-                case 8: // Final Submission
+                case 8: 
                     String bookingID = generateBookingID();
                     String appDate = java.time.LocalDate.now().format(java.time.format.DateTimeFormatter.ofPattern("ddMMyyyy"));
 
                     Booking b = new Booking(
-                        bookingID, currentUser.getId(), selectedFacility.getFacilityID(),
-                        appDate, bookingDateStr, selectedSlot, purpose, pax, Constants.STATUS_PENDING, ""
+                        bookingID, 
+                        currentUser.getId(), 
+                        selectedFacility.getFacilityID(),
+                        appDate, 
+                        bookingDateStr, 
+                        selectedSlot, 
+                        purpose, 
+                        pax, 
+                        Constants.STATUS_PENDING, 
+                        ""
                     );
 
                     if (bookingManager.addBooking(b)) {
                         System.out.println("\n============================================");
-                        System.out.println("   SUCCESS: Booking " + bookingID + " Submitted!");
+                        System.out.println("   SUCCESS: Booking Request Submitted!      ");
                         System.out.println("============================================");
-                        System.out.println("Press [Enter] to return to the main menu...");
+                        System.out.println("Booking ID   : " + bookingID);
+                        System.out.println("Facility     : " + selectedFacility.getRoomNo() + " (" + selectedFacility.getType() + ")");
+                        System.out.println("Status       : Pending Admin Approval");
+                        System.out.println("============================================");
+                        
+                        System.out.println("\nPress [Enter] to return to the main menu...");
                         sc.nextLine(); 
                         return; 
                     } else {
-                        System.out.println(">> Error: System could not save the booking.");
+                        System.out.println(">> Error: Failed to save booking. Please try again.");
                         return;
                     }
             }
         }
     }
+    
     private void modifyBooking() {
-        while (true) { // OUTER LOOP: Returns here if user cancels an action or presses 'B'
-            // 1. Refresh data from the manager
+        while (true) { 
             List<Booking> allBookings = bookingManager.getBookingList();
             List<Booking> userBookings = allBookings.stream()
                     .filter(b -> b.getUserID().equals(currentUser.getId()))
@@ -828,7 +887,6 @@ public class UserMenu {
             long confirmedCount = userBookings.stream()
                     .filter(b -> b.getStatus().equalsIgnoreCase("Approved")).count();
 
-            // 2. Summary Header
             System.out.println("\n========== MODIFY / CANCEL BOOKING ==========");
             System.out.println("Status: Only PENDING bookings can be modified or cancelled.");
             System.out.println("Confirmed Bookings Count: [" + confirmedCount + "]");
@@ -840,7 +898,6 @@ public class UserMenu {
                 return;
             }
 
-         // 3. Display Selection Table
             System.out.println("\n--- PENDING BOOKING LIST ---");
             System.out.printf("%-4s | %-10s | %-20s | %-15s\n", "No.", "Room No", "Booking Date", "Time Slot");
             System.out.println("------------------------------------------------------------------");
@@ -848,34 +905,29 @@ public class UserMenu {
             for (int i = 0; i < pendingBookings.size(); i++) {
                 Booking b = pendingBookings.get(i);
                 
-                // LOOKUP FACILITY HERE to get Room No instead of Facility ID
                 Facility f = FileManager.getFacilityById(b.getFacilityID());
                 String roomDisplay = (f != null) ? f.getRoomNo() : b.getFacilityID();
 
-                // Format ddMMyyyy -> 21 April 2026
                 String dateDisplay = java.time.LocalDate.parse(b.getBookingDate(), 
                         java.time.format.DateTimeFormatter.ofPattern("ddMMyyyy"))
                         .format(Constants.DATE_DISPLAY_FORMAT);
                 
-                // Use roomDisplay instead of b.getFacilityID()
                 System.out.printf("%-4d | %-10s | %-20s | %-15s\n", 
                         (i + 1), roomDisplay, dateDisplay, Constants.TIME_SLOTS[b.getTimeSlot()]);
             }
 
-            // 4. Selection Input
             System.out.print("\nSelect number to manage [B: Back to Main Menu]: ");
             String input = sc.nextLine().trim().toUpperCase();
 
             if (input.equals("B")) return;
             if (!Validator.isValidMenuChoice(input, 1, pendingBookings.size())) {
                 System.out.println(">> Invalid selection. Please try again.");
-                continue; // Re-run the table display
+                continue;
             }
 
             Booking selected = pendingBookings.get(Integer.parseInt(input) - 1);
             Facility f = FileManager.getFacilityById(selected.getFacilityID());
 
-            // 5. Display Full Details of Selection
             String fullDate = java.time.LocalDate.parse(selected.getBookingDate(), 
                     java.time.format.DateTimeFormatter.ofPattern("ddMMyyyy"))
                     .format(Constants.DATE_DISPLAY_FORMAT);
@@ -891,7 +943,6 @@ public class UserMenu {
             System.out.println("Purpose         : " + selected.getPurpose());
             System.out.println("---------------------------------");
 
-            // 6. Action Choice Validation Loop
             String action = "";
             while (true) {
                 System.out.println("\nWhat would you like to do?");
@@ -905,9 +956,8 @@ public class UserMenu {
                 System.out.println(">> Invalid choice. Please enter [1], [2], or [B].");
             }
 
-            if (action.equals("B")) continue; // Goes back to table list
+            if (action.equals("B")) continue;
 
-            // ================= CANCEL BOOKING =================
             if (action.equals("2")) {
                 while (true) {
                     System.out.print("\nAre you sure you want to cancel this booking? (Y/N): ");
@@ -919,19 +969,18 @@ public class UserMenu {
                         System.out.println("\nSUCCESS: Booking successfully cancelled. This time slot is now available for others.");
                         System.out.println("Press Enter to return to Main Menu...");
                         sc.nextLine();
-                        return; // EXIT TO MAIN MENU
+                        return;
                     } else if (confirm.equals("N")) {
                         System.out.println("\nAction cancelled. Press Enter to back to Pending Booking list...");
                         sc.nextLine();
-                        break; // EXIT confirmation loop to re-run 'continue' below
+                        break; 
                     } else {
                         System.out.println(">> Invalid input. Please type 'Y' or 'N'.");
                     }
                 }
-                continue; // Back to table list
+                continue;
             }
 
-            // ================= UPDATE BOOKING =================
             if (action.equals("1")) {
                 boolean success = false;
                 System.out.println("\n--- UPDATE MENU ---");
@@ -946,7 +995,7 @@ public class UserMenu {
                 if (updateChoice.equals("B")) continue;
 
                 switch (updateChoice) {
-                    case "1": // Time Slot
+                    case "1": 
                         System.out.println("\nAvailable slots for " + fullDate + ":");
                         List<Integer> freeSlots = new ArrayList<>();
                         for (int i = 1; i <= 5; i++) {
@@ -969,7 +1018,7 @@ public class UserMenu {
                         }
                         break;
 
-                    case "2": // Pax
+                    case "2":
                         System.out.print("\nEnter new Pax (Capacity: " + (f != null ? f.getCapacity() : "N/A") + "): ");
                         String pIn = sc.nextLine().trim();
                         if (Validator.isNumeric(pIn)) {
@@ -985,7 +1034,7 @@ public class UserMenu {
                         }
                         break;
 
-                    case "3": // Purpose
+                    case "3": 
                         System.out.print("\nEnter new purpose (Max 50 chars): ");
                         String purp = sc.nextLine().trim();
                         if (!purp.isEmpty() && purp.length() <= 50) {
@@ -1002,30 +1051,25 @@ public class UserMenu {
                     System.out.println("\nSUCCESS: Booking updated successfully!");
                     System.out.println("Press Enter to return to Main Menu...");
                     sc.nextLine();
-                    return; // EXIT TO MAIN MENU
+                    return; 
                 } else {
                     System.out.println("\nNo changes were made. Press Enter to back to list...");
                     sc.nextLine();
-                    continue; // Back to Table
+                    continue; 
                 }
             }
         }
     }
 
-    // ===================== MEMBER 2: VIEW BOOKING STATUS =====================
- // ===================== MEMBER 2: VIEW BOOKING STATUS =====================
     private void viewBookingRequestStatus() {
         Scanner sc = new Scanner(System.in);
 
         while (true) {
-            // Fetch all bookings for the user
             List<Booking> allUserBookings = bookingManager.getBookingsByUser(currentUser.getId());
             
-            // 1. Filter bookings to exclude "Cancelled"
             List<Booking> filteredBookings = new java.util.ArrayList<>();
             for (Booking b : allUserBookings) {
                 String status = b.getStatus().toLowerCase();
-                // Only add if NOT cancelled
                 if (!status.equals("cancelled")) {
                     filteredBookings.add(b);
                 }
@@ -1033,10 +1077,11 @@ public class UserMenu {
 
             if (filteredBookings.isEmpty()) {
                 System.out.println("\n>> You have no active booking requests (Pending/Confirmed/Rejected).");
+                System.out.println("\nPress Enter to continue...");
+                sc.nextLine();
                 return;
             }
 
-            // 2. Display Table Header
             System.out.println("\n--- Booking Request Status ---");
             System.out.printf("%-4s | %-10s | %-20s | %-20s | %-10s\n", 
                               "No.", "Room No", "Booking Date", "Time Slot", "Status");
@@ -1060,7 +1105,6 @@ public class UserMenu {
                         b.getStatus());
             }
 
-            // 3. User Selection
             System.out.print("\nSelect number to view the detail [B: Back to Main Menu]: ");
             String input = sc.nextLine().trim().toUpperCase();
 
@@ -1068,7 +1112,6 @@ public class UserMenu {
 
             try {
                 int choice = Integer.parseInt(input);
-                // Use filteredBookings.size() to ensure valid selection
                 if (choice >= 1 && choice <= filteredBookings.size()) {
                     Booking selected = filteredBookings.get(choice - 1);
                     Facility f = FileManager.getFacilityById(selected.getFacilityID());
@@ -1096,7 +1139,6 @@ public class UserMenu {
         System.out.println("Selected Date   : " + dateDisplay);
         System.out.println("Booking Time    : " + Constants.TIME_SLOTS[b.getTimeSlot()]);
         
-        // Facility info from facility.txt
         System.out.println("Room No         : " + (f != null ? f.getRoomNo() : "N/A"));
         System.out.println("Facility Name   : " + (f != null ? f.getName() : "N/A"));
         System.out.println("Facility Type   : " + (f != null ? f.getType() : "N/A"));
@@ -1105,100 +1147,17 @@ public class UserMenu {
         System.out.println("Purpose         : " + b.getPurpose());
         System.out.println("Status          : " + b.getStatus());
         
-        // Use your specific method name: getRejectReason()
         if (b.getStatus().equalsIgnoreCase("Rejected")) {
             String reason = b.getRejectReason(); 
             System.out.println("Reason          : " + (reason != null && !reason.isEmpty() ? reason : "No reason provided."));
         }
         System.out.println("---------------------------------");
     }
- // ===================== MEMBER 3: REPORT ISSUE =====================
-    /** Member 3: Maintenance Management - Admin Side */
-    private void maintenanceManagement() {
-        while (true) {
-            List<MaintenanceReport> allReports = FileManager.loadAllMaintenanceReports();
-            
-            // Prepare the pending list (Anything not Resolved)
-            List<MaintenanceReport> pending = allReports.stream()
-                .filter(r -> !r.getStatus().equalsIgnoreCase(Constants.MAINT_RESOLVED))
-                .collect(Collectors.toList());
 
-            System.out.println("\n=============== MAINTENANCE MANAGEMENT ===============");
-            System.out.println("Active Pending Tasks: " + pending.size());
-            System.out.println("-----------------------------------------------------");
-            System.out.println("[1] View & Update Pending Tasks");
-            System.out.println("[2] View Full Maintenance History (Paged)");
-            System.out.println("[B] Back to Admin Menu");
-            System.out.print("Selection: ");
-            
-            String mainChoice = sc.nextLine().trim().toUpperCase();
-            if (mainChoice.equals("B")) break;
-
-            switch (mainChoice) {
-                case "1":
-                    // FIX: Passing both lists ensures the update method works correctly
-                    updateIssueWorkflow(allReports, pending); 
-                    break;
-                case "2":
-                    reportIssue();
-                    break;
-                default:
-                    System.out.println(">> Invalid selection.");
-                    break;
-            }
-        }
-    }
-    private void updateIssueWorkflow(List<MaintenanceReport> allReports, List<MaintenanceReport> pending) {
-        if (pending.isEmpty()) {
-            System.out.println("\n>> No pending tasks. All facilities are operational!");
-            return;
-        }
-
-        System.out.println("\n--- PENDING MAINTENANCE TASKS ---");
-        System.out.printf("%-15s | %-10s | %-20s | %-12s\n", "Issue ID", "Facility", "Type", "Status");
-        System.out.println("-".repeat(65));
-        for (MaintenanceReport r : pending) {
-            System.out.printf("%-15s | %-10s | %-20s | %-12s\n", 
-                r.getIssueID(), r.getFacilityID(), r.getIssueType(), r.getStatus());
-        }
-
-        System.out.print("\nEnter Issue ID to handle (or 'B' to back): ");
-        String targetID = sc.nextLine().trim();
-        if (targetID.equalsIgnoreCase("B")) return;
-
-        MaintenanceReport target = allReports.stream()
-            .filter(r -> r.getIssueID().equalsIgnoreCase(targetID))
-            .findFirst().orElse(null);
-
-        if (target != null) {
-            target.displaySummary();
-            System.out.println("\nActions: [1] Mark In-Progress [2] Resolve [C] Cancel");
-            System.out.print("Choice: ");
-            String action = sc.nextLine().trim().toUpperCase();
-
-            if (action.equals("1")) {
-                target.setStatus(Constants.MAINT_IN_PROGRESS);
-                target.setAssignedTo(currentUser.getId()); 
-                FileManager.saveAllMaintenanceReports(allReports);
-                System.out.println(">> Status updated to In-Progress.");
-            } else if (action.equals("2")) {
-                target.setStatus(Constants.MAINT_RESOLVED);
-                target.setAssignedTo(currentUser.getId()); 
-                target.setResolvedDate(LocalDate.now().format(DateTimeFormatter.ofPattern("ddMMyyyy")));
-                FileManager.saveAllMaintenanceReports(allReports);
-                System.out.println(">> Issue marked as Resolved.");
-            }
-        } else {
-            System.out.println(">> Issue ID not found.");
-        }
-    }
-
-    // ===================== MEMBER 4: VIEW BOOKING HISTORY =====================
     private void viewBookingHistory() {
         Scanner sc = new Scanner(System.in);
         
         while (true) {
-            // 1. Get user-specific bookings
             ArrayList<Booking> allBookings = bookingManager.getBookingList();
             ArrayList<Booking> userBookings = new ArrayList<>();
             for (Booking b : allBookings) {
@@ -1206,15 +1165,19 @@ public class UserMenu {
                     userBookings.add(b);
                 }
             }
+            
+            ReportGenerator rg = new ReportGenerator();
+            rg.generateUserReport(currentUser.getId(), allBookings);
+
 
             if (userBookings.isEmpty()) {
                 System.out.println("\n>> No booking history found.");
+                System.out.println("\nPress Enter to continue...");
+                sc.nextLine();
                 break;
             }
 
-            // 2. Display Table
             System.out.println("\n--- YOUR BOOKING HISTORY ---");
-            // Updated Header to match your request
             System.out.printf("%-4s | %-10s | %-20s | %-20s | %-10s\n", 
                               "No.", "Room No", "Booking Date", "Time Slot", "Status");
             System.out.println("---------------------------------------------------------------------------------");
@@ -1222,27 +1185,19 @@ public class UserMenu {
             for (int i = 0; i < userBookings.size(); i++) {
                 Booking b = userBookings.get(i);
                 
-                // Get Room No from Facility Manager
                 Facility f = FileManager.getFacilityById(b.getFacilityID());
                 String roomNo = (f != null) ? f.getRoomNo() : b.getFacilityID();
 
-                // Format Date
                 String dateDisplay = java.time.LocalDate.parse(b.getBookingDate(), 
                         java.time.format.DateTimeFormatter.ofPattern("ddMMyyyy"))
                         .format(java.time.format.DateTimeFormatter.ofPattern("dd MMMM yyyy"));
 
-                // Convert Time Slot index to String (e.g., 1 -> "10 a.m. - 12 p.m.")
                 String timeDisplay = Constants.TIME_SLOTS[b.getTimeSlot()];
 
                 System.out.printf("%-4d | %-10s | %-20s | %-20s | %-10s\n", 
                         (i + 1), roomNo, dateDisplay, timeDisplay, b.getStatus());
             }
 
-            // 3. Generate Summary Report
-            ReportGenerator rg = new ReportGenerator();
-            rg.generateUserReport(currentUser.getId(), allBookings);
-
-            // 4. Interaction Logic
             System.out.print("\nSelect number to view details [B: Back to Main Menu]: ");
             String input = sc.nextLine().trim().toUpperCase();
 
@@ -1264,9 +1219,7 @@ public class UserMenu {
         }
     }
 
-    // Helper method with detailed Facility information
     private void showBookingDetail(Booking selected) {
-        // Fetch facility object to get detailed info
         Facility f = FileManager.getFacilityById(selected.getFacilityID());
         
         String fullDate = java.time.LocalDate.parse(selected.getBookingDate(), 
@@ -1333,16 +1286,16 @@ public class UserMenu {
 
         while (step <= 5) {
             switch (step) {
-                case 1: // 1. Select Block
+                case 1: 
                     List<String> blocks = allFacilities.stream()
                             .map(Facility::getBlock).distinct().sorted().collect(Collectors.toList());
                     block = selectWithBack(blocks, "Block");
-                    if (block == null) return; // Cancel
-                    if (block.equals("BACK")) return; // Back to Menu
+                    if (block == null) return; 
+                    if (block.equals("BACK")) return;
                     step++;
                     break;
 
-                case 2: // 2. Select Facility Type
+                case 2: 
                     final String b2 = block;
                     List<String> types = allFacilities.stream()
                             .filter(f -> f.getBlock().equalsIgnoreCase(b2))
@@ -1353,7 +1306,7 @@ public class UserMenu {
                     step++;
                     break;
 
-                case 3: // 3. Select Floor
+                case 3: 
                     final String b3 = block, t3 = type;
                     List<String> floors = allFacilities.stream()
                             .filter(f -> f.getBlock().equalsIgnoreCase(b3) && f.getType().equalsIgnoreCase(t3))
@@ -1364,7 +1317,7 @@ public class UserMenu {
                     step++;
                     break;
 
-                case 4: // 4. Select Specific Room from Numbered List
+                case 4: 
                     final String b4 = block, t4 = type, f4 = floor;
                     List<Facility> filtered = allFacilities.stream()
                             .filter(f -> f.getBlock().equalsIgnoreCase(b4) && 
@@ -1397,10 +1350,9 @@ public class UserMenu {
                     }
                     break;
 
-                case 5: // 5. Enter Issue Details & Submit
+                case 5:
                     System.out.println("\nSelected: " + selectedFacility.getRoomNo() + " (" + selectedFacility.getName() + ")");
                     
-                    // Select Issue Type from Constants
                     System.out.println("\n--- Select Issue Type ---");
                     for (int i = 0; i < Constants.ISSUE_TYPES.length; i++) {
                         System.out.println("[" + (i + 1) + "] " + Constants.ISSUE_TYPES[i]);
@@ -1442,6 +1394,50 @@ public class UserMenu {
             }
         }
     }
+    
+    private void viewMyReportedIssues() {
+        System.out.println("\n  ====================== MY REPORTED ISSUES ======================");
+        
+        List<MaintenanceReport> allReports = FileManager.loadAllMaintenanceReports();
+        List<Facility> allFacilities = FileManager.loadAllFacilities(); // Needed for Room Numbers
+
+        List<MaintenanceReport> myReports = allReports.stream()
+            .filter(r -> r.getReporterID().equals(currentUser.getId()))
+            .collect(Collectors.toList());
+
+        if (myReports.isEmpty()) {
+            System.out.println("  >> You have not reported any issues yet.");
+            System.out.println("  Press Enter to continue...");
+            sc.nextLine();
+            return;
+        }
+        System.out.printf("  %-10s | %-12s | %-25s | %-15s\n", "Room", "Date", "Issue Type", "Status");
+        System.out.println("  " + "-".repeat(68));
+
+        for (MaintenanceReport report : myReports) {
+            
+            String roomNo = allFacilities.stream()
+                .filter(fac -> fac.getFacilityID().equals(report.getFacilityID()))
+                .map(Facility::getRoomNo)
+                .findFirst()
+                .orElse(report.getFacilityID());
+
+            String rawDate = report.getReportDate();
+            String formattedDate = rawDate.substring(0,2) + "-" + rawDate.substring(2,4) + "-" + rawDate.substring(4);
+
+            System.out.printf("  %-10s | %-12s | %-25s | %-15s\n", 
+                roomNo, 
+                formattedDate, 
+                report.getIssueType(), 
+                report.getStatus());
+        }
+
+        System.out.println("  " + "-".repeat(68));
+        System.out.println("  (Note: You cannot edit reports once submitted.)");
+        System.out.println("  Press Enter to return to menu...");
+        sc.nextLine();
+    }
+    
     private void showAdminContact() {
         System.out.println("\n[!] Online booking limit is 1 month.");
         System.out.println("Contact " + Constants.ADMIN_NAME + " (" + Constants.ADMIN_PHONE + ") for advanced bookings.");

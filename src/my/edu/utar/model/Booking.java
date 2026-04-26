@@ -4,15 +4,15 @@ import my.edu.utar.util.Constants;
 
 public class Booking {
 
-    private String bookingID;   // Format: B + YYYYMMDD + 4-digit seq e.g. B202603140001
+    private String bookingID;
     private String userID;
     private String facilityID;
-    private String applyDate;   // DDMMYYYY when booking was submitted
-    private String bookingDate; // DDMMYYYY the actual booked date
-    private int    timeSlot;    // 1-5 (see Constants.TIME_SLOTS)
+    private String applyDate; 
+    private String bookingDate;
+    private int    timeSlot; 
     private String purpose;
-    private int    pax;         // number of people
-    private String status;      // Pending / Approved / Rejected / Cancelled
+    private int    pax;       
+    private String status; 
     private String rejectReason;
 
     public Booking(String bookingID, String userID, String facilityID,

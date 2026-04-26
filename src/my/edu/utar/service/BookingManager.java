@@ -7,6 +7,7 @@ import my.edu.utar.util.Constants;
 import java.util.ArrayList;
 import java.util.List;
 import java.time.LocalDate;
+import my.edu.utar.model.MaintenanceReport;
 
 public class BookingManager {
 	
@@ -15,7 +16,6 @@ public class BookingManager {
 	public BookingManager() {
 		bookingList = new ArrayList<>();
 		loadFromFile();
-		
 	}
 	
 	public ArrayList<Booking> getBookingList(){
@@ -125,10 +125,19 @@ public class BookingManager {
 	}
 	
 	public boolean isTimeSlotAvailable(String facilityID, String date, int timeSlot) {
-	    for (Booking b : bookingList) {
+	    List<MaintenanceReport> maintReports = FileManager.loadAllMaintenanceReports();
+	    for (MaintenanceReport report : maintReports) {
+	        if (report.getFacilityID().equalsIgnoreCase(facilityID) && 
+	            report.getStatus().equalsIgnoreCase(Constants.MAINT_IN_PROGRESS)) {
+	            return false; 
+	        }
+	    }
 
-	        if (b.getFacilityID().equals(facilityID) && b.getBookingDate().equals(date) &&
-	            b.getTimeSlot() == timeSlot && (b.getStatus().equals("Approved") || b.getStatus().equals("Pending"))) {
+	    for (Booking b : bookingList) {
+	        if (b.getFacilityID().equals(facilityID) && 
+	            b.getBookingDate().equals(date) &&
+	            b.getTimeSlot() == timeSlot && 
+	            (b.getStatus().equals("Approved") || b.getStatus().equals("Pending"))) {
 
 	            return false;
 	        }
@@ -154,7 +163,6 @@ public class BookingManager {
 	public List<Facility> getAvailableFacilities(List<Facility> facilities, String date, int slot) {
 	    List<Facility> available = new ArrayList<>();
 	    for (Facility f : facilities) {
-	        // Use your existing isTimeSlotAvailable method here!
 	        if (isTimeSlotAvailable(f.getFacilityID(), date, slot) && f.getStatus().equalsIgnoreCase("Available")) {
 	            available.add(f);
 	        }
@@ -288,12 +296,12 @@ public class BookingManager {
         }
         return list;
     }
+    
     public List<String[]> getPendingBookings() {
         List<String[]> allBookings = FileManager.loadAllBookings(); // Use your existing FileManager method
         List<String[]> pending = new ArrayList<>();
         
         for (String[] row : allBookings) {
-            // Based on your example, index 8 is the status
             if (row.length > 8 && row[8].equalsIgnoreCase("Pending")) {
                 pending.add(row);
             }

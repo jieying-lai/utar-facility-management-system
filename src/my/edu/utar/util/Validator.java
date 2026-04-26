@@ -42,7 +42,6 @@ public class Validator {
         return password.equals(confirm);
     }
 
-
     public static boolean isValidName(String name) {
         if (name == null) return false;
         return !name.trim().isEmpty();
@@ -128,6 +127,7 @@ public class Validator {
             return currentHour < slotStartHour;
         }
     }
+    
     public static boolean isNumeric(String str) {
         if (str == null || str.isEmpty()) {
             return false;

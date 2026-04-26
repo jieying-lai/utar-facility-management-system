@@ -81,7 +81,6 @@ public class FileManager {
             String line = lines.get(i);
             try {
                 String[] parts = line.split(Constants.DELIMITER_REGEX, -1);
-                // Format: id|name|email|phone|role|faculty|programme|password
                 if (parts.length < 8) {
                     System.out.println("[WARNING] Skipping malformed user data on line " + (i + 1));
                     continue;
@@ -157,12 +156,10 @@ public class FileManager {
     public static List<Admin> loadAllAdmins() {
         List<Admin> admins = new ArrayList<>();
         List<String> lines = readAllLines(Constants.FILE_ADMIN);
-
         for (int i = 0; i < lines.size(); i++) {
             String line = lines.get(i);
             try {
                 String[] parts = line.split(Constants.DELIMITER_REGEX, -1);
-                // Format: adminID|name|email|phone|department|password
                 if (parts.length < 6) {
                     System.out.println("[WARNING] Skipping malformed admin data on line " + (i + 1));
                     continue;
@@ -196,7 +193,6 @@ public class FileManager {
             try {
                 String[] parts = lines.get(i).split(Constants.DELIMITER_REGEX, -1);
                 
-                // We now have 8 fields in the text file
                 if (parts.length < 8) continue;
                 
                 facilities.add(new Facility(
@@ -206,8 +202,8 @@ public class FileManager {
                         parts[3].trim(), // Room No
                         parts[4].trim(), // Description
                         parts[5].trim(), // Type (The NEW field)
-                        Integer.parseInt(parts[6].trim()), // Capacity (Shifted to index 6)
-                        parts[7].trim()  // Status (Shifted to index 7)
+                        Integer.parseInt(parts[6].trim()), // Capacity 
+                        parts[7].trim()  // Status 
                 ));
             } catch (Exception e) {
                 System.out.println("[WARNING] Error parsing facility on line " + (i + 1) + ": " + e.getMessage());
@@ -229,9 +225,8 @@ public class FileManager {
     }
     
     public static boolean isFacilityInBookings(String facilityID) {
-        File file = new File("data/bookings.txt"); // Ensure this path matches your project structure
+        File file = new File("data/bookings.txt"); 
         
-        // If the file doesn't exist yet, there are no bookings, so it's safe
         if (!file.exists()) {
             return false;
         }
@@ -239,23 +234,17 @@ public class FileManager {
         try (Scanner fileScanner = new Scanner(file)) {
             while (fileScanner.hasNextLine()) {
                 String line = fileScanner.nextLine().trim();
-                
-                // Skip empty lines
                 if (line.isEmpty()) continue;
-
                 String[] parts = line.split("\\|");
-                
-                // Check if the line has enough parts and if the 3rd part (index 2) matches
-                // Booking format: BookingID|UserID|FacilityID|Date|...
                 if (parts.length > 2 && parts[2].equalsIgnoreCase(facilityID)) {
-                    return true; // Found a match!
+                    return true; 
                 }
             }
         } catch (FileNotFoundException e) {
             System.out.println("Error reading bookings file: " + e.getMessage());
         }
         
-        return false; // No matching booking found
+        return false; 
     }
     
     public static void saveFacility(Facility f) {
@@ -311,7 +300,7 @@ public class FileManager {
                 if (parts.length < 9)
                 {
                 	System.out.println("[WARNING] Data error occured on line" + lineNumber + " .");
-                	continue; // skip the error part then continue with the next
+                	continue; 
                 }
                 reports.add(new MaintenanceReport(parts[0], parts[1],parts[2],parts[3],parts[4],parts[5],parts[6],parts[7],parts[8]));
     		}
@@ -334,6 +323,7 @@ public class FileManager {
 		return reports;
 		
 	}    
+    
     public static void writeMaintenanceReports(List<MaintenanceReport> reports)
     {
     	try (BufferedWriter bw = new BufferedWriter(new FileWriter(Constants.FILE_MAINTENANCE, false)))
@@ -362,9 +352,9 @@ public class FileManager {
             System.out.println(">> Error: User ID not found in database.");
         }
     }
+    
     public static List<String[]> loadAllBookings() {
         List<String[]> bookings = new ArrayList<>();
-        // Use the constant for your file path
         File file = new File(Constants.FILE_BOOKINGS); 
 
         if (!file.exists()) return bookings;
@@ -381,6 +371,7 @@ public class FileManager {
         }
         return bookings;
     }
+    
     public static void saveAllUsers(List<User> users) {
         try (PrintWriter writer = new PrintWriter(new FileWriter("data/users.txt"))) {
             for (User u : users) {
@@ -391,6 +382,7 @@ public class FileManager {
             System.out.println("Error saving users: " + e.getMessage());
         }
     }
+    
     public static boolean hasActiveBookings(String facilityID) {
         try (Scanner scanner = new Scanner(new File("data/bookings.txt"))) {
             while (scanner.hasNextLine()) {
@@ -398,14 +390,11 @@ public class FileManager {
                 if (line.trim().isEmpty()) continue;
                 
                 String[] parts = line.split("\\|");
-                // Parts index depends on your bookings.txt structure. 
-                // Assuming: BookingID | UserID | FacilityID | Status | ...
                 if (parts.length > 3) {
                     String fID = parts[2];
                     String status = parts[3]; 
 
                     if (fID.equals(facilityID)) {
-                        // Only block deletion if the status is NOT Cancelled
                         if (!status.equalsIgnoreCase("Cancelled")) {
                             return true; 
                         }
@@ -413,7 +402,6 @@ public class FileManager {
                 }
             }
         } catch (FileNotFoundException e) {
-            // If file doesn't exist, there are no bookings
         }
         return false;
     }
@@ -421,6 +409,7 @@ public class FileManager {
     public static void appendMaintenanceReport(MaintenanceReport report) {
         appendLine(Constants.FILE_MAINTENANCE, report.toFileString());
     }
+    
     public static List<MaintenanceReport> loadAllMaintenanceReports() {
         List<MaintenanceReport> reports = new ArrayList<>();
         try (BufferedReader br = new BufferedReader(new FileReader(Constants.FILE_MAINTENANCE))) {
@@ -441,7 +430,6 @@ public class FileManager {
         return reports;
     }
 
-    // Use this to overwrite the file when an Admin updates a status
     public static void saveAllMaintenanceReports(List<MaintenanceReport> reports) {
         List<String> lines = new ArrayList<>();
         for (MaintenanceReport r : reports) {
@@ -450,13 +438,11 @@ public class FileManager {
         writeAllLines(Constants.FILE_MAINTENANCE, lines);
     }
 
-    // Fixed ID Generator for M + YYYYMMDD + 0001 format
     public static String generateMaintenanceID() {
         LocalDate today = LocalDate.now();
         String datePart = today.format(DateTimeFormatter.ofPattern("yyyyMMdd"));
         List<MaintenanceReport> all = loadAllMaintenanceReports();
         
-        // Count how many reports exist for today to determine the sequence
         long count = all.stream()
                         .filter(r -> r.getIssueID().contains(datePart))
                         .count();

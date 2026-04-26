@@ -5,25 +5,18 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 
-/**
- * Model class for Maintenance Reports.
- * This class holds data and formatting logic only.
- */
 public class MaintenanceReport {
 
-    private String issueID;       // Format: M + YYYYMMDD + 4-digit seq
+    private String issueID; 
     private String facilityID;
-    private String reporterID;    // user ID who reported
-    private String issueType;     // from Constants.ISSUE_TYPES
+    private String reporterID; 
+    private String issueType;  
     private String description;
-    private String reportDate;    // DDMMYYYY
-    private String status;        // Reported / In Progress / Resolved / Closed
-    private String assignedTo;    // Admin ID who handled the case
-    private String resolvedDate;  // DDMMYYYY, empty if not resolved
+    private String reportDate;  
+    private String status;        
+    private String assignedTo;   
+    private String resolvedDate; 
     
-    // --- CONSTRUCTORS ---
-
-    // Constructor used when a User submits a NEW report
     public MaintenanceReport(String issueID, String facilityID, String reporterID,
             String issueType, String description, String reportDate) {
         this.issueID      = issueID;
@@ -37,7 +30,6 @@ public class MaintenanceReport {
         this.resolvedDate = "";
     }
     
-    // Constructor used when loading existing data from maintenance.txt
     public MaintenanceReport(String issueID, String facilityID, String reporterID,
                              String issueType, String description, String reportDate,
                              String status, String assignedTo, String resolvedDate) {
@@ -54,7 +46,6 @@ public class MaintenanceReport {
 
     public MaintenanceReport() {}
 
-    // --- GETTERS ---
     public String getIssueID()      { return issueID; }
     public String getFacilityID()   { return facilityID; }
     public String getReporterID()   { return reporterID; }
@@ -65,17 +56,10 @@ public class MaintenanceReport {
     public String getAssignedTo()   { return assignedTo; }
     public String getResolvedDate() { return resolvedDate; }
 
-    // --- SETTERS ---
     public void setStatus(String status)             { this.status = status; }
     public void setAssignedTo(String assignedTo)     { this.assignedTo = assignedTo; }
     public void setResolvedDate(String resolvedDate) { this.resolvedDate = resolvedDate; }
     
-    // --- LOGIC METHODS ---
-
-    /**
-     * Converts the object into a single line for file storage.
-     * Format: ID|Facility|Reporter|Type|Desc|Date|Status|AdminID|ResolvedDate
-     */
     public String toFileString() {
         return issueID + "|" + facilityID + "|" +
                reporterID + "|" + issueType + "|" +
@@ -83,9 +67,6 @@ public class MaintenanceReport {
                status + "|" + assignedTo + "|" + resolvedDate;
     }
 
-    /**
-     * Requirement E: Calculates the days elapsed between report and resolution.
-     */
     public long getDaysToResolve() {
         if (resolvedDate == null || resolvedDate.isEmpty() || reportDate == null) return 0;
         try {
@@ -98,9 +79,6 @@ public class MaintenanceReport {
         }
     }
 
-    /**
-     * Displays a clean summary of the report to the console.
-     */
     public void displaySummary() {
         System.out.println("\n---------------------------------------------------");
         System.out.printf("Issue ID     : %-15s\n", issueID);
