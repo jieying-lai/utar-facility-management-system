@@ -1,2 +1,20 @@
-M202603080001|F003|1001001|Broken Chairs / Furniture|3 chairs broken|08032026|Resolved|Rahman|12032026
-M202604240001|F011|2401444|Air-Conditioning Problem|problem|24042026|Reported||
+M202511050001|F001|A001|Lighting Problem|Replace blown bulb|05112025|Resolved|A001|06112025
+M202511150002|F058|A002|Air-Conditioning Problem|Water dripping from unit|15112025|Resolved|A001|17112025
+M202512020003|F020|A001|Other|Network router restart needed|02122025|Resolved|A003|02122025
+M202512120004|F011|A003|Damaged Equipment|Keyboard has sticky keys|12122025|Resolved|A001|13122025
+M202601050005|F001|A001|Broken Chairs / Furniture|Loose handle on chair|05012026|Resolved|A002|06012026
+M202601180006|F191|A003|Damaged Equipment|Clean CPU fans - overheating|18012026|Resolved|A003|19012026
+M202602020007|F020|A001|Projector / AV System Issue|Flickering screen|02022026|Resolved|A001|04022026
+M202602150008|F008|A002|Broken Chairs / Furniture|Chair leg broken|15022026|Resolved|A003|18022026
+M202602250009|F001|A001|Projector / AV System Issue|Blurry image|25022026|Resolved|A001|26022026
+M202603050010|F196|A003|Other|Crack in dance studio mirror|05032026|Resolved|A002|10032026
+M202603120011|F020|A001|Damaged Equipment|Mouse left click broken|12032026|Resolved|A001|13032026
+M202603200012|F002|A002|Projector / AV System Issue|Microphone low volume|20032026|Resolved|A003|22032026
+M202603280013|F001|A001|Air-Conditioning Problem|AC Filter needs cleaning|28032026|Resolved|A001|29032026
+M202604050014|F020|A003|Other|Software update required|05042026|Resolved|A003|05042026
+M202604120015|F018|A001|Damaged Equipment|Treadmill belt slipping|12042026|Resolved|A001|15042026
+M202604180016|F001|A001|Cleanliness Issue|Scratched wall and stains|18042026|Resolved|A002|20042026
+M202604220017|F112|A003|Other|Power plug sparking|22042026|Resolved|A001|22042026
+M202604250018|F001|A001|Projector / AV System Issue|Remote batteries lost|25042026|Reported|-|-
+M202604260019|F020|A003|Other|No internet connection|26042026|Reported|-|-
+M202604270020|F058|A002|Other|Toilet pipe burst|27042026|Reported|-|-

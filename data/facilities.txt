@@ -195,7 +195,3 @@ F194|KB|1|KB113|Ping Pong Table A|Sports Court|4|Available
 F195|KB|1|KB114|Ping Pong Table B|Sports Court|4|Available
 F196|KB|1|KB120|Dance Studio|Sports Court|25|Available
 F197|KB|9|KB906|Martial Arts Studio|Sports Court|30|Available
-F198|KA|G|KA001|testing|Lecture Hall|200|Available
-F199|KA|G|KA888|test|Lecture Hall|200|Available
-F200|KA|SB|KA999|testing3|Lecture Hall|200|Available
-F201|KA|G|KA003|testing999|Lecture Hall|200|Available
