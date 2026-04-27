@@ -28,7 +28,6 @@ public class Constants {
 
     // ===================== FACILITY STATUS =====================
     public static final String FACILITY_AVAILABLE   = "Available";
-    public static final String FACILITY_UNAVAILABLE = "Unavailable";
     public static final String FACILITY_MAINTENANCE = "Under Maintenance";
 
     // ===================== FACILITY TYPES =====================

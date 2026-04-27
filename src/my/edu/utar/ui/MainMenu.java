@@ -272,7 +272,7 @@ public class MainMenu {
         while (true) {
             System.out.println("\n--------------------------------------------");
             if (Constants.ROLE_STUDENT.equals(role)) {
-                System.out.println("  Enter your Programme Code (e.g., SE, MH, AS):");
+                System.out.println("  Enter your Programme Code or [C]ancel (e.g., SE, MH, AS):");
             } else {
                 System.out.println("  Enter your Department Code (e.g., HR, LIB):");
             }

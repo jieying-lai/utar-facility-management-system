@@ -1,4 +1,4 @@
-F001|KA|G|KG01|Lecture Theatre 1|Lecture Hall|100|Available
+F001|KA|G|KG01|Lecture Theatre 1|Lecture Hall|100|Under Maintenance
 F002|KA|G|KG02|Lecture Theatre 2|Lecture Hall|100|Available
 F003|KA|G|KG03|Lecture Theatre 3|Lecture Hall|100|Available
 F004|KA|M|M001|Meeting Room|Discussion Room|15|Available

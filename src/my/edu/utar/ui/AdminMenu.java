@@ -350,100 +350,176 @@ public class AdminMenu {
                 }
 
                 case "2": { 
-                    System.out.println("\n============================================");
-                    System.out.println("          ADD NEW CAMPUS FACILITY           ");
-                    System.out.println("============================================");
+                	block = ""; 
+                    floor = ""; 
+                    String roomNo = "";
+                    String name = "";  
+                    type = ""; 
+                    int capacity = 0;
+                    step = 1; 
+                    boolean addingProcess = true;
 
-                    int nextIdNum = 1;
-                    for (Facility existing : allFacilities) {
-                        try {
-                            int currentIdNum = Integer.parseInt(existing.getFacilityID().substring(1));
-                            if (currentIdNum >= nextIdNum) nextIdNum = currentIdNum + 1;
-                        } catch (Exception e) { }
-                    }
-                    String ID = String.format("F%03d", nextIdNum);
-                    System.out.println("Generated Facility ID: " + ID);
+                    while (addingProcess) {
+                        switch (step) {
+                            case 1:
+                                System.out.println("\n============================================");
+                                System.out.println("          ADD NEW CAMPUS FACILITY           ");
+                                System.out.println("============================================");
+                                System.out.print("Select Block [1] KA [2] KB [C: Cancel]: ");
+                                String bChoice = sc.nextLine().trim().toUpperCase();
 
-                    while (true) {
-                        System.out.print("Select Block [1] KA [2] KB: ");
-                        String bChoice = sc.nextLine().trim();
-                        if (bChoice.equals("1")) { block = "KA"; break; }
-                        if (bChoice.equals("2")) { block = "KB"; break; }
-                        System.out.println(">> Invalid choice.");
-                    }
+                                if (bChoice.equals("C")) { 
+                                    System.out.println(">> Addition Cancelled.");
+                                    addingProcess = false; 
+                                } else if (bChoice.equals("1")) { 
+                                    block = "KA"; 
+                                    step++; 
+                                } else if (bChoice.equals("2")) { 
+                                    block = "KB"; 
+                                    step++; 
+                                } else { 
+                                    System.out.println(">> [!] Invalid choice. Please enter 1, 2, or C."); 
+                                }
+                                break;
 
-                    String[] kaFloors = {"SB", "G", "M", "1", "2", "3", "4", "5", "6", "7", "8"};
-                    String[] kbFloors = {"SB", "G", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10"};
-                    String[] targetFloors = block.equals("KA") ? kaFloors : kbFloors;
+                            case 2: 
+                                String[] kaFloors = {"SB", "G", "M", "1", "2", "3", "4", "5", "6", "7", "8"};
+                                String[] kbFloors = {"SB", "G", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10"};
+                                String[] targetFloors = block.equals("KA") ? kaFloors : kbFloors;
 
-                    while (true) {
-                        System.out.println("Available Floors: " + Arrays.toString(targetFloors));
-                        System.out.print("Select Floor: ");
-                        floor = sc.nextLine().trim().toUpperCase();
-                        final String fSearch = floor;
-                        if (Arrays.stream(targetFloors).anyMatch(f -> f.equals(fSearch))) break;
-                        System.out.println(">> Invalid Floor.");
-                    }
+                                System.out.println("\nLocation: Block " + block);
+                                System.out.println("Available Floors: " + Arrays.toString(targetFloors));
+                                System.out.print("Enter Floor [B: Back, C: Cancel]: ");
+                                String fInput = sc.nextLine().trim().toUpperCase();
 
-                    String roomNo;
-                    while (true) {
-                        System.out.print("Enter Facility Number (Start with " + block + "): ");
-                        roomNo = sc.nextLine().trim().toUpperCase();
-                        final String rSearch = roomNo;
-                        if (roomNo.startsWith(block) && allFacilities.stream().noneMatch(f -> f.getRoomNo().equals(rSearch))) break;
-                        System.out.println(">> Invalid or Duplicate Room Number.");
-                    }
+                                if (fInput.equals("C")) { addingProcess = false; break; }
+                                if (fInput.equals("B")) { step--; break; }
 
-                    System.out.print("Enter Facility Name: ");
-                    String description = sc.nextLine().trim();
+                                if (Arrays.asList(targetFloors).contains(fInput)) {
+                                    floor = fInput;
+                                    step++;
+                                } else {
+                                    System.out.println(">> [!] Invalid Floor for Block " + block);
+                                }
+                                break;
 
-                    while (true) {
-                        System.out.println("\nSelect Facility Type:");
-                        for (int i = 0; i < Constants.FACILITY_TYPES.length; i++) {
-                            System.out.printf("[%d] %-20s ", (i + 1), Constants.FACILITY_TYPES[i]);
-                            
-                            if ((i + 1) % 2 == 0) {
-                                System.out.println();
-                            }
+                            case 3: 
+                                System.out.println("\nLocation: " + block + " Floor " + floor);
+                                System.out.print("Enter Room Number (e.g., " + block + "101) [B: Back, C: Cancel]: ");
+                                String rInput = sc.nextLine().trim().toUpperCase();
+
+                                if (rInput.equals("C")) { addingProcess = false; break; }
+                                if (rInput.equals("B")) { step--; break; }
+
+                                final String rSearch = rInput;
+                                if (rInput.startsWith(block) && allFacilities.stream().noneMatch(f -> f.getRoomNo().equals(rSearch))) {
+                                    roomNo = rInput;
+                                    step++;
+                                } else {
+                                    System.out.println(">> [!] Invalid Format (must start with " + block + ") or Room Number already exists.");
+                                }
+                                break;
+
+                            case 4: 
+                                System.out.print("\nEnter Facility Name (e.g. Tutorial Room 1) [B: Back, C: Cancel]: ");
+                                String nInput = sc.nextLine().trim();
+
+                                if (nInput.equalsIgnoreCase("C")) { addingProcess = false; break; }
+                                if (nInput.equalsIgnoreCase("B")) { step--; break; }
+
+                                if (!nInput.isEmpty()) {
+                                    name = nInput;
+                                    step++;
+                                } else {
+                                    System.out.println(">> [!] Name cannot be empty.");
+                                }
+                                break;
+
+                            case 5:
+                                System.out.println("\nSelect Facility Type:");
+                                for (int i = 0; i < Constants.FACILITY_TYPES.length; i++) {
+                                    System.out.printf("[%d] %-20s ", (i + 1), Constants.FACILITY_TYPES[i]);
+                                    if ((i + 1) % 2 == 0) System.out.println();
+                                }
+                                System.out.print("\nChoice [B: Back, C: Cancel]: ");
+                                String tChoice = sc.nextLine().trim().toUpperCase();
+
+                                if (tChoice.equals("C")) { addingProcess = false; break; }
+                                if (tChoice.equals("B")) { step--; break; }
+
+                                try {
+                                    int idx = Integer.parseInt(tChoice) - 1;
+                                    if (idx >= 0 && idx < Constants.FACILITY_TYPES.length) {
+                                        type = Constants.FACILITY_TYPES[idx];
+                                        step++;
+                                    } else {
+                                        System.out.println(">> [!] Invalid selection.");
+                                    }
+                                } catch (NumberFormatException e) {
+                                    System.out.println(">> [!] Please enter a number.");
+                                }
+                                break;
+
+                            case 6: 
+                                System.out.print("\nEnter Capacity (1-300) [B: Back, C: Cancel]: ");
+                                String capInput = sc.nextLine().trim().toUpperCase();
+
+                                if (capInput.equals("C")) { addingProcess = false; break; }
+                                if (capInput.equals("B")) { step--; break; }
+
+                                try {
+                                    int c = Integer.parseInt(capInput);
+                                    if (c > 0 && c <= 300) {
+                                        capacity = c;
+                                        step++;
+                                    } else {
+                                        System.out.println(">> [!] Capacity must be between 1 and 300.");
+                                    }
+                                } catch (NumberFormatException e) {
+                                    System.out.println(">> [!] Please enter a valid number.");
+                                }
+                                break;
+
+                            case 7:
+                                int nextIdNum = 1;
+                                for (Facility existing : allFacilities) {
+                                    try {
+                                        int currentIdNum = Integer.parseInt(existing.getFacilityID().substring(1));
+                                        if (currentIdNum >= nextIdNum) nextIdNum = currentIdNum + 1;
+                                    } catch (Exception e) { }
+                                }
+                                String finalID = String.format("F%03d", nextIdNum);
+
+                                System.out.println("\n============================================");
+                                System.out.println("        CONFIRM NEW FACILITY DETAILS        ");
+                                System.out.println("============================================");
+                                System.out.println("ID:       " + finalID);
+                                System.out.println("Room:     " + roomNo);
+                                System.out.println("Name:     " + name);
+                                System.out.println("Type:     " + type);
+                                System.out.println("Location: Block " + block + ", Floor " + floor);
+                                System.out.println("Capacity: " + capacity);
+                                System.out.println("--------------------------------------------");
+                                System.out.print("Save this facility? (Y/N) [B: Back]: ");
+                                String confirm = sc.nextLine().trim().toUpperCase();
+
+                                if (confirm.equals("B")) { 
+                                    step--; 
+                                } else if (confirm.equals("Y")) {
+                                    Facility newFacility = new Facility(finalID, block, floor, roomNo, name, type, capacity, "Available");
+                                    if (facilitiesService.addFacility(newFacility) == null) {
+                                        System.out.println("\n>> SUCCESS: Facility [" + roomNo + "] added permanently.");
+                                    } else {
+                                        System.out.println("\n[!] ERROR: Failed to write to data file.");
+                                    }
+                                    addingProcess = false; // Finish
+                                } else {
+                                    System.out.println(">> Save cancelled. Returning to step 6.");
+                                }
+                                break;
                         }
-                        
-                        if (Constants.FACILITY_TYPES.length % 2 != 0) {
-                            System.out.println();
-                        }
-
-                        System.out.print("Choice: ");
-                        String tChoice = sc.nextLine().trim();
-                        if (Validator.isValidMenuChoice(tChoice, 1, Constants.FACILITY_TYPES.length)) {
-                            type = Constants.FACILITY_TYPES[Integer.parseInt(tChoice) - 1];
-                            break;
-                        }
-                        System.out.println(">> Invalid choice. Please try again.");
                     }
-
-                    System.out.print("Enter Capacity (1-300): ");
-                    int capacity = Integer.parseInt(sc.nextLine().trim());
-
-                    Facility newFacility = new Facility(ID, block, floor, roomNo, description, type, capacity, Constants.FACILITY_AVAILABLE);
-                    
-                    if (facilitiesService.addFacility(newFacility) == null) {
-                        System.out.println("\n============================================");
-                        System.out.println("        FACILITY SUCCESSFULLY ADDED         ");
-                        System.out.println("============================================");
-                        System.out.printf("  %-15s : %s%n", "Facility ID", newFacility.getFacilityID());
-                        System.out.printf("  %-15s : %s%n", "Room Number", newFacility.getRoomNo());
-                        System.out.printf("  %-15s : %s%n", "Name", newFacility.getName());
-                        System.out.printf("  %-15s : %s%n", "Type", newFacility.getType());
-                        System.out.printf("  %-15s : %s%n", "Location", newFacility.getBlock() + " - Level " + newFacility.getFloor());
-                        System.out.printf("  %-15s : %d%n", "Capacity", newFacility.getCapacity());
-                        System.out.printf("  %-15s : %s%n", "Status", newFacility.getStatus());
-                        System.out.println("============================================");
-                        
-                        System.out.println("\nPress Enter to continue...");
-                        sc.nextLine();
-                    } else {
-                        System.out.println("\n[!] Error: Could not save the facility. Please check the data logs.");
-                    }
-                    break;
+                    break; 
                 }
 
                 case "3": { 
@@ -545,13 +621,14 @@ public class AdminMenu {
                                 } 
                                 else if (action.equals("2")) {
                                     String deletedID = selectedFacility.getFacilityID();
+                                    boolean success = performDeletion(selectedFacility, allFacilities);
                                     
-                                    performDeletion(selectedFacility, allFacilities);
-                                    
-                                    System.out.println("\n>> SUCCESS: Facility [" + deletedID + "] has been removed.");
-                                    System.out.println("Press Enter to continue...");
-                                    sc.nextLine();
-                                    inModifyMode = false;
+                                    if (success) {
+                                        System.out.println("\n>> SUCCESS: Facility [" + deletedID + "] has been removed.");
+                                        System.out.println("Press Enter to continue...");
+                                        sc.nextLine();
+                                        inModifyMode = false; 
+                                    } 
                                 } 
                                 else {
                                     System.out.println("\n>> [!] Invalid action. Please enter '1', '2', 'B', or 'C'.");
@@ -701,7 +778,7 @@ public class AdminMenu {
         }
     }
         
-    private void performDeletion(Facility target, List<Facility> allF) {
+    private boolean performDeletion(Facility target, List<Facility> allF) {
         boolean hasActive = FileManager.hasActiveBookings(target.getFacilityID());
         
         if (hasActive) {
@@ -710,7 +787,7 @@ public class AdminMenu {
             System.out.println(">> Please resolve or cancel those bookings before deleting.");
             System.out.println("Press Enter to return...");
             sc.nextLine();
-            return;
+            return false;
         }
 
         System.out.println("\n==============================================");
@@ -726,18 +803,16 @@ public class AdminMenu {
 
         if (confirm.equals("Y")) {
             allF.remove(target);
-            
             if (facilitiesService.updateFacilities(allF)) {
-                System.out.println("\n>> SUCCESS: Facility [" + target.getRoomNo() + "] removed permanently.");
+                return true; // <--- SUCCESS
             } else {
                 System.out.println("\n>> [!] SYSTEM ERROR: Failed to update database file.");
+                return false;
             }
         } else {
             System.out.println("\n>> Deletion cancelled. Facility is safe.");
+            return false; 
         }
-        
-        System.out.println("Press Enter to continue...");
-        sc.nextLine();
     }
     
     private void approval(Scanner sc) {
@@ -1155,7 +1230,7 @@ public class AdminMenu {
         List<User> allUsers = FileManager.loadAllUsers();
         List<Admin> admins = FileManager.loadAllAdmins();
         System.out.println("\n--- PENDING MAINTENANCE LIST ---");
-        System.out.printf("%-4s | %-14s | %-10s | %-25s | %-12s\n", "No.", "Issue ID", "Room", "Type", "Status");
+        System.out.printf("%-4s | %-14s | %-10s | %-27s | %-12s\n", "No.", "Issue ID", "Room", "Type", "Status");
         System.out.println("-".repeat(77));
         
         for (int i = 0; i < pending.size(); i++) {
@@ -1164,7 +1239,7 @@ public class AdminMenu {
                 .filter(fac -> fac.getFacilityID().equalsIgnoreCase(r.getFacilityID()))
                 .findFirst().orElse(null);
             
-            System.out.printf("%-4d | %-14s | %-10s | %-25s | %-12s\n", 
+            System.out.printf("%-4d | %-14s | %-10s | %-27s | %-12s\n", 
                 (i + 1), r.getIssueID(), (f != null ? f.getRoomNo() : r.getFacilityID()), r.getIssueType(), r.getStatus());
         }
 
@@ -1587,7 +1662,7 @@ public class AdminMenu {
             return;
         }
 
-        System.out.print("Are you SURE you want to delete " + user.getName() + "? (YES/NO): ");
+        System.out.print("Are you SURE you want to delete " + user.getName() + "? [YES / NO]: ");
         if (sc.nextLine().trim().equalsIgnoreCase("YES")) {
             FileManager.deleteUser(user.getId()); 
             System.out.println("User deleted successfully.");

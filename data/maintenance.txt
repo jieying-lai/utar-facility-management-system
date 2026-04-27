@@ -15,6 +15,7 @@ M202604050014|F020|A003|Other|Software update required|05042026|Resolved|A003|05
 M202604120015|F018|A001|Damaged Equipment|Treadmill belt slipping|12042026|Resolved|A001|15042026
 M202604180016|F001|A001|Cleanliness Issue|Scratched wall and stains|18042026|Resolved|A002|20042026
 M202604220017|F112|A003|Other|Power plug sparking|22042026|Resolved|A001|22042026
-M202604250018|F001|A001|Projector / AV System Issue|Remote batteries lost|25042026|Reported|-|-
+M202604250018|F001|A001|Projector / AV System Issue|Remote batteries lost|25042026|In Progress|A003|-
 M202604260019|F020|A003|Other|No internet connection|26042026|Reported|-|-
 M202604270020|F058|A002|Other|Toilet pipe burst|27042026|Reported|-|-
+M202604270002|F004|2401444|Damaged Equipment|testing|27042026|Resolved|A003|27042026

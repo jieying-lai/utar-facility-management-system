@@ -492,6 +492,9 @@ public class UserMenu {
                             }
                             break;
                         }
+                        else {
+                        	System.out.println(">> Invalid input.");
+                        }
                     }
                     break;
             }
