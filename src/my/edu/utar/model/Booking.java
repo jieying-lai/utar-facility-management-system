@@ -2,6 +2,7 @@ package my.edu.utar.model;
 
 import my.edu.utar.util.Constants;
 
+//Represents a facility booking request made by a user
 public class Booking {
 
     private String bookingID;
@@ -33,6 +34,7 @@ public class Booking {
 
     public Booking() {}
 
+ // Formats booking as a pipe-delimited line for saving to bookings.txt
     public String toFileString() {
         return bookingID + Constants.DELIMITER + userID + Constants.DELIMITER +
                facilityID + Constants.DELIMITER + applyDate + Constants.DELIMITER +

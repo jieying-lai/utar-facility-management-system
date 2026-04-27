@@ -6,6 +6,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
+//Shows upcoming booking reminders and maintenance conflict alerts on login
 public class NotificationService {
 	public void showReminders(String userID, ArrayList<Booking> bookingList, BookingManager bm) {
 	    LocalDate today = LocalDate.now();

@@ -2,6 +2,7 @@ package my.edu.utar.model;
 
 import my.edu.utar.util.Constants;
 
+//Represents a staff user. Email must end with @utar.edu.my.
 public class Staff extends User {
 
     public Staff(String staffId, String name, String email, String phone,
@@ -12,6 +13,7 @@ public class Staff extends User {
 
     public Staff() {}
     
+ // Staff reuses the 'programme' field from User to store department
     public String getDepartment() {
         return getProgramme(); 
     }

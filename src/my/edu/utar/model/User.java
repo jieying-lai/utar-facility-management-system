@@ -2,6 +2,7 @@ package my.edu.utar.model;
 
 import my.edu.utar.util.Constants;
 
+//Abstract class for registered users (Student/Staff). Extends Person with role, faculty, and programme.
 public abstract class User extends Person {
 
     private String role;        
@@ -34,6 +35,7 @@ public abstract class User extends Person {
         System.out.println("================================");
     }
 
+ // Formats user data as a pipe-delimited line for saving to users.txt
     public String toFileString() {
         return getId() + Constants.DELIMITER +
                getName() + Constants.DELIMITER +

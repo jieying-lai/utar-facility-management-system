@@ -6,11 +6,14 @@ import my.edu.utar.model.Facility;
 import my.edu.utar.data.FileManager;
 import my.edu.utar.util.Constants;
 
+//Handles facility add, update, and status management
 public class FacilitiesService {
 
 	public List<Facility> getAllFacilities() {
 	    return FileManager.loadAllFacilities();
 	}
+	
+	// Returns null on success, or an error message string if the facility ID already exists
     public String addFacility(Facility f) {
         if (FileManager.isFacilityIdExists(f.getFacilityID())) {
             return "ID already exists.";
@@ -44,7 +47,7 @@ public class FacilitiesService {
         }
 
         if (found) {
-            return updateFacilities(list); // Uses your existing updateFacilities method
+            return updateFacilities(list); 
         }
         
         System.out.println("Facility " + facilityID + " not found.");

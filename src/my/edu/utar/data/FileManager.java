@@ -10,6 +10,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
+//Static utility class for all file read/write operations.
+//All data is stored as pipe-delimited (|) plain text files under the data/ folder.
 public class FileManager {
 
     public static void initFiles() {

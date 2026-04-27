@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 
+//Utility class with static validation methods used throughout the system
 public class Validator {
 
     public static boolean isValidStudentID(String id) {
@@ -73,6 +74,7 @@ public class Validator {
         return !date.isAfter(oneMonthLater);
     }
 
+ // Returns an error message string if the date is invalid, or null if it passes all checks
     public static String validateBookingDate(String dateStr) {
         if (!isValidDateFormat(dateStr)) {
             return "Invalid date format. Please enter date as DDMMYYYY (e.g., 14032026).";
@@ -111,7 +113,9 @@ public class Validator {
             return false;
         }
     }
-
+    
+ // Lecture halls, labs, and MPH require booking at least 2 hours before slot start.
+ // Discussion rooms and sports courts only require booking before the slot starts.
     public static boolean isAdvanceBookingAllowed(String facilityType, int slotIndex, int currentHour) {
         int slotStartHour = Constants.TIME_SLOT_START_HOUR[slotIndex];
         boolean requires2Hr = false;

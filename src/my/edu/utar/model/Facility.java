@@ -2,6 +2,7 @@ package my.edu.utar.model;
 
 import my.edu.utar.util.Constants;
 
+//Represents a bookable campus facility (lecture hall, lab, sports court, etc.)
 public class Facility {
     private String facilityID;
     private String block;

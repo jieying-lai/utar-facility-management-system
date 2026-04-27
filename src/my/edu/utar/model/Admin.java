@@ -2,6 +2,7 @@ package my.edu.utar.model;
 
 import my.edu.utar.util.Constants;
 
+//Represents an admin account. Pre-loaded from admin.txt, cannot self-register.
 public class Admin extends Person {
 
     private String department;

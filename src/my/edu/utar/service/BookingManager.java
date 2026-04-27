@@ -9,6 +9,7 @@ import java.util.List;
 import java.time.LocalDate;
 import my.edu.utar.model.MaintenanceReport;
 
+//Manages all booking operations: create, cancel, modify, approve, reject, and conflict detection
 public class BookingManager {
 	
 	private ArrayList<Booking> bookingList;
@@ -22,6 +23,7 @@ public class BookingManager {
 		return bookingList;
 	}
 	
+	// Validates the booking, adds it to the list, and saves to file. Returns false if validation fails.
 	public boolean createBooking(Booking booking) {
 	    if (booking.getPurpose() == null || booking.getPurpose().trim().isEmpty()) {
 	        System.out.println("Purpose cannot be empty!");
@@ -38,8 +40,8 @@ public class BookingManager {
 	        return false;
 	    }
 	    booking.setStatus("Pending");
-	    saveToFile();
 	    bookingList.add(booking);
+	    saveToFile();
 	    System.out.println("Booking created successfully (Pending approval)");
 	    return true;
 	}
@@ -232,6 +234,7 @@ public class BookingManager {
         return pending;
     }
     
+ // Checks if an approved booking already exists for the same facility, date, and time slot
     public boolean hasConflict(Booking request) {
         for (Booking b : bookingList) {
             if (b.getStatus().equalsIgnoreCase("Approved") &&
@@ -244,6 +247,7 @@ public class BookingManager {
         return false;
     }
     
+ // Auto-rejects all pending bookings for a facility (called when facility goes under maintenance)
     public int rejectAllPendingForFacility(String facilityID, String reason) {
         int count = 0;
         for (Booking b : bookingList) {

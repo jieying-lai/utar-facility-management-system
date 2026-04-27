@@ -1,5 +1,6 @@
 package my.edu.utar.model;
 
+//Abstract base class representing any person in the system (student, staff, or admin)
 public abstract class Person {
 
     private String id;
@@ -8,6 +9,7 @@ public abstract class Person {
     private String phone;
     private String password;
 
+// Name and email are normalised on input: name -> uppercase, email -> lowercase
     public Person(String id, String name, String email, String phone, String password) {
         this.id       = id;
         this.name     = name.toUpperCase();

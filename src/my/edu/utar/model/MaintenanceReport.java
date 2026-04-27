@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 
+//Represents a maintenance issue reported for a facility
 public class MaintenanceReport {
 
     private String issueID; 
@@ -17,6 +18,7 @@ public class MaintenanceReport {
     private String assignedTo;   
     private String resolvedDate; 
     
+ // Used when creating a new report — status defaults to "Reported"
     public MaintenanceReport(String issueID, String facilityID, String reporterID,
             String issueType, String description, String reportDate) {
         this.issueID      = issueID;
@@ -30,6 +32,7 @@ public class MaintenanceReport {
         this.resolvedDate = "";
     }
     
+ // Used when loading an existing report from maintenance.txt
     public MaintenanceReport(String issueID, String facilityID, String reporterID,
                              String issueType, String description, String reportDate,
                              String status, String assignedTo, String resolvedDate) {
@@ -67,6 +70,7 @@ public class MaintenanceReport {
                status + "|" + assignedTo + "|" + resolvedDate;
     }
 
+ // Returns number of days between report date and resolved date
     public long getDaysToResolve() {
         if (resolvedDate == null || resolvedDate.isEmpty() || reportDate == null) return 0;
         try {
